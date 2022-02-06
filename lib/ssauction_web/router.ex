@@ -1,27 +1,41 @@
-defmodule SsauctionWeb.Router do
-  use SsauctionWeb, :router
+defmodule SSAuctionWeb.Router do
+  use SSAuctionWeb, :router
+
+  import SSAuctionWeb.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {SsauctionWeb.LayoutView, :root}
+    plug :put_root_layout, {SSAuctionWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/", SsauctionWeb do
+  scope "/", SSAuctionWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live "/", AuctionLive.Index, :index
+    live "/auctions", AuctionLive.Index, :index
+    live "/auction/:id", AuctionLive.Show, :show
+    live "/auction/:id/autonominationqueue", AuctionLive.AutoNominationQueue
+    live "/auction/:id/bids", AuctionLive.Bids
+    live "/auction/:id/rosteredplayers", AuctionLive.RosteredPlayers
+
+    live "/team/:id", TeamLive.Show, :show
+    live "/team/:id/bids", TeamLive.Bids
+    live "/team/:id/rosteredplayers", TeamLive.RosteredPlayers
+
+    live "/player/:id", PlayerLive.Show, :show
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", SsauctionWeb do
+  # scope "/api", SSAuctionWeb do
   #   pipe_through :api
   # end
 
@@ -37,8 +51,7 @@ defmodule SsauctionWeb.Router do
 
     scope "/" do
       pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: SsauctionWeb.Telemetry
+      live_dashboard "/dashboard", metrics: SSAuctionWeb.Telemetry
     end
   end
 
@@ -52,5 +65,38 @@ defmodule SsauctionWeb.Router do
 
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  ## Authentication routes
+
+  scope "/", SSAuctionWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    # get "/users/register", UserRegistrationController, :new
+    # post "/users/register", UserRegistrationController, :create
+    get "/users/log_in", UserSessionController, :new
+    post "/users/log_in", UserSessionController, :create
+    get "/users/reset_password", UserResetPasswordController, :new
+    post "/users/reset_password", UserResetPasswordController, :create
+    get "/users/reset_password/:token", UserResetPasswordController, :edit
+    put "/users/reset_password/:token", UserResetPasswordController, :update
+  end
+
+  scope "/", SSAuctionWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/users/settings", UserSettingsController, :edit
+    put "/users/settings", UserSettingsController, :update
+    get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+  end
+
+  scope "/", SSAuctionWeb do
+    pipe_through [:browser]
+
+    delete "/users/log_out", UserSessionController, :delete
+    get "/users/confirm", UserConfirmationController, :new
+    post "/users/confirm", UserConfirmationController, :create
+    get "/users/confirm/:token", UserConfirmationController, :edit
+    post "/users/confirm/:token", UserConfirmationController, :update
   end
 end

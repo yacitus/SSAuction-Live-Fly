@@ -1,5 +1,5 @@
-defmodule SsauctionWeb.ErrorView do
-  use SsauctionWeb, :view
+defmodule SSAuctionWeb.ErrorView do
+  use SSAuctionWeb, :view
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

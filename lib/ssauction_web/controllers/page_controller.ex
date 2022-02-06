@@ -1,5 +1,5 @@
-defmodule SsauctionWeb.PageController do
-  use SsauctionWeb, :controller
+defmodule SSAuctionWeb.PageController do
+  use SSAuctionWeb, :controller
 
   def index(conn, _params) do
     render(conn, "index.html")

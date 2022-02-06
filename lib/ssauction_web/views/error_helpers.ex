@@ -1,4 +1,4 @@
-defmodule SsauctionWeb.ErrorHelpers do
+defmodule SSAuctionWeb.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """
@@ -39,9 +39,9 @@ defmodule SsauctionWeb.ErrorHelpers do
     # should be written to the errors.po file. The :count option is
     # set by Ecto and indicates we should also apply plural rules.
     if count = opts[:count] do
-      Gettext.dngettext(SsauctionWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(SSAuctionWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(SsauctionWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(SSAuctionWeb.Gettext, "errors", msg, opts)
     end
   end
 end

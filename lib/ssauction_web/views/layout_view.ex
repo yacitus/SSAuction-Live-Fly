@@ -1,5 +1,5 @@
-defmodule SsauctionWeb.LayoutView do
-  use SsauctionWeb, :view
+defmodule SSAuctionWeb.LayoutView do
+  use SSAuctionWeb, :view
 
   # Phoenix LiveDashboard is available only in development by default,
   # so we instruct Elixir to not warn if the dashboard route is missing.

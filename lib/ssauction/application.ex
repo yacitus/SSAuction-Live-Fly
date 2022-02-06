@@ -1,4 +1,4 @@
-defmodule Ssauction.Application do
+defmodule SSAuction.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -9,20 +9,20 @@ defmodule Ssauction.Application do
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
-      Ssauction.Repo,
+      SSAuction.Repo,
       # Start the Telemetry supervisor
-      SsauctionWeb.Telemetry,
+      SSAuctionWeb.Telemetry,
       # Start the PubSub system
-      {Phoenix.PubSub, name: Ssauction.PubSub},
+      {Phoenix.PubSub, name: SSAuction.PubSub},
       # Start the Endpoint (http/https)
-      SsauctionWeb.Endpoint
-      # Start a worker by calling: Ssauction.Worker.start_link(arg)
-      # {Ssauction.Worker, arg}
+      SSAuctionWeb.Endpoint
+      # Start a worker by calling: SSAuction.Worker.start_link(arg)
+      # {SSAuction.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Ssauction.Supervisor]
+    opts = [strategy: :one_for_one, name: SSAuction.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
@@ -30,7 +30,7 @@ defmodule Ssauction.Application do
   # whenever the application is updated.
   @impl true
   def config_change(changed, _new, removed) do
-    SsauctionWeb.Endpoint.config_change(changed, removed)
+    SSAuctionWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

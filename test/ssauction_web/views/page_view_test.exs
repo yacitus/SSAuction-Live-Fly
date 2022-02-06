@@ -1,3 +1,3 @@
-defmodule SsauctionWeb.PageViewTest do
-  use SsauctionWeb.ConnCase, async: true
+defmodule SSAuctionWeb.PageViewTest do
+  use SSAuctionWeb.ConnCase, async: true
 end

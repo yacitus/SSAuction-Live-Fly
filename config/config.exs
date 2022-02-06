@@ -8,13 +8,13 @@
 import Config
 
 config :ssauction,
-  ecto_repos: [Ssauction.Repo]
+  ecto_repos: [SSAuction.Repo]
 
 # Configures the endpoint
-config :ssauction, SsauctionWeb.Endpoint,
+config :ssauction, SSAuctionWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: SsauctionWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Ssauction.PubSub,
+  render_errors: [view: SSAuctionWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: SSAuction.PubSub,
   live_view: [signing_salt: "nQAbI+yY"]
 
 # Configures the mailer
@@ -24,7 +24,7 @@ config :ssauction, SsauctionWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :ssauction, Ssauction.Mailer, adapter: Swoosh.Adapters.Local
+config :ssauction, SSAuction.Mailer, adapter: Swoosh.Adapters.Local
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false

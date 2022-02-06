@@ -1,0 +1,8 @@
+<div class="auth">
+<h1>Register</h1>
+
+<p>
+  <%= link "Log in", to: Routes.user_session_path(@conn, :new) %> |
+  <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
+</p>
+</div>

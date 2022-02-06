@@ -1,0 +1,8 @@
+<%= if @current_user do %>
+  <span class="text-black"><%= @current_user.username %> |</span>
+  <span class="underline text-blue-600 hover:text-blue-800"><%= link "Settings", to: Routes.user_settings_path(@conn, :edit) %></span>
+  <span class="text-black">|</span>
+  <span class="underline text-blue-600 hover:text-blue-800"><%= link "Log out", to: Routes.user_session_path(@conn, :delete), method: :delete %></span>
+<% else %>
+  <span class="underline text-blue-600 hover:text-blue-800"><%= link "Log in", to: Routes.user_session_path(@conn, :new) %></span>
+<% end %>

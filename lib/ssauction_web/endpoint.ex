@@ -1,4 +1,4 @@
-defmodule SsauctionWeb.Endpoint do
+defmodule SSAuctionWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :ssauction
 
   # The session will be stored in the cookie and signed,
@@ -46,5 +46,5 @@ defmodule SsauctionWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug SsauctionWeb.Router
+  plug SSAuctionWeb.Router
 end

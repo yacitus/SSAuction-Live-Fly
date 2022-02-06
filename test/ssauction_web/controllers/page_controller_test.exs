@@ -1,5 +1,5 @@
-defmodule SsauctionWeb.PageControllerTest do
-  use SsauctionWeb.ConnCase
+defmodule SSAuctionWeb.PageControllerTest do
+  use SSAuctionWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")

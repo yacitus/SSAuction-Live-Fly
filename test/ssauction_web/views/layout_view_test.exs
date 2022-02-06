@@ -1,5 +1,5 @@
-defmodule SsauctionWeb.LayoutViewTest do
-  use SsauctionWeb.ConnCase, async: true
+defmodule SSAuctionWeb.LayoutViewTest do
+  use SSAuctionWeb.ConnCase, async: true
 
   # When testing helpers, you may want to import Phoenix.HTML and
   # use functions such as safe_to_string() to convert the helper

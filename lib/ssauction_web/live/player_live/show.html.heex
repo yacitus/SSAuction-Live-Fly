@@ -1,0 +1,86 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Player Info
+</h1>
+
+<table class="w-full m-5 table-auto border-collapse border border-blue-400">
+  <tbody id="auction_info">
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Scoresheet Num:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @player.ssnum %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Name:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @player.name %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Position:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @player.position %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Rostered By:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @rostered_player.team.name %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Purchase Price:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        $<%= @rostered_player.cost %>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Bids
+</h1>
+
+<div class="w-full m-5">
+  <table class="w-full table-auto border-collapse border border-blue-400">
+    <thead>
+      <tr>
+        <th class="border border-blue-300">When</th>
+        <th class="border border-blue-300">Team</th>
+        <th class="border border-blue-300">Amount</th>
+        <th class="border border-blue-300">Bid Type</th>
+      </tr>
+    </thead>
+    <tbody id="teams">
+      <%= for logged_bid <- @bid_logs do %>
+        <tr>
+          <td class="pl-5 text-left border border-blue-300">
+            <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                               utc_datetime: logged_bid.datetime,
+                               locale: @locale,
+                               timezone: @timezone %>
+          </td>
+          <td class="pl-5 text-left border border-blue-300"><%= logged_bid.team.name %></td>
+          <td class="pl-5 text-left border border-blue-300">$<%= logged_bid.amount %></td>
+          <td class="pl-5 text-left border border-blue-300">
+            <%= Bids.bid_log_type_string(logged_bid.type) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

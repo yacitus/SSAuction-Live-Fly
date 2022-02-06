@@ -1,6 +1,6 @@
-defmodule Ssauction do
+defmodule SSAuction do
   @moduledoc """
-  Ssauction keeps the contexts that define your domain
+  SSAuction keeps the contexts that define your domain
   and business logic.
 
   Contexts are also responsible for managing your data, regardless

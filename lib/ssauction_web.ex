@@ -1,12 +1,12 @@
-defmodule SsauctionWeb do
+defmodule SSAuctionWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use SsauctionWeb, :controller
-      use SsauctionWeb, :view
+      use SSAuctionWeb, :controller
+      use SSAuctionWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,11 +19,11 @@ defmodule SsauctionWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: SsauctionWeb
+      use Phoenix.Controller, namespace: SSAuctionWeb
 
       import Plug.Conn
-      import SsauctionWeb.Gettext
-      alias SsauctionWeb.Router.Helpers, as: Routes
+      import SSAuctionWeb.Gettext
+      alias SSAuctionWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -31,7 +31,7 @@ defmodule SsauctionWeb do
     quote do
       use Phoenix.View,
         root: "lib/ssauction_web/templates",
-        namespace: SsauctionWeb
+        namespace: SSAuctionWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
@@ -45,7 +45,7 @@ defmodule SsauctionWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {SsauctionWeb.LayoutView, "live.html"}
+        layout: {SSAuctionWeb.LayoutView, "live.html"}
 
       unquote(view_helpers())
     end
@@ -80,7 +80,7 @@ defmodule SsauctionWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import SsauctionWeb.Gettext
+      import SSAuctionWeb.Gettext
     end
   end
 
@@ -91,13 +91,14 @@ defmodule SsauctionWeb do
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
       import Phoenix.LiveView.Helpers
+      import SSAuctionWeb.LiveHelpers
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
-      import SsauctionWeb.ErrorHelpers
-      import SsauctionWeb.Gettext
-      alias SsauctionWeb.Router.Helpers, as: Routes
+      import SSAuctionWeb.ErrorHelpers
+      import SSAuctionWeb.Gettext
+      alias SSAuctionWeb.Router.Helpers, as: Routes
     end
   end
 

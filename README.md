@@ -1,19 +1,13 @@
-# Ssauction
+# SSAuction-Live
 
-To start your Phoenix server:
+## TODO:
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+* display player page (with breadcrumbs) when clicking on player in auto-nomination queue page
+* don't link to bids page from auction and team pages if there are zero open bids
+* Teams Table on auction page: hide Time Nominations Expire and New Nominations Open At columns if there are no unused nominations
+* Auto-Nomination Queue page: show Nominations Per Team
+* Auto-Nomination Queue page: highlight top N players where N = Nominations Per Team
+* allow teams of the same name, as long as they're not in the same auction
+* add sort_name column to all_players and players tables
+* consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
+* figure out how to dedupe team_live/bids.html.heex and auction_live/bids.html.heex

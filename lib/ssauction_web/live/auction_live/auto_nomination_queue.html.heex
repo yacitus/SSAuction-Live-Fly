@@ -1,0 +1,24 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Auto-Nomination Queue
+</h1>
+
+<div class="w-full m-5">
+  <table class="w-full table-auto border-collapse border border-blue-400">
+    <thead>
+      <tr>
+        <th class="border border-blue-300">Scoresheet num</th>
+        <th class="border border-blue-300">Player</th>
+        <th class="border border-blue-300">Position</th>
+      </tr>
+    </thead>
+    <tbody id="queue">
+      <%= for ordered_player <- @ordered_players do %>
+        <tr class="hover:bg-sky-100" id={"player-#{ordered_player.id}"}>
+          <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.ssnum %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.position %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

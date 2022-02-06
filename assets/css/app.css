@@ -1,124 +1,102 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-
 /* This file is for your main application CSS */
+/*@import "./phoenix.css";*/
 
-/* Alerts and form errors used by phx.new */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*@import "./custom.css";*/
+
+@layer base {
+  body {
+    @apply antialiased relative font-sans bg-white;
+  }
+}
+
+h1 {
+  @apply text-center text-slate-900 font-extrabold text-4xl mb-8;
+}
+
+/* Alerts and form errors */
+
 .alert {
-  padding: 15px;
-  margin-bottom: 20px;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  @apply w-full m-5 p-[15px] mb-20 border border-solid border-transparent rounded;
 }
+
 .alert-info {
-  color: #31708f;
-  background-color: #d9edf7;
-  border-color: #bce8f1;
+  @apply text-[#31708f] bg-[#d9edf7] border-[#bce8f1];
 }
+
 .alert-warning {
-  color: #8a6d3b;
-  background-color: #fcf8e3;
-  border-color: #faebcc;
+  @apply text-[#8a6d3b] bg-[#fcf8e3] border-[#faebcc];
 }
+
 .alert-danger {
-  color: #a94442;
-  background-color: #f2dede;
-  border-color: #ebccd1;
+  @apply text-[#a94442] bg-[#f2dede] border-[#ebccd1];
 }
+
 .alert p {
-  margin-bottom: 0;
+  @apply mb-0;
 }
+
 .alert:empty {
-  display: none;
-}
-.invalid-feedback {
-  color: #a94442;
-  display: block;
-  margin: -1rem 0 2rem;
+  @apply hidden;
 }
 
-/* LiveView specific classes for your customization */
-.phx-no-feedback.invalid-feedback,
-.phx-no-feedback .invalid-feedback {
-  display: none;
-}
+/* Auth */
 
-.phx-click-loading {
-  opacity: 0.5;
-  transition: opacity 1s ease-out;
-}
+.auth {
+  @apply px-6 mt-8 mx-auto w-full max-w-md;
 
-.phx-loading{
-  cursor: wait;
-}
+  h3 {
+    @apply mt-6 mb-2 text-xl font-bold text-slate-900;
+  }
 
-.phx-modal {
-  opacity: 1!important;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4);
-}
+  form {
+    @apply bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg;
 
-.phx-modal-content {
-  background-color: #fefefe;
-  margin: 15vh auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-}
+    @apply px-6 mt-8 mx-auto w-full max-w-md;
 
-.phx-modal-close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
+    label {
+      @apply block mb-2 text-sm font-medium text-slate-700;
+    }
 
-.phx-modal-close:hover,
-.phx-modal-close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
+    input[type="email"],
+    input[type="password"] {
+      @apply mb-4 appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md transition duration-150 ease-in-out text-sm;
+    }
 
-.fade-in-scale {
-  animation: 0.2s ease-in 0s normal forwards 1 fade-in-scale-keys;
-}
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      @apply outline-none ring ring-indigo-300 border-indigo-300;
+    }
 
-.fade-out-scale {
-  animation: 0.2s ease-out 0s normal forwards 1 fade-out-scale-keys;
-}
+    .checkbox-field {
+      @apply flex items-center mb-4;
 
-.fade-in {
-  animation: 0.2s ease-out 0s normal forwards 1 fade-in-keys;
-}
-.fade-out {
-  animation: 0.2s ease-out 0s normal forwards 1 fade-out-keys;
-}
+      input[type="checkbox"] {
+        @apply m-0 h-4 w-4 text-slate-700 transition duration-150 ease-in-out;
+      }
 
-@keyframes fade-in-scale-keys{
-  0% { scale: 0.95; opacity: 0; }
-  100% { scale: 1.0; opacity: 1; }
-}
+      label {
+        @apply m-0 ml-2;
+      }
+    }
 
-@keyframes fade-out-scale-keys{
-  0% { scale: 1.0; opacity: 1; }
-  100% { scale: 0.95; opacity: 0; }
-}
+    button {
+      @apply mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out;
+    }
 
-@keyframes fade-in-keys{
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
+    button:focus {
+      @apply outline-none border-indigo-700 ring ring-indigo-300;
+    }
 
-@keyframes fade-out-keys{
-  0% { opacity: 1; }
-  100% { opacity: 0; }
-}
+    button:active {
+      @apply bg-indigo-700;
+    }
 
+    button:hover {
+      @apply bg-indigo-500;
+    }
+  }
+}

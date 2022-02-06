@@ -1,3 +1,3 @@
-defmodule SsauctionWeb.PageView do
-  use SsauctionWeb, :view
+defmodule SSAuctionWeb.PageView do
+  use SSAuctionWeb, :view
 end

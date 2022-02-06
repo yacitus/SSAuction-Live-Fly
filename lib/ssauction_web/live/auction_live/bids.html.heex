@@ -1,0 +1,34 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Bids
+</h1>
+
+<div class="w-full m-5">
+  <table class="w-full table-auto border-collapse border border-blue-400">
+    <thead>
+      <tr>
+        <th class="border border-blue-300">Team</th>
+        <th class="border border-blue-300">Player</th>
+        <th class="border border-blue-300">Position</th>
+        <th class="border border-blue-300">S. num</th>
+        <th class="border border-blue-300">$ Bid</th>
+        <th class="border border-blue-300">$ Hidden Max Bid</th>
+        <th class="border border-blue-300">Expires In</th>
+      </tr>
+    </thead>
+    <tbody id="queue">
+      <%= for bid <- @bids do %>
+        <tr>
+          <td class="pl-5 text-left border border-blue-300"><%= bid.team.name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= bid.player.name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= bid.player.position %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= bid.player.ssnum %></td>
+          <td class="pl-5 text-left border border-blue-300">$<%= bid.bid_amount %></td>
+          <td class="pl-5 text-left border border-blue-300"></td>
+          <td class="pl-5 text-left border border-blue-300">
+            <%= Auctions.seconds_to_string(Bids.seconds_until_bid_expires(bid, @auction)) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

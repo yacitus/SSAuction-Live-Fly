@@ -1,4 +1,4 @@
-defmodule Ssauction.MixProject do
+defmodule SSAuction.MixProject do
   use Mix.Project
 
   def project do
@@ -19,7 +19,7 @@ defmodule Ssauction.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Ssauction.Application, []},
+      mod: {SSAuction.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -33,6 +33,7 @@ defmodule Ssauction.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 2.0"},
       {:phoenix, "~> 1.6.6"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
@@ -49,7 +50,9 @@ defmodule Ssauction.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev}
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
+      {:timex, "~> 3.6"},
+      {:ex_cldr_dates_times, "~> 2.0"},
     ]
   end
 
