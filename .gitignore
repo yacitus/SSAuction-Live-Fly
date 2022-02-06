@@ -1,6 +1,7 @@
 .DS_Store
 
 ssauction_dump.sql
+wireguard.conf
 
 rel/
 
