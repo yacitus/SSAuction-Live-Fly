@@ -47,7 +47,19 @@ h1 {
 
 .auth {
   @apply px-6 mt-8 mx-auto w-full max-w-md;
+}
 
+input[type="email"],
+input[type="password"] {
+  @apply mb-4 appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md transition duration-150 ease-in-out text-sm;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+  @apply outline-none ring ring-indigo-300 border-indigo-300;
+}
+
+/* BELOW REQUIRES NESTING, WHICH TAILWIND STANDALONE WON'T SUPPORT 
   h3 {
     @apply mt-6 mb-2 text-xl font-bold text-slate-900;
   }
@@ -98,5 +110,5 @@ h1 {
     button:hover {
       @apply bg-indigo-500;
     }
-  }
-}
+  } 
+} */

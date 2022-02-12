@@ -8,23 +8,35 @@
 
 <h1>Log in</h1>
 
-<.form class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md" let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}>
+<.form class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md"
+    let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}>
   <div class="block mb-2 text-sm font-medium text-slate-700">
     <%= label f, :email%>
+  </div>
+  <div>
     <%= email_input f, :email, required: true %>
   </div>
 
   <div class="block mb-2 text-sm font-medium text-slate-700">
     <%= label f, :password %>
+  </div>
+  <div>
     <%= password_input f, :password, required: true %>
   </div>
 
-  <div class="block mb-2 text-sm font-medium text-slate-700">
-    <%= checkbox f, :remember_me %>
-    <%= label f, :remember_me, "Keep me logged in for 60 days" %>
+  <div class="flex">
+    <span class="m-0 h-4 w-4 text-slate-700 transition duration-150 ease-in-out">
+      <%= checkbox f, :remember_me %>
+    </span>
+    <span class="block mb-2 text-sm font-medium text-slate-700 m-1 ml-1">
+      <%= label f, :remember_me, "Keep me logged in for 60 days" %>
+    </span>
   </div>
 
-  <button class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+  <button class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
     Log in
   </button>
 </.form>
