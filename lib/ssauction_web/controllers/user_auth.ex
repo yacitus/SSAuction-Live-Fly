@@ -139,6 +139,29 @@ defmodule SSAuctionWeb.UserAuth do
     end
   end
 
+  @doc """
+  Used for routes that require the user to be authenticated and "super".
+  """
+  def require_authenticated_super_user(conn, _opts) do
+    if conn.assigns[:current_user] do
+      if conn.assigns.current_user.super do
+        conn
+      else
+        conn
+        |> put_flash(:error, "You must be 'super' to access this page.")
+        |> maybe_store_return_to()
+        |> redirect(to: signed_in_path(conn))
+        |> halt()
+      end
+    else
+      conn
+      |> put_flash(:error, "You must log in to access this page.")
+      |> maybe_store_return_to()
+      |> redirect(to: signed_in_path(conn))
+      |> halt()
+    end
+  end
+
   defp maybe_store_return_to(%{method: "GET"} = conn) do
     put_session(conn, :user_return_to, current_path(conn))
   end

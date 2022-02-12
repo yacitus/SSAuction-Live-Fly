@@ -91,6 +91,12 @@ defmodule SSAuctionWeb.Router do
   end
 
   scope "/", SSAuctionWeb do
+    pipe_through [:browser, :require_authenticated_super_user]
+
+    live "/admin/importplayers", AdminLive.ImportPlayers
+  end
+
+  scope "/", SSAuctionWeb do
     pipe_through [:browser]
 
     delete "/users/log_out", UserSessionController, :delete
