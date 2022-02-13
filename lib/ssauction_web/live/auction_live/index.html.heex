@@ -2,19 +2,6 @@
   Auctions
 </h1>
 
-<%= if @live_action in [:new, :edit] do %>
-  <.modal return_to={Routes.auction_index_path(@socket, :index)}>
-    <.live_component
-      module={FiddleLiveWeb.AuctionLive.FormComponent}
-      id={@auction.id || :new}
-      title={@page_title}
-      action={@live_action}
-      auction={@auction}
-      return_to={Routes.auction_index_path(@socket, :index)}
-    />
-  </.modal>
-<% end %>
-
 <div class="w-full m-5">
   <table class="w-full table-auto border-collapse border border-blue-400">
     <thead>

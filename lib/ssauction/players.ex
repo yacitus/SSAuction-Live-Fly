@@ -21,6 +21,21 @@ defmodule SSAuction.Players do
     Repo.all(AllPlayer)
   end
 
+ @doc """
+  Returns the list of all_players with indicated year and league.
+
+  ## Examples
+
+      iex> list_all_players("2022-AL")
+      [%AllPlayer{}, ...]
+
+  """
+  def list_all_players(year_and_league) do
+    Repo.all(from p in AllPlayer,
+              where: p.year_range == ^year_and_league,
+              select: p)
+  end
+
   @doc """
   Gets a single all_player.
 
@@ -49,10 +64,10 @@ defmodule SSAuction.Players do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_all_player(attrs \\ %{}) do
+  def create_all_player!(attrs \\ %{}) do
     %AllPlayer{}
     |> AllPlayer.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert!()
   end
 
   @doc """
@@ -87,6 +102,24 @@ defmodule SSAuction.Players do
   """
   def delete_all_player(%AllPlayer{} = all_player) do
     Repo.delete(all_player)
+  end
+
+  @doc """
+  Deletes all all_player records with indicated year and league.
+
+  ## Examples
+
+      iex> delete_all_players("2022-AL")
+      {:ok, %AllPlayer{}}
+
+      iex> delete_all_players("2022-AL")
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_all_players(year_and_league) do
+    Repo.delete_all(from p in AllPlayer,
+                      where: p.year_range == ^year_and_league,
+                      select: p)
   end
 
   @doc """

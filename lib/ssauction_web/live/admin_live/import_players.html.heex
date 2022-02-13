@@ -1,3 +1,79 @@
 <h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
   Import Players
 </h1>
+
+<div class="w-full m-5 border-2 border-blue-200 text-slate-900 text-2xl">
+  <p class="ml-2">
+    Upload a comma-separated CSV file with three columns:
+  </p>
+  <ol class="list-decimal ml-10 text-xl">
+    <li>Scoresheet number</li>
+    <li>Name</li>
+    <li>Position</li>
+  </ol>
+</div>
+
+<.form let={_f1} for={@changeset} as={:changeset} id="upload-form" phx-submit="upload" phx-change="validate-upload"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <%= live_file_input @uploads.csv %>
+  <div class="bg-slate-100 px-5 py-8 mt-2 mb-3 shadow rounded-lg" phx-drop-target={@uploads.csv.ref}>
+    or drag and drop here
+  </div>
+
+  <button form="upload-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    Upload
+  </button>
+</.form>
+
+<%= if Enum.count(@players_for_import) != 0 do %>
+  <h2 class="w-full m-5 border-4 border-blue-400 text-blue-600 text-4xl font-bold text-center">
+    for import
+  </h2>
+
+  <div class="w-full m-5">
+    <table class="w-full table-auto border-collapse border border-blue-400">
+      <thead>
+        <tr>
+          <th class="border border-blue-300">SS Num</th>
+          <th class="border border-blue-300">Name</th>
+          <th class="border border-blue-300">Position</th>
+        </tr>
+      </thead>
+      <tbody id="auctions">
+        <%= for player <- @players_for_import do %>
+          <tr>
+            <td class="pl-5 border border-blue-300"><%= player.ssnum %></td>
+            <td class="pl-5 border border-blue-300"><%= player.name %></td>
+            <td class="pl-5 border border-blue-300"><%= player.position %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <.form let={f2} for={@changeset} as={:changeset} id="import-form" phx-submit="import" phx-change="validate-import"
+      class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+    <div class="block mb-2 text-sm font-medium text-slate-700">
+      <%= label f2, :year_and_league, "Year and League Type"%>
+    </div>
+    <%= text_input f2, :year_and_league, placeholder: "2022-AL" %>
+
+    <div class="flex">
+      <%= checkbox f2, :replace %>
+      <%= label f2, :replace, "replace all existing players with year and league type",
+            class: "block text-sm font-medium text-slate-700 ml-1 -mt-1" %>
+    </div>
+
+    <button form="import-form" type="submit"
+      class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+              active:bg-indigo-700
+              hover:bg-indigo-500
+              focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+      Import
+    </button>
+  </.form>
+<% end %>
