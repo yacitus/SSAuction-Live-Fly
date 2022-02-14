@@ -2,6 +2,7 @@ defmodule SSAuctionWeb.AdminLive.ImportPlayers do
   use SSAuctionWeb, :live_view
 
   alias SSAuction.Players
+  alias SSAuctionWeb.AdminLive.AllPlayers
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -16,7 +17,7 @@ defmodule SSAuctionWeb.AdminLive.ImportPlayers do
     {:noreply, socket}
   end
 
-   def handle_event("upload", _params, socket) do
+  def handle_event("upload", _params, socket) do
     [uploaded] =
       consume_uploaded_entries(socket, :csv, fn %{path: path}, _entry ->
         {:ok, players_from_csv(path)}
@@ -28,18 +29,19 @@ defmodule SSAuctionWeb.AdminLive.ImportPlayers do
     {:noreply, socket}
   end
 
-   def handle_event("import", params, socket) do
+  def handle_event("import", params, socket) do
     year_and_league = params["changeset"]["year_and_league"]
 
-    IO.puts("import")
-    IO.inspect(params["changeset"]["replace"])
+    if params["changeset"]["replace"] == "true" do
+      Players.delete_all_players(year_and_league)
+    end
 
     Enum.map(socket.assigns[:players_for_import],
              fn row -> row
                        |> Map.put(:year_range, year_and_league)
-
                        |> Players.create_all_player! end)
-    {:noreply, assign(socket, :players_for_import, [])}
+
+    {:noreply, redirect(socket, to: Routes.live_path(socket, AllPlayers, year_and_league: year_and_league))}
   end
 
   defp players_from_csv(csv_filepath) do

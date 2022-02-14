@@ -21,6 +21,19 @@ defmodule SSAuction.Players do
     Repo.all(AllPlayer)
   end
 
+  @doc """
+  Returns the number records in all_players.
+
+  ## Examples
+
+      iex> count_all_players()
+      320
+
+  """
+  def count_all_players do
+    Repo.one(from p in AllPlayer, select: count(p.id))
+  end
+
  @doc """
   Returns the list of all_players with indicated year and league.
 
@@ -34,6 +47,21 @@ defmodule SSAuction.Players do
     Repo.all(from p in AllPlayer,
               where: p.year_range == ^year_and_league,
               select: p)
+  end
+
+  @doc """
+  Returns the number records in all_players with indicated year and league.
+
+  ## Examples
+
+      iex> count_all_players()
+      320
+
+  """
+  def count_all_players(year_and_league) do
+    Repo.one(from p in AllPlayer,
+              where: p.year_range == ^year_and_league,
+              select: count(p.id))
   end
 
   @doc """

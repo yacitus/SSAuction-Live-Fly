@@ -94,6 +94,7 @@ defmodule SSAuctionWeb.Router do
     pipe_through [:browser, :require_authenticated_super_user]
 
     live "/admin/importplayers", AdminLive.ImportPlayers
+    live "/admin/allplayers", AdminLive.AllPlayers
   end
 
   scope "/", SSAuctionWeb do

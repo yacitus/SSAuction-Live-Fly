@@ -1,0 +1,39 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  AllPlayers
+</h1>
+
+<div class="w-full m-5 border-2 border-blue-200 text-slate-900 text-2xl">
+  <p class="ml-2">
+    <%= @num_players %> records in the AllPlayers table
+    <%= if @year_and_league != "" do %>
+      with year and league: <%= @year_and_league %>
+    <% end %>
+  </p>
+</div>
+
+<%= if Enum.count(@all_players) != 0 do %>
+  <h2 class="w-full m-5 border-4 border-blue-400 text-blue-600 text-4xl font-bold text-center">
+    <%= @year_and_league %>
+  </h2>
+
+  <div class="w-full m-5">
+    <table class="w-full table-auto border-collapse border border-blue-400">
+      <thead>
+        <tr>
+          <th class="border border-blue-300">SS Num</th>
+          <th class="border border-blue-300">Name</th>
+          <th class="border border-blue-300">Position</th>
+        </tr>
+      </thead>
+      <tbody id="auctions">
+        <%= for player <- @all_players do %>
+          <tr>
+            <td class="pl-5 border border-blue-300"><%= player.ssnum %></td>
+            <td class="pl-5 border border-blue-300"><%= player.name %></td>
+            <td class="pl-5 border border-blue-300"><%= player.position %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
