@@ -2,9 +2,8 @@
 
 ## TODO:
 
-* fix log_in page (either by getting tailwindcss/nesting working or changing the templates)
-* create upload players CSV page (to add to all_players) table
 * create create auction page
+* created nomination queue page with nomination modal
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
 * display player page (with breadcrumbs) when clicking on player in auto-nomination queue page
