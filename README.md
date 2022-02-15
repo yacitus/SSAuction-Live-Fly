@@ -3,7 +3,8 @@
 ## TODO:
 
 * create create auction page
-* created nomination queue page with nomination modal
+* create nomination queue page with nomination modal
+* create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
 * display player page (with breadcrumbs) when clicking on player in auto-nomination queue page
