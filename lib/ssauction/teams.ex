@@ -24,6 +24,19 @@ defmodule SSAuction.Teams do
   end
 
   @doc """
+  Returns the list of teams that don't belong to an auction
+
+  ## Examples
+
+      iex> list_teams_not_in_an_auction()
+      [%Team{}, ...]
+
+  """
+  def list_teams_not_in_an_auction do
+    Repo.all(from t in Team, where: is_nil(t.auction_id))
+  end
+
+  @doc """
   Gets a single team.
 
   Raises `Ecto.NoResultsError` if the Team does not exist.

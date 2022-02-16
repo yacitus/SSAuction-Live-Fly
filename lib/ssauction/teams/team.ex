@@ -17,8 +17,12 @@ defmodule SSAuction.Teams.Team do
 
   @doc false
   def changeset(team, attrs) do
+    required_fields = [:name, :unused_nominations, :new_nominations_open_at]
+    optional_fields = [:time_nominations_expire]
+
     team
-    |> cast(attrs, [:name, :unused_nominations, :time_nominations_expire, :new_nominations_open_at])
-    |> validate_required([:name, :unused_nominations, :time_nominations_expire, :new_nominations_open_at])
+    |> cast(attrs, required_fields ++ optional_fields)
+    |> validate_required(required_fields)
+    |> unique_constraint(:name)
   end
 end
