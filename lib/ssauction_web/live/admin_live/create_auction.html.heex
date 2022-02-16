@@ -1,0 +1,77 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Create Auction
+</h1>
+
+<div class="w-full m-5 border-2 border-blue-200 text-slate-900 text-2xl">
+  <p class="ml-2">
+    Notes:
+  </p>
+  <ul class="list-disc ml-10 text-xl">
+    <li>New Nominations Created indicates when new nominations are created; can be either:</li>
+      <ul class="list-disc ml-10 text-xl">
+        <li>"Time" - at a time specified in the team record</li>
+        <li>"Auction" - when the auction closes on a previously nominated player</li>
+      </ul>
+  </ul>
+</div>
+
+<.form let={f} for={@changeset} as={:changeset} id="create-form" phx-submit="create" phx-change="validate-create"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :name, "Auction Name"%>
+  </div>
+  <%= text_input f, :name, value: "2022-AL" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :year_and_league, "Year and League Type"%>
+  </div>
+  <%= text_input f, :year_and_league, value: "2022-AL" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :nominations_per_team, "Nominations Per Team"%>
+  </div>
+  <%= number_input f, :nominations_per_team, value: "2" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :seconds_before_autonomination, "Seconds Before Autonomination"%>
+  </div>
+  <%= number_input f, :seconds_before_autonomination, value: "3600" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :new_nominations_created, "New Nominations Created"%>
+  </div>
+  <%= multiple_select f, :new_nominations_created, ["Time": 1, "Auction": 2], selected: [1] %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :initial_bid_timeout_seconds, "Initial Bid Timeout (in seconds)"%>
+  </div>
+  <%= number_input f, :initial_bid_timeout_seconds, value: "86400" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :bid_timeout_seconds, "Subsequent Bid Timeout (in seconds)"%>
+  </div>
+  <%= number_input f, :bid_timeout_seconds, value: "43200" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :players_per_team, "Players Per Team"%>
+  </div>
+  <%= number_input f, :players_per_team, value: "50" %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :must_roster_all_players, "Must Roster All Players"%>
+  </div>
+  <%= multiple_select f, :must_roster_all_players, ["Yes": 1, "No": 2], selected: [2] %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :team_dollars_per_player, "Team Dollars Per Player"%>
+  </div>
+  <%= number_input f, :team_dollars_per_player, value: "20" %>
+
+  <button form="create-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    Create Auction
+  </button>
+</.form>

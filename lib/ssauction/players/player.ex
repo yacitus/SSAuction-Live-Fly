@@ -32,21 +32,15 @@ defmodule SSAuction.Players.Player do
       true ->
         year_range = get_field(changeset, :year_range)
         case String.length(year_range) do
-          12 ->
+          7 ->
             case parse_year_range(year_range) do
-              %{"start_year" => start_year, "end_year" => end_year} ->
-                case String.to_integer(end_year) >= String.to_integer(start_year) do
-                  false ->
-                    add_error(changeset, :year_range, "end year must be greater or equal to start year")
-
-                  _ ->
-                    changeset
-                end
+              %{"year" => _year, "league" => _league} ->
+                  changeset
               _ ->
                 add_error(changeset, :year_range, "can't find start and end year")
             end
           _ ->
-            add_error(changeset, :year_range, "must be 12 characters")
+            add_error(changeset, :year_range, "must be 7 characters")
         end
 
       _ ->
@@ -55,6 +49,6 @@ defmodule SSAuction.Players.Player do
   end
 
   def parse_year_range(year_range) do
-    Regex.named_captures(~r/(?<start_year>\d{4})-(?<end_year>\d{4})-(?<league>[A-Z]{2})/, year_range)
+    Regex.named_captures(~r/(?<year>\d{4})-(?<league>[A-Z]{2})/, year_range)
   end
 end

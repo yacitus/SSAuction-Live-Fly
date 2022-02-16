@@ -28,7 +28,7 @@ defmodule SSAuction.Players.AllPlayer do
         case String.length(year_range) do
           7 ->
             case parse_year_range(year_range) do
-              %{"year" => year, "league" => league} ->
+              %{"year" => _year, "league" => _league} ->
                   changeset
               _ ->
                 add_error(changeset, :year_range, "can't find start and end year")

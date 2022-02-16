@@ -50,14 +50,18 @@ h1 {
 }
 
 input[type="text"],
+input[type="number"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+select {
   @apply mb-4 appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md transition duration-150 ease-in-out text-sm;
 }
 
 input[type="text"]:focus,
+input[type="number"]:focus,
 input[type="email"]:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+select:focus {
   @apply outline-none ring ring-indigo-300 border-indigo-300;
 }
 

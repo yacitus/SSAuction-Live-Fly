@@ -7,7 +7,13 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Repo
 
   alias SSAuction.Auctions.Auction
+  alias SSAuction.Players.AllPlayer
+  alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(SSAuction.PubSub, "auctions")
+  end
 
   @doc """
   Returns the list of auctions.
@@ -39,22 +45,69 @@ defmodule SSAuction.Auctions do
   def get_auction!(id), do: Repo.get!(Auction, id)
 
   @doc """
-  Creates a auction.
-
-  ## Examples
-
-      iex> create_auction(%{field: value})
-      {:ok, %Auction{}}
-
-      iex> create_auction(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  Creates an auction.
 
   """
-  def create_auction(attrs \\ %{}) do
-    %Auction{}
-    |> Auction.changeset(attrs)
-    |> Repo.insert()
+  def create_auction(name: name,
+                     year_range: year_range,
+                     nominations_per_team: nominations_per_team,
+                     seconds_before_autonomination: seconds_before_autonomination,
+                     new_nominations_created: new_nominations_created,
+                     initial_bid_timeout_seconds: initial_bid_timeout_seconds,
+                     bid_timeout_seconds: bid_timeout_seconds,
+                     players_per_team: players_per_team,
+                     must_roster_all_players: must_roster_all_players,
+                     team_dollars_per_player: team_dollars_per_player) do
+
+    {:ok, now} = DateTime.now("Etc/UTC")
+    now = now
+          |> DateTime.truncate(:second)
+          |> DateTime.add(-now.second, :second)
+
+
+    auction =
+      %Auction{
+        name: name,
+        year_range: year_range,
+        nominations_per_team: nominations_per_team,
+        seconds_before_autonomination: seconds_before_autonomination,
+        new_nominations_created: new_nominations_created,
+        initial_bid_timeout_seconds: initial_bid_timeout_seconds,
+        bid_timeout_seconds: bid_timeout_seconds,
+        players_per_team: players_per_team,
+        must_roster_all_players: must_roster_all_players,
+        team_dollars_per_player: team_dollars_per_player,
+        started_or_paused_at: now
+        } |> Repo.insert!
+
+    q = from p in AllPlayer,
+          where: p.year_range == ^year_range,
+          select: p
+    Repo.all(q)
+    |> Enum.each(fn player -> %Player{}
+                              |> Player.changeset(%{
+                                   year_range: player.year_range,
+                                   name: player.name,
+                                   ssnum: player.ssnum,
+                                   position: player.position,
+                                   auction_id: auction.id
+                                 })
+                              |> Repo.insert!
+                 end)
+    broadcast({:ok, auction}, :auction_created)
+    auction
   end
+
+  def broadcast({:ok, auction}, event) do
+    Phoenix.PubSub.broadcast(
+      SSAuction.PubSub,
+      "auctions",
+      {event, auction}
+    )
+    {:ok, auction}
+  end
+
+  def broadcast({:error, _reason} = error, _event), do: error
 
   @doc """
   Updates a auction.
@@ -72,6 +125,7 @@ defmodule SSAuction.Auctions do
     auction
     |> Auction.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:auction_updated)
   end
 
   @doc """
@@ -88,6 +142,7 @@ defmodule SSAuction.Auctions do
   """
   def delete_auction(%Auction{} = auction) do
     Repo.delete(auction)
+    broadcast({:ok, auction}, :auction_deleted)
   end
 
   @doc """
