@@ -10,6 +10,10 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Players.AllPlayer
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
+  alias SSAuction.Players.RosteredPlayer
+  alias SSAuction.Bids.BidLog
+  alias SSAuction.Bids.Bid
+  alias SSAuction.Teams.Team
 
   def subscribe do
     Phoenix.PubSub.subscribe(SSAuction.PubSub, "auctions")
@@ -141,7 +145,37 @@ defmodule SSAuction.Auctions do
 
   """
   def delete_auction(%Auction{} = auction) do
-    Repo.delete(auction)
+    Repo.delete_all(from bl in BidLog, where: bl.auction_id == ^auction.id)
+    Repo.delete_all(from op in OrderedPlayer, where: op.auction_id == ^auction.id)
+    Repo.all(from t in Team, where: t.auction_id == ^auction.id)
+    |> Enum.each(fn team ->
+                   Repo.delete_all(from op in OrderedPlayer, where: op.team_id == ^team.id)
+                   Repo.all(from b in Bid, where: b.team_id == ^team.id)
+                   |> Enum.each(fn bid ->
+                                  player = Repo.preload(bid, [:player]).player
+                                  if player do
+                                    player
+                                    |> Ecto.Changeset.change(%{bid_id: nil})
+                                    |> Repo.update
+                                  end
+                                  Repo.delete!(bid)
+                                end)
+                   Repo.all(from rp in RosteredPlayer, where: rp.team_id == ^team.id)
+                   |> Enum.each(fn rostered_player ->
+                                  player = Repo.preload(rostered_player, [:player]).player
+                                  if player do
+                                    player
+                                    |> Ecto.Changeset.change(%{rostered_player_id: nil})
+                                    |> Repo.update
+                                  end
+                                  Repo.delete!(rostered_player)
+                                end)
+                   Repo.delete_all(from r in "teams_users", where: r.team_id == ^team.id, select: [r.id, r.team_id, r.user_id])
+                   Repo.delete!(team)
+                 end)
+    Repo.delete_all(from r in "auctions_users", where: r.auction_id == ^auction.id, select: [r.id, r.auction_id, r.user_id])
+    Repo.delete_all(from p in Player, where: p.auction_id == ^auction.id)
+    Repo.delete!(auction)
     broadcast({:ok, auction}, :auction_deleted)
   end
 
