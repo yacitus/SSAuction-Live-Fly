@@ -12,5 +12,6 @@
 * Teams Table on auction page: hide Time Nominations Expire and New Nominations Open At columns if there are no unused nominations
 * Auto-Nomination Queue page: show Nominations Per Team
 * Auto-Nomination Queue page: highlight top N players where N = Nominations Per Team
-* allow teams of the same name, as long as they're not in the same auction
+* don't allow adding a team to an auction that already has a team with that name
+* don't allow renaming a team in an auction that already has a team with that name
 * figure out how to dedupe team_live/bids.html.heex and auction_live/bids.html.heex
