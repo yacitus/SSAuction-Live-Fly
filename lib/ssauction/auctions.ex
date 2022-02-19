@@ -303,6 +303,16 @@ defmodule SSAuction.Auctions do
 
   def get_teams(%Auction{} = auction) do
     Repo.preload(auction, [:teams]).teams
+    |> Enum.map(fn team -> team
+                           |> Map.put(:dollars_spent, Teams.dollars_spent(team))
+                           |> Map.put(:time_nominations_expire, Teams.time_nominations_expire(team))
+                           |> Map.put(:number_of_rostered_players, Teams.number_of_rostered_players(team))
+                end)
+  end
+
+  def get_teams(%Auction{} = auction, %{sort_by: sort_by, sort_order: sort_order}) do
+    get_teams(auction)
+    |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
   end
 
   def create_team(%Auction{} = auction,

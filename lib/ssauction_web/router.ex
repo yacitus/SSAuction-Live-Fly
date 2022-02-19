@@ -22,7 +22,7 @@ defmodule SSAuctionWeb.Router do
 
     live "/", AuctionLive.Index, :index
     live "/auctions", AuctionLive.Index, :index
-    live "/auction/:id", AuctionLive.Show, :show
+    live "/auction/:id", AuctionLive.Show
     live "/auction/:id/autonominationqueue", AuctionLive.AutoNominationQueue
     live "/auction/:id/bids", AuctionLive.Bids
     live "/auction/:id/rosteredplayers", AuctionLive.RosteredPlayers

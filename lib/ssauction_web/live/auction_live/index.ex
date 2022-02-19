@@ -13,7 +13,7 @@ defmodule SSAuctionWeb.AuctionLive.Index do
 
   @impl true
   def handle_event("auction", %{"id" => id}, socket) do
-    {:noreply, redirect(socket, to: Routes.auction_show_path(socket, :show, id))}
+    {:noreply, redirect(socket, to: Routes.live_path(socket, SSAuctionWeb.AuctionLive.Show, id))}
   end
 
   @impl true
