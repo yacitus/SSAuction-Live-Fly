@@ -3,6 +3,7 @@
 ## TODO:
 
 * create admin page to add users to teams
+* add users table to Team Info page
 * create team edit page to allow users to change team name
 * create auction admin page to allow auction admin to change new nomination open at times for teams
 * create nomination queue page with nomination modal
