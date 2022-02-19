@@ -14,6 +14,7 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Bids.BidLog
   alias SSAuction.Bids.Bid
   alias SSAuction.Teams.Team
+  alias SSAuction.Teams
 
   def subscribe do
     Phoenix.PubSub.subscribe(SSAuction.PubSub, "auctions")
@@ -302,6 +303,14 @@ defmodule SSAuction.Auctions do
 
   def get_teams(%Auction{} = auction) do
     Repo.preload(auction, [:teams]).teams
+  end
+
+  def create_team(%Auction{} = auction,
+                  name: team_name,
+                  new_nominations_open_at: new_nominations_open_at) do
+    team = Ecto.build_assoc(auction, :teams, %{name: team_name, new_nominations_open_at: new_nominations_open_at, unused_nominations: 0})
+    Repo.insert!(team)
+    broadcast({:ok, auction}, :team_added)
   end
 
   def dollars_per_team(%Auction{} = auction) do

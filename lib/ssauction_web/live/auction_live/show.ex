@@ -7,6 +7,8 @@ defmodule SSAuctionWeb.AuctionLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Auctions.subscribe()
+
      socket =
       socket
       |> assign_locale()
@@ -29,5 +31,10 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   @impl true
   def handle_event("team", %{"id" => id}, socket) do
     {:noreply, redirect(socket, to: Routes.team_show_path(socket, :show, id))}
+  end
+
+  @impl true
+  def handle_info({:team_added, auction}, socket) do
+    {:noreply, assign(socket, :teams, Auctions.get_teams(auction))}
   end
 end

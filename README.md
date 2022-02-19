@@ -2,7 +2,7 @@
 
 ## TODO:
 
-* create create auction page
+* make Teams table sortable on /auction/:id & /admin/auction/:id/createteam pages
 * create nomination queue page with nomination modal
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
