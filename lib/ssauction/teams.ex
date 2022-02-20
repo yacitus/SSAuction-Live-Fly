@@ -123,7 +123,7 @@ defmodule SSAuction.Teams do
   end
 
   def get_users(%Team{} = team) do
-    Repo.preload(team, [:users]).users
+    Enum.sort_by(Repo.preload(team, [:users]).users, fn user -> user.username end)
   end
 
   def add_user(%Team{} = team, %User{} = user) do
