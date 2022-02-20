@@ -97,6 +97,7 @@ defmodule SSAuctionWeb.Router do
     live "/admin/allplayers", AdminLive.AllPlayers
     live "/admin/createauction", AdminLive.CreateAuction
     live "/admin/auction/:id/createteam", AdminLive.CreateTeam
+    live "/team/:id/adduser", AdminLive.AddUserToTeam
   end
 
   scope "/", SSAuctionWeb do

@@ -7,6 +7,8 @@ defmodule SSAuctionWeb.TeamLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Teams.subscribe()
+
     socket =
       socket
       |> assign_locale()
@@ -27,5 +29,17 @@ defmodule SSAuctionWeb.TeamLive.Show do
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
        |> assign(:users, users)
     }
+  end
+
+  @impl true
+  def handle_info({:user_added, team}, socket) do
+    socket =
+      if team.id == socket.assigns.team.id do
+        assign(socket, :users, Teams.get_users(team))
+      else
+        socket
+      end
+
+    {:noreply, socket}
   end
 end

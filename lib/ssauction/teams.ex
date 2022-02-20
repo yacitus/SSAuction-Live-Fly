@@ -4,11 +4,16 @@ defmodule SSAuction.Teams do
   """
 
   import Ecto.Query, warn: false
-  alias SSAuction.Repo
 
+  alias SSAuction.Repo
   alias SSAuction.Teams.Team
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
+  alias SSAuction.Accounts.User
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(SSAuction.PubSub, "teams")
+  end
 
   @doc """
   Returns the list of teams.
@@ -119,6 +124,23 @@ defmodule SSAuction.Teams do
 
   def get_users(%Team{} = team) do
     Repo.preload(team, [:users]).users
+  end
+
+  def add_user(%Team{} = team, %User{} = user) do
+    team = Repo.preload(team, [:users])
+    changeset = Ecto.Changeset.change(team)
+      |> Ecto.Changeset.put_assoc(:users, [user | team.users])
+    team = Repo.update!(changeset)
+    broadcast({:ok, team}, :user_added)
+  end
+
+  def broadcast({:ok, team}, event) do
+    Phoenix.PubSub.broadcast(
+      SSAuction.PubSub,
+      "teams",
+      {event, team}
+    )
+    {:ok, team}
   end
 
   def time_nominations_expire(%Team{} = team) do

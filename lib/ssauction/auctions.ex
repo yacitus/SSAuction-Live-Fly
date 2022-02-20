@@ -15,6 +15,8 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Bids.Bid
   alias SSAuction.Teams.Team
   alias SSAuction.Teams
+  alias SSAuction.Accounts
+  alias SSAuction.Accounts.User
 
   def subscribe do
     Phoenix.PubSub.subscribe(SSAuction.PubSub, "auctions")
@@ -321,6 +323,13 @@ defmodule SSAuction.Auctions do
     team = Ecto.build_assoc(auction, :teams, %{name: team_name, new_nominations_open_at: new_nominations_open_at, unused_nominations: 0})
     Repo.insert!(team)
     broadcast({:ok, auction}, :team_added)
+  end
+
+  def get_users_not_in_auction(%Auction{} = auction) do
+    all_user_ids = Repo.all(from u in User, select: u.id, order_by: u)
+    auction_user_ids = Enum.sort(Enum.map(Enum.concat(Enum.map(Repo.preload(auction, [:teams]).teams, fn t -> Repo.preload(t, [:users]).users end)), fn u -> u.id end))
+    user_ids_not_in_auction = all_user_ids -- auction_user_ids
+    Enum.map(user_ids_not_in_auction, fn id -> Accounts.get_user!(id) end)
   end
 
   def dollars_per_team(%Auction{} = auction) do
