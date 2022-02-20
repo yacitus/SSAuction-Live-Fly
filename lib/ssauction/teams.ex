@@ -117,6 +117,10 @@ defmodule SSAuction.Teams do
     Team.changeset(team, attrs)
   end
 
+  def get_users(%Team{} = team) do
+    Repo.preload(team, [:users]).users
+  end
+
   def time_nominations_expire(%Team{} = team) do
     if team.unused_nominations > 0 do
       team.time_nominations_expire

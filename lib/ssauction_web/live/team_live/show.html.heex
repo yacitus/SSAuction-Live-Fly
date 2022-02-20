@@ -96,3 +96,34 @@
     </tr>
   </tbody>
 </table>
+
+<%= if Enum.count(@users) != 0 do %>
+  <h2 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+    Owners
+  </h2>
+
+  <div class="w-full m-5">
+    <table class="w-full table-auto border-collapse border border-blue-400">
+      <thead>
+        <tr>
+          <th class="border border-blue-300">Username</th>
+          <th class="border border-blue-300">Email</th>
+          <th class="border border-blue-300">Slack</th>
+        </tr>
+      </thead>
+      <tbody id="users">
+        <%= for user <- @users do %>
+          <tr id={"user-#{user.id}"} >
+            <td class="pl-2 text-left border border-blue-300"><%= user.username %></td>
+            <td class="pl-2 text-left border border-blue-300">
+              <a href={"mailto:#{user.email}"}>
+                <%= user.email %>
+              </a>
+            </td>
+            <td class="pl-2 text-left border border-blue-300"><%= user.slack_display_name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

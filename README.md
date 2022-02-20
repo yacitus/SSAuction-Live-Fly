@@ -3,7 +3,6 @@
 ## TODO:
 
 * create admin page to add users to teams
-* add users table to Team Info page
 * create team edit page to allow users to change team name
 * create auction admin page to allow auction admin to change new nomination open at times for teams
 * create nomination queue page with nomination modal
@@ -20,3 +19,4 @@
 * dedupe sort_link, toggle_sort_order, and emoji functions
 * figure out how to dedupe team_live/bids.html.heex and auction_live/bids.html.heex
 * make Teams table sortable on /admin/auction/:id/createteam page
+* link to user's Slack profikle in Owners table on Team Info page
