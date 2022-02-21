@@ -283,6 +283,10 @@ defmodule SSAuction.Auctions do
     Repo.update!(changeset)
   end
 
+  def user_is_admin(%Auction{} = auction, %User{} = user) do
+    Enum.member?(Enum.map(Repo.preload(auction, [:admins]).admins, fn u -> u.id end), user.id)
+  end
+
   def get_rostered_players(%Auction{} = auction) do
     auction
       |> Ecto.assoc(:rostered_players)

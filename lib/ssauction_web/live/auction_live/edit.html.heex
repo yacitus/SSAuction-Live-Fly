@@ -1,0 +1,18 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Auction "<%= @auction.name %>" Administration
+</h1>
+
+<.form let={_f} for={@changeset} as={:changeset} id="start-pause-form" phx-submit="start-pause" phx-change="validate-start-pause"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <button form="start-pause-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    <%= if @auction.active do %>
+      Pause
+    <% else %>
+      Start
+    <% end %>
+  </button>
+</.form>

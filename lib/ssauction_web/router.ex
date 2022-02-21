@@ -89,6 +89,8 @@ defmodule SSAuctionWeb.Router do
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
+    live "/auction/:id/edit", AuctionLive.Edit
+
     live "/team/:id/edit", TeamLive.Edit
   end
 
