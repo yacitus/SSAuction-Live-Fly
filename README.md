@@ -2,7 +2,7 @@
 
 ## TODO:
 
-* create auction admin page to allow auction admin to change new nomination open at times for teams
+* create auction admin page to allow auction admins to start/pause auction and change new nomination open at times for teams
 * create nomination queue page with nomination modal
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
