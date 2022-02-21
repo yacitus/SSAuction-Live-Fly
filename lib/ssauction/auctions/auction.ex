@@ -23,6 +23,8 @@ defmodule SSAuction.Auctions.Auction do
     has_many :ordered_players, SSAuction.Players.OrderedPlayer
     has_many :bid_logs, SSAuction.Bids.BidLog
 
+    many_to_many :admins, SSAuction.Accounts.User, join_through: "auctions_users"
+
     timestamps()
   end
 

@@ -272,6 +272,17 @@ defmodule SSAuction.Auctions do
     end
   end
 
+  def get_admin_users(%Auction{} = auction) do
+    Enum.sort_by(Repo.preload(auction, [:admins]).admins, fn user -> user.username end)
+  end
+
+  def add_user_to_auction_admins(%Auction{} = auction, %User{} = user) do
+    auction = Repo.preload(auction, [:admins])
+    changeset = Ecto.Changeset.change(auction)
+      |> Ecto.Changeset.put_assoc(:admins, [user | auction.admins])
+    Repo.update!(changeset)
+  end
+
   def get_rostered_players(%Auction{} = auction) do
     auction
       |> Ecto.assoc(:rostered_players)
@@ -326,10 +337,17 @@ defmodule SSAuction.Auctions do
   end
 
   def get_users_not_in_auction(%Auction{} = auction) do
-    all_user_ids = Repo.all(from u in User, select: u.id, order_by: u)
-    auction_user_ids = Enum.sort(Enum.map(Enum.concat(Enum.map(Repo.preload(auction, [:teams]).teams, fn t -> Repo.preload(t, [:users]).users end)), fn u -> u.id end))
-    user_ids_not_in_auction = all_user_ids -- auction_user_ids
+    all_user_ids = Repo.all(from u in User, select: u.id, order_by: u.username)
+    user_ids_not_in_auction = all_user_ids -- get_auction_user_ids(auction)
     Enum.map(user_ids_not_in_auction, fn id -> Accounts.get_user!(id) end)
+  end
+
+  def get_users_in_auction(%Auction{} = auction) do
+    Enum.map(get_auction_user_ids(auction), fn id -> Accounts.get_user!(id) end)
+  end
+
+  defp get_auction_user_ids(%Auction{} = auction) do
+    Enum.sort(Enum.map(Enum.concat(Enum.map(Repo.preload(auction, [:teams]).teams, fn t -> Repo.preload(t, [:users]).users end)), fn u -> u.id end))
   end
 
   def dollars_per_team(%Auction{} = auction) do
