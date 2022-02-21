@@ -88,16 +88,19 @@ defmodule SSAuctionWeb.Router do
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+
+    live "/team/:id/edit", TeamLive.Edit
   end
 
   scope "/", SSAuctionWeb do
     pipe_through [:browser, :require_authenticated_super_user]
 
-    live "/admin/importplayers", AdminLive.ImportPlayers
+    live "/admin/import_players", AdminLive.ImportPlayers
     live "/admin/allplayers", AdminLive.AllPlayers
-    live "/admin/createauction", AdminLive.CreateAuction
-    live "/admin/auction/:id/createteam", AdminLive.CreateTeam
-    live "/team/:id/adduser", AdminLive.AddUserToTeam
+    live "/admin/create_auction", AdminLive.CreateAuction
+    live "/admin/auction/:id/create_team", AdminLive.CreateTeam
+    live "/admin/team/:id/add_user", AdminLive.AddUserToTeam
+    live "/admin/confirm_user", AdminLive.ConfirmUser
   end
 
   scope "/", SSAuctionWeb do

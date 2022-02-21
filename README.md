@@ -2,7 +2,7 @@
 
 ## TODO:
 
-* create team edit page to allow users to change team name
+* insert underscores in routes that should have them (and confirm the pages still work)
 * create auction admin page to allow auction admin to change new nomination open at times for teams
 * create nomination queue page with nomination modal
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
@@ -17,6 +17,7 @@
 * don't allow renaming a team in an auction that already has a team with that name
 * dedupe sort_link, toggle_sort_order, and emoji functions
 * figure out how to dedupe team_live/bids.html.heex and auction_live/bids.html.heex
-* make Teams table sortable on /admin/auction/:id/createteam page
+* make Teams table sortable on /admin/auction/:id/create_team page
 * link to user's Slack profikle in Owners table on Team Info page
-* fix bug in /team/:id/adduser page where added username is not removed from selection list after adding
+* fix bug in /admin/team/:id/add_user page where added username is not removed from selection list after adding
+* fix bug (same as above) in /admin/confirm_user page where confirmed user is not removed from selection list after confirming

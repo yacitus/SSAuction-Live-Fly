@@ -91,6 +91,7 @@ defmodule SSAuction.Teams do
     team
     |> Team.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:team_updated)
   end
 
   @doc """
@@ -124,6 +125,10 @@ defmodule SSAuction.Teams do
 
   def get_users(%Team{} = team) do
     Enum.sort_by(Repo.preload(team, [:users]).users, fn user -> user.username end)
+  end
+
+  def user_in_team(%Team{} = team, %User{} = user) do
+    Enum.member?(Enum.map(Repo.preload(team, [:users]).users, fn u -> u.id end), user.id)
   end
 
   def add_user(%Team{} = team, %User{} = user) do

@@ -284,10 +284,18 @@ defmodule SSAuction.Accounts do
     end
   end
 
-  defp confirm_user_multi(user) do
+  def confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))
+  end
+
+  def get_confirmed_users() do
+    Repo.all(from u in User, where: not is_nil(u.confirmed_at), order_by: u.username)
+  end
+
+  def get_users_not_confirmed() do
+    Repo.all(from u in User, where: is_nil(u.confirmed_at), order_by: u.username)
   end
 
   ## Reset password
