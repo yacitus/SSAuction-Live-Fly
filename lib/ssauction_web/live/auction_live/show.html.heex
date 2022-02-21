@@ -38,7 +38,7 @@
         Rostered Players:
       </td>
       <td class="pl-5 border border-blue-300">
-        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/rosteredplayers"}>
+        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/rostered_players"}>
           <%= Auctions.number_of_rostered_players(@auction) %> rostered players
         </a>
       </td>
@@ -119,7 +119,7 @@
         Nominations Per Team:
       </td>
       <td class="pl-5 border border-blue-300">
-        <%= @auction.nominations_per_team %> - <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/autonominationqueue"}>Auto-Nomination Queue</a>
+        <%= @auction.nominations_per_team %> - <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/autonomination_queue"}>Auto-Nomination Queue</a>
       </td>
     </tr>
 

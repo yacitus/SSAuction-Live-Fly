@@ -29,10 +29,10 @@ defmodule SSAuctionWeb.PlayerLive.Show do
     links = if back_to == "team" do
       [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
        %{label: "#{rostered_player.team.name}", to: "/team/#{rostered_player.team.id}"},
-       %{label: "rostered players", to: "/team/#{rostered_player.team.id}/rosteredplayers"}]
+       %{label: "rostered players", to: "/team/#{rostered_player.team.id}/rostered_players"}]
     else
       [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
-       %{label: "rostered players", to: "/auction/#{auction.id}/rosteredplayers"}]
+       %{label: "rostered players", to: "/auction/#{auction.id}/rostered_players"}]
     end
 
     {:noreply,
