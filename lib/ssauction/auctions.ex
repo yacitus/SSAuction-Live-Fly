@@ -362,4 +362,38 @@ defmodule SSAuction.Auctions do
               order_by: :rank
     Repo.all(query)
   end
+
+  @doc """
+  Returns a query of all players in the auction's bids
+
+  """
+  def players_in_bids_query(auction = %Auction{}) do
+    from a in Auction,
+      where: a.id == ^auction.id,
+      join: bids in assoc(a, :bids),
+      join: player in assoc(bids, :player),
+      select: player
+  end
+
+  @doc """
+  Returns a query of all players rostered in the auction
+
+  """
+  def players_rostered_in_query(auction = %Auction{}) do
+    from a in Auction,
+      where: a.id == ^auction.id,
+      join: rostered_players in assoc(a, :rostered_players),
+      join: player in assoc(rostered_players, :player),
+      select: player
+  end
+
+  @doc """
+  Returns a query of all players in the auction
+
+  """
+  def players_in_query(auction = %Auction{}) do
+    from player in Player,
+      where: player.auction_id == ^auction.id,
+      select: player
+  end
 end

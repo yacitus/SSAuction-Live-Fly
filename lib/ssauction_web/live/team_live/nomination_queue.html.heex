@@ -1,0 +1,46 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Nomination Queue
+</h1>
+
+<h2 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-4xl font-bold text-center">
+  Players Available to Nominate
+</h2>
+
+<div class="w-full max-w-md mx-auto">
+  <form id="change-filter" phx-change="filter">
+    <div class="filters">
+      <div class="flex">
+        <%= for position <- ["SP", "RP", "C", "1B", "2B", "3B", "SS", "OF", "DH"]  do %>
+          <%= position_checkbox(position: position, checked: position in @positions) %>
+        <% end %>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="w-full m-5">
+  <table class="w-full table-auto border-collapse border border-blue-400">
+    <thead>
+      <tr>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Scoresheet num", :ssnum, @team.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Player", :name, @team.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Position", :position, @team.id, @options) %>
+        </th>
+      </tr>
+    </thead>
+    <tbody id="teams">
+      <%= for player <- @players_available_for_nomination do %>
+        <tr id={"available_player-#{player.id}"}>
+          <td class="pl-5 text-left border border-blue-300"><%= player.ssnum %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= player.name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= player.position %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

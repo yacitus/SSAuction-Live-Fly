@@ -7,6 +7,7 @@ defmodule SSAuction.Teams do
 
   alias SSAuction.Repo
   alias SSAuction.Teams.Team
+  alias SSAuction.Players.Player
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Accounts.User
@@ -200,6 +201,83 @@ defmodule SSAuction.Teams do
       |> Ecto.assoc(:rostered_players)
       |> Repo.all
       |> Repo.preload([:player])
+  end
+
+  @doc """
+  Returns a query for players who can be added to the team's nomination queue
+
+  """
+  def queueable_players_query(team = %Team{}) do
+    auction = Auctions.get_auction!(team.auction_id)
+
+    bid_players = Auctions.players_in_bids_query(auction)
+    rostered_players = Auctions.players_rostered_in_query(auction)
+    queued_players = players_in_nomination_queue_query(team)
+
+    from player in Player,
+      where: player.auction_id == ^auction.id,
+      select: player,
+      except_all: ^bid_players,
+      except_all: ^rostered_players,
+      except_all: ^queued_players
+  end
+
+  @doc """
+  Returns a list of players (sorted by id) who can be added to the team's nomination queue
+
+  """
+  def queueable_players(team = %Team{}) do
+    query = queueable_players_query(team)
+
+    Repo.all(from p in subquery(query), order_by: p.id)
+  end
+
+  defp filter_players_with_positions(players_all_positions, positions) do
+    Enum.filter(players_all_positions,
+                fn player ->
+                  Enum.any?(String.split(player.position, "/", trim: true),
+                            fn position -> position in positions end)
+                end)
+  end
+
+  @doc """
+  Returns a list of players (sorted by id) who can be added to the team's nomination queue,
+  sorted and filtered as specified
+
+  """
+  def queueable_players(team = %Team{}, %{sort_by: sort_by, sort_order: sort_order, positions: positions}) do
+    query = queueable_players_query(team)
+
+    players_all_positions = Repo.all(from p in subquery(query), order_by: [{^sort_order, ^sort_by}])
+
+    if Kernel.length(positions) == 0 or positions == [""] do
+      players_all_positions
+    else
+      filter_players_with_positions(players_all_positions, positions)
+    end
+  end
+
+  @doc """
+  Returns true if the player can be added to the team's nomination queue
+
+  """
+  def queueable_player?(player = %Player{}, team = %Team{}) do
+    query = queueable_players_query(team)
+
+    Enum.any?(Repo.all(from p in subquery(query), order_by: p.id,  select: p.id),
+              fn id -> id == player.id end)
+  end
+
+  @doc """
+  Returns a query of all players in the team's nomination queue
+
+  """
+  def players_in_nomination_queue_query(team = %Team{}) do
+    from t in Team,
+      where: t.id == ^team.id,
+      join: ordered_players in assoc(t, :ordered_players),
+      join: player in assoc(ordered_players, :player),
+      select: player
   end
 
   alias SSAuction.Bids

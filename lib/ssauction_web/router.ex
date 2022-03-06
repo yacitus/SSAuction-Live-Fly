@@ -90,6 +90,7 @@ defmodule SSAuctionWeb.Router do
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
     live "/team/:id/edit", TeamLive.Edit
+    live "/team/:id/nomination_queue", TeamLive.NominationQueue
   end
 
   scope "/", SSAuctionWeb do

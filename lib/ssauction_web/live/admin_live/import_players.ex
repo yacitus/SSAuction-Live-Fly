@@ -50,8 +50,9 @@ defmodule SSAuctionWeb.AdminLive.ImportPlayers do
     csv_filepath
     |> File.read!()
     |> String.split("\n", trim: true)
-    |> Enum.map(&String.split(&1, ","))
+    |> Enum.map(&String.split(&1, ",", trim: true))
     |> Enum.map(fn row -> columns |> Enum.zip(row) |> Map.new() end)
     |> Enum.map(fn row -> Map.update!(row, :ssnum, &String.to_integer/1) end)
+    |> Enum.map(fn row -> Map.update!(row, :position, &String.trim/1) end)
   end
 end
