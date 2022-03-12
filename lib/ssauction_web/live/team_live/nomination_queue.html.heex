@@ -7,12 +7,17 @@
 </h2>
 
 <div class="w-full max-w-md mx-auto">
-  <form id="change-filter" phx-change="filter">
+  <form id="change-filter" phx-change="filter" phx-submit="filter-submit">
     <div class="filters">
       <div class="flex">
         <%= for position <- ["SP", "RP", "C", "1B", "2B", "3B", "SS", "OF", "DH"]  do %>
           <%= position_checkbox(position: position, checked: position in @positions) %>
         <% end %>
+        <input class="ml-3 min-w-max"
+          type="search" id="search" name="search" autofocus autocomplete="off"
+          value={@search} >
+        <input class="h-10 px-4 py-2 bg-transparent border border-cool-gray-400 border-l-0 rounded-r-md transition ease-in-out duration-150 outline-none hover:bg-blue-400 hover:cursor-pointer"
+          type="image" src="/images/search.svg"/>
       </div>
     </div>
   </form>

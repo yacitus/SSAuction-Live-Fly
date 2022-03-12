@@ -19,18 +19,16 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
 
   @impl true
   def handle_params(params, _, socket) do
-    IO.puts "handle_params"
     id = params["id"]
     team = Teams.get_team!(id)
     if Teams.user_in_team(team, socket.assigns.current_user) do
       sort_by = (params["sort_by"] || "ssnum") |> String.to_atom()
       sort_order = (params["sort_order"] || "asc") |> String.to_atom()
       positions = String.split((params["positions"] || ""), "|", trim: true)
-      options = %{sort_by: sort_by, sort_order: sort_order, positions: positions}
+      search = (params["search"] || "")
+      options = %{sort_by: sort_by, sort_order: sort_order, positions: positions, search: search}
 
       auction = Auctions.get_auction!(team.auction_id)
-
-      IO.inspect(options)
 
       {:noreply,
        socket
@@ -38,6 +36,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
          |> assign(:players_available_for_nomination, Teams.queueable_players(team, options))
          |> assign(:options, options)
          |> assign(:positions, positions)
+         |> assign(:search, search)
          |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
                             %{label: "#{team.name}", to: "/team/#{id}"}])
       }
@@ -49,8 +48,6 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
 
   @impl true
   def handle_event("filter", %{"positions" => positions}, socket) do
-    IO.puts "handle_event"
-    IO.inspect(positions)
     socket =
       push_patch(socket,
         to:
@@ -59,6 +56,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
             __MODULE__,
             socket.assigns.team.id,
             positions: Enum.join(positions, "|"),
+            search: socket.assigns.search,
             sort_by: socket.assigns.options.sort_by,
             sort_order: socket.assigns.options.sort_order
           )
@@ -68,8 +66,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
-  def handle_event("filter", _, socket) do
-    IO.puts "handle_event 2"
+  def handle_event("filter", _params, socket) do
     socket =
       push_patch(socket,
         to:
@@ -78,6 +75,27 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
             __MODULE__,
             socket.assigns.team.id,
             positions: "",
+            search: socket.assigns.search,
+            sort_by: socket.assigns.options.sort_by,
+            sort_order: socket.assigns.options.sort_order
+          )
+      )
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("filter-submit", %{"search" => search}, socket) do
+    search = String.downcase(search)
+    socket =
+      push_patch(socket,
+        to:
+          Routes.live_path(
+            socket,
+            __MODULE__,
+            socket.assigns.team.id,
+            positions: Enum.join(socket.assigns.positions, "|"),
+            search: search,
             sort_by: socket.assigns.options.sort_by,
             sort_order: socket.assigns.options.sort_order
           )

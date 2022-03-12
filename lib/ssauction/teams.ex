@@ -232,11 +232,18 @@ defmodule SSAuction.Teams do
     Repo.all(from p in subquery(query), order_by: p.id)
   end
 
-  defp filter_players_with_positions(players_all_positions, positions) do
-    Enum.filter(players_all_positions,
+  defp filter_players_with_positions(players, positions) do
+    Enum.filter(players,
                 fn player ->
                   Enum.any?(String.split(player.position, "/", trim: true),
                             fn position -> position in positions end)
+                end)
+  end
+
+  defp filter_players_by_search_string(players, search_string) do
+    Enum.filter(players,
+                fn player ->
+                  String.contains?(String.downcase(player.name), String.downcase(search_string))
                 end)
   end
 
@@ -245,15 +252,23 @@ defmodule SSAuction.Teams do
   sorted and filtered as specified
 
   """
-  def queueable_players(team = %Team{}, %{sort_by: sort_by, sort_order: sort_order, positions: positions}) do
+  def queueable_players(team = %Team{},
+                        %{sort_by: sort_by, sort_order: sort_order, positions: positions, search: search}) do
     query = queueable_players_query(team)
 
-    players_all_positions = Repo.all(from p in subquery(query), order_by: [{^sort_order, ^sort_by}])
+    players = Repo.all(from p in subquery(query), order_by: [{^sort_order, ^sort_by}])
 
-    if Kernel.length(positions) == 0 or positions == [""] do
-      players_all_positions
+    players =
+      if Kernel.length(positions) == 0 or positions == [""] do
+        players
+      else
+        filter_players_with_positions(players, positions)
+      end
+
+    if search == "" do
+      players
     else
-      filter_players_with_positions(players_all_positions, positions)
+      filter_players_by_search_string(players, search)
     end
   end
 
