@@ -4,9 +4,12 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
 
   alias SSAuction.Teams
   alias SSAuction.Auctions
+  alias SSAuction.Players
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Teams.subscribe()
+
     socket =
       socket
       |> assign_locale()
@@ -14,7 +17,8 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       |> assign_timezone_offset()
       |> assign(positions: [])
   
-    {:ok, socket, temporary_assigns: [players_available_for_nomination: []]}
+    {:ok, socket, temporary_assigns: [players_available_for_nomination: [],
+                                      players_in_nomination_queue: []]}
   end
 
   @impl true
@@ -33,6 +37,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       {:noreply,
        socket
          |> assign(:team, team)
+         |> assign(:players_in_nomination_queue, Teams.players_in_nomination_queue(team))
          |> assign(:players_available_for_nomination, Teams.queueable_players(team, options))
          |> assign(:options, options)
          |> assign(:positions, positions)
@@ -100,6 +105,38 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
             sort_order: socket.assigns.options.sort_order
           )
       )
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("add-player-to-queue", %{"id" => id}, socket) do
+    player = Players.get_player!(id)
+    Teams.add_to_nomination_queue(player, socket.assigns.team)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:nomination_queue_changed, team}, socket) do
+    socket =
+      if team.id == socket.assigns.team.id do
+        assign(socket, :players_in_nomination_queue, Teams.players_in_nomination_queue(team))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:queueable_players_changed, team}, socket) do
+    socket =
+      if team.id == socket.assigns.team.id do
+        assign(socket, :players_available_for_nomination, Teams.queueable_players(team, socket.assigns.options))
+      else
+        socket
+      end
 
     {:noreply, socket}
   end

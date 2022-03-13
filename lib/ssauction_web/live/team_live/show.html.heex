@@ -68,6 +68,18 @@
       </td>
     </tr>
 
+    <%= if current_user_in_team(@team, @current_user) do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Nomination queue:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= @team.num_players_in_nomination_queue %> players in <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/nomination_queue"}>nomination queue</a>
+        </td>
+      </tr>
+    <% end %>
+
+
     <tr>
       <td class="pl-5 border border-blue-300">
         Time nominations expire:

@@ -8,6 +8,7 @@ defmodule SSAuction.Teams do
   alias SSAuction.Repo
   alias SSAuction.Teams.Team
   alias SSAuction.Players.Player
+  alias SSAuction.Players.OrderedPlayer
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Accounts.User
@@ -56,7 +57,10 @@ defmodule SSAuction.Teams do
       ** (Ecto.NoResultsError)
 
   """
-  def get_team!(id), do: Repo.get!(Team, id)
+  def get_team!(id) do
+    Repo.get!(Team, id)
+    |> Map.put(:num_players_in_nomination_queue, num_players_in_nomination_queue(id))
+  end
 
   @doc """
   Creates a team.
@@ -187,6 +191,46 @@ defmodule SSAuction.Teams do
                       - number_of_bids(team))
     else
       dollars_left
+    end
+  end
+
+  def num_players_in_nomination_queue(team_id) do
+    Repo.one(from op in OrderedPlayer, where: op.team_id == ^team_id, select: count())
+  end
+
+  def players_in_nomination_queue(%Team{} = team) do
+    Repo.all(from op in OrderedPlayer,
+             where: op.team_id == ^team.id,
+             order_by: op.rank,
+             preload: [:player])
+  end
+
+  def add_to_nomination_queue(player = %Player{}, team = %Team{}) do
+    ordered_player =
+      %OrderedPlayer{
+        rank: largest_rank_in_team_nomination_queue(team) + 1,
+        player: player
+      }
+    ordered_player = Ecto.build_assoc(team, :ordered_players, ordered_player)
+    map = Repo.insert!(ordered_player)
+    broadcast({:ok, team}, :nomination_queue_changed)
+    broadcast({:ok, team}, :queueable_players_changed)
+    map
+  end
+
+  def largest_rank_in_team_nomination_queue(team = %Team{}) do
+    query = from t in Team,
+              where: t.id == ^team.id,
+              join: ordered_players in assoc(t, :ordered_players),
+              select: ordered_players.rank,
+              order_by: ordered_players.rank
+    ranks = Repo.all(query)
+    case ranks do
+      [] ->
+        0
+
+      _ ->
+        Enum.max(ranks)
     end
   end
 
