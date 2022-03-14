@@ -24,7 +24,7 @@
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.ssnum %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.position %></td>
-          <td class="pl-5 text-left border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
               phx-click="move-to-top-of-queue" phx-value-id={"#{ordered_player.id}"}}>🔝</td>
         </tr>
       <% end %>
@@ -75,7 +75,7 @@
           <td class="pl-5 text-left border border-blue-300"><%= player.ssnum %></td>
           <td class="pl-5 text-left border border-blue-300"><%= player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= player.position %></td>
-          <td class="pl-5 text-left border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
               phx-click="add-player-to-queue" phx-value-id={"#{player.id}"}}>⬆️</td>
         </tr>
       <% end %>
