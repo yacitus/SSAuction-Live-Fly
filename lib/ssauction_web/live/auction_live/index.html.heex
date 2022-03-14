@@ -14,7 +14,7 @@
     </thead>
     <tbody id="auctions">
       <%= for auction <- @auctions do %>
-        <tr class="hover:bg-sky-100" id={"auction-#{auction.id}"} phx-click="auction" phx-value-id={"#{auction.id}"}}>
+        <tr class="hover:bg-sky-100 hover:cursor-pointer" id={"auction-#{auction.id}"} phx-click="auction" phx-value-id={"#{auction.id}"}}>
           <td class="pr-2 text-right border border-blue-300"><%= auction.id %></td>
           <td class="pl-5 border border-blue-300"><%= auction.name %></td>
           <td class="text-center border border-blue-300"><%= Auctions.dedup_years(auction) %></td>
