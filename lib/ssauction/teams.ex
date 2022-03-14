@@ -7,6 +7,7 @@ defmodule SSAuction.Teams do
 
   alias SSAuction.Repo
   alias SSAuction.Teams.Team
+  alias SSAuction.Players
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
   alias SSAuction.Auctions
@@ -208,7 +209,7 @@ defmodule SSAuction.Teams do
   def add_to_nomination_queue(player = %Player{}, team = %Team{}) do
     ordered_player =
       %OrderedPlayer{
-        rank: largest_rank_in_team_nomination_queue(team) + 1,
+        rank: largest_rank_in_nomination_queue(team) + 1,
         player: player
       }
     ordered_player = Ecto.build_assoc(team, :ordered_players, ordered_player)
@@ -218,19 +219,44 @@ defmodule SSAuction.Teams do
     map
   end
 
-  def largest_rank_in_team_nomination_queue(team = %Team{}) do
-    query = from t in Team,
-              where: t.id == ^team.id,
-              join: ordered_players in assoc(t, :ordered_players),
-              select: ordered_players.rank,
-              order_by: ordered_players.rank
+  def move_to_top_of_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    query = from op in OrderedPlayer,
+             where: op.team_id == ^team.id,
+             where: op.rank < ^ordered_player.rank,
+             order_by: [desc: op.rank]
+    Enum.map(Repo.all(query),
+             fn op -> Players.update_ordered_player(op, %{rank: op.rank+1}) end)
+    Players.update_ordered_player(ordered_player, %{rank: smallest_rank_in_nomination_queue(team)-1})
+    broadcast({:ok, team}, :nomination_queue_changed)
+  end
+
+  defp largest_rank_in_nomination_queue(team = %Team{}) do
+    query = from op in OrderedPlayer,
+              where: op.team_id == ^team.id,
+              order_by: [desc: op.rank],
+              select: op.rank
     ranks = Repo.all(query)
     case ranks do
       [] ->
         0
 
       _ ->
-        Enum.max(ranks)
+        Enum.at(ranks, 0)
+    end
+  end
+
+ defp smallest_rank_in_nomination_queue(team = %Team{}) do
+    query = from op in OrderedPlayer,
+              where: op.team_id == ^team.id,
+              order_by: [asc: op.rank],
+              select: op.rank
+    ranks = Repo.all(query)
+    case ranks do
+      [] ->
+        1
+
+      _ ->
+        Enum.at(ranks, 0)
     end
   end
 

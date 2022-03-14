@@ -118,6 +118,14 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
+  def handle_event("move-to-top-of-queue", %{"id" => id}, socket) do
+    ordered_player = Players.get_ordered_player!(id)
+    Teams.move_to_top_of_nomination_queue(ordered_player, socket.assigns.team)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:nomination_queue_changed, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do

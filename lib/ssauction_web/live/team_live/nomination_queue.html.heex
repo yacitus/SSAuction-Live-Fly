@@ -15,6 +15,7 @@
         <th class="border border-blue-300 hover:bg-sky-100">
           <%= sort_link(@socket, "Position", :position, @team.id, @options) %>
         </th>
+        <th class="border border-blue-300"></th>
       </tr>
     </thead>
     <tbody id="teams">
@@ -23,6 +24,8 @@
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.ssnum %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.position %></td>
+          <td class="pl-5 text-left border border-blue-300 hover:bg-sky-100"
+              phx-click="move-to-top-of-queue" phx-value-id={"#{ordered_player.id}"}}>🔝</td>
         </tr>
       <% end %>
     </tbody>
