@@ -230,6 +230,33 @@ defmodule SSAuction.Teams do
     broadcast({:ok, team}, :nomination_queue_changed)
   end
 
+  def move_to_bottom_of_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    Players.update_ordered_player(ordered_player, %{rank: largest_rank_in_nomination_queue(team)+1})
+    broadcast({:ok, team}, :nomination_queue_changed)
+  end
+
+  def move_up_in_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    previous = previous_in_nomination_queue(ordered_player, team)
+    if previous do
+      swap_ranks(ordered_player, previous)
+      broadcast({:ok, team}, :nomination_queue_changed)
+    end
+  end
+
+  def move_down_in_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    next = next_in_nomination_queue(ordered_player, team)
+    if next do
+      swap_ranks(ordered_player, next)
+      broadcast({:ok, team}, :nomination_queue_changed)
+    end
+  end
+
+  defp swap_ranks(op1 = %OrderedPlayer{}, op2 = %OrderedPlayer{}) do
+    rank2 = op2.rank
+    Players.update_ordered_player(op2, %{rank: op1.rank})
+    Players.update_ordered_player(op1, %{rank: rank2})
+  end
+
   defp largest_rank_in_nomination_queue(team = %Team{}) do
     query = from op in OrderedPlayer,
               where: op.team_id == ^team.id,
@@ -257,6 +284,36 @@ defmodule SSAuction.Teams do
 
       _ ->
         Enum.at(ranks, 0)
+    end
+  end
+
+  defp previous_in_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    query = from op in OrderedPlayer,
+              where: op.team_id == ^team.id,
+              where: op.rank < ^ordered_player.rank,
+              order_by: [desc: op.rank]
+    ordered_players = Repo.all(query)
+    case ordered_players do
+      [] ->
+        nil
+
+      _ ->
+        Enum.at(ordered_players, 0)
+    end
+  end
+
+  defp next_in_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    query = from op in OrderedPlayer,
+              where: op.team_id == ^team.id,
+              where: op.rank > ^ordered_player.rank,
+              order_by: [asc: op.rank]
+    ordered_players = Repo.all(query)
+    case ordered_players do
+      [] ->
+        nil
+
+      _ ->
+        Enum.at(ordered_players, 0)
     end
   end
 

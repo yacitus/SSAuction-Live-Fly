@@ -126,6 +126,30 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
+  def handle_event("move-up-in-queue", %{"id" => id}, socket) do
+    ordered_player = Players.get_ordered_player!(id)
+    Teams.move_up_in_nomination_queue(ordered_player, socket.assigns.team)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("move-down-in-queue", %{"id" => id}, socket) do
+    ordered_player = Players.get_ordered_player!(id)
+    Teams.move_down_in_nomination_queue(ordered_player, socket.assigns.team)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("move-to-bottom-of-queue", %{"id" => id}, socket) do
+    ordered_player = Players.get_ordered_player!(id)
+    Teams.move_to_bottom_of_nomination_queue(ordered_player, socket.assigns.team)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:nomination_queue_changed, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do

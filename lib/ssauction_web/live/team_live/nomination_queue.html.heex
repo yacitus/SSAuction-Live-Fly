@@ -15,7 +15,6 @@
         <th class="border border-blue-300 hover:bg-sky-100">
           Position
         </th>
-        <th class="border border-blue-300"></th>
       </tr>
     </thead>
     <tbody id="teams">
@@ -25,7 +24,13 @@
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.position %></td>
           <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
-              phx-click="move-to-top-of-queue" phx-value-id={"#{ordered_player.id}"}}>🔝</td>
+              phx-click="move-to-top-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤴️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-up-in-queue" phx-value-id={"#{ordered_player.id}"}}>⬆️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-down-in-queue" phx-value-id={"#{ordered_player.id}"}}>⬇️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-to-bottom-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤵️</td>
         </tr>
       <% end %>
     </tbody>
@@ -54,7 +59,7 @@
 </div>
 
 <div class="w-full m-5">
-  <table class="w-full table-auto border-collapse border border-blue-400">
+  <table class="w-full table-auto border-collapse">
     <thead>
       <tr>
         <th class="border border-blue-300 hover:bg-sky-100">
@@ -66,7 +71,6 @@
         <th class="border border-blue-300 hover:bg-sky-100">
           <%= sort_link(@socket, "Position", :position, @team.id, @options) %>
         </th>
-        <th class="border border-blue-300"></th>
       </tr>
     </thead>
     <tbody id="teams">
@@ -76,7 +80,7 @@
           <td class="pl-5 text-left border border-blue-300"><%= player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= player.position %></td>
           <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
-              phx-click="add-player-to-queue" phx-value-id={"#{player.id}"}}>⬆️</td>
+              phx-click="add-player-to-queue" phx-value-id={"#{player.id}"}}>⤴️</td>
         </tr>
       <% end %>
     </tbody>
