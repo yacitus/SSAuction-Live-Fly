@@ -230,7 +230,7 @@ defmodule SSAuction.Teams do
     broadcast({:ok, team}, :nomination_queue_changed)
   end
 
-  defp largest_rank_in_nomination_queue(team = %Team{}) do
+  def largest_rank_in_nomination_queue(team = %Team{}) do
     query = from op in OrderedPlayer,
               where: op.team_id == ^team.id,
               order_by: [desc: op.rank],
@@ -245,7 +245,7 @@ defmodule SSAuction.Teams do
     end
   end
 
- defp smallest_rank_in_nomination_queue(team = %Team{}) do
+ def smallest_rank_in_nomination_queue(team = %Team{}) do
     query = from op in OrderedPlayer,
               where: op.team_id == ^team.id,
               order_by: [asc: op.rank],

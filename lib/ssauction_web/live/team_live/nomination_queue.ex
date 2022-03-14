@@ -38,6 +38,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
        socket
          |> assign(:team, team)
          |> assign(:players_in_nomination_queue, Teams.players_in_nomination_queue(team))
+         |> assign(:smallest_rank_in_nomination_queue, Teams.smallest_rank_in_nomination_queue(team))
          |> assign(:players_available_for_nomination, Teams.queueable_players(team, options))
          |> assign(:options, options)
          |> assign(:positions, positions)
@@ -129,7 +130,12 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   def handle_info({:nomination_queue_changed, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
-        assign(socket, :players_in_nomination_queue, Teams.players_in_nomination_queue(team))
+        players_in_nomination_queue = Teams.players_in_nomination_queue(team)
+        IO.inspect(players_in_nomination_queue)
+        socket =
+          socket
+          |> assign(:players_in_nomination_queue, players_in_nomination_queue)
+          |> assign(:smallest_rank_in_nomination_queue, Teams.smallest_rank_in_nomination_queue(team))
       else
         socket
       end
