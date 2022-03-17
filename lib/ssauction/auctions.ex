@@ -13,6 +13,7 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Players.RosteredPlayer
   alias SSAuction.Bids.BidLog
   alias SSAuction.Bids.Bid
+  alias SSAuction.Bids
   alias SSAuction.Teams.Team
   alias SSAuction.Teams
   alias SSAuction.Accounts
@@ -193,6 +194,39 @@ defmodule SSAuction.Auctions do
   """
   def change_auction(%Auction{} = auction, attrs \\ %{}) do
     Auction.changeset(auction, attrs)
+  end
+
+  def start_auction(auction = %Auction{}) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    now = now
+      |> DateTime.truncate(:second)
+      |> DateTime.add(-now.second, :second)
+
+    update_bids_to_new_start_time(auction, now)
+
+    Auctions.change_auction(auction, %{active: true, started_or_paused_at: now})
+    |> Repo.update()
+  end
+
+  defp update_bids_to_new_start_time(%Auction{} = auction, new_start_time) do
+    seconds_since_auction_paused = DateTime.diff(new_start_time, auction.started_or_paused_at)
+    Enum.map(Repo.preload(auction, [:bids]).bids,
+             fn (bid) -> add_seconds_to_expires_at(seconds_since_auction_paused, bid) end)
+  end
+
+  defp add_seconds_to_expires_at(seconds, %Bid{} = bid) do
+    Bids.update_bid(bid, %{expires_at: DateTime.add(bid.expires_at, seconds, :second)})
+    |> Repo.update()
+  end
+
+  def pause_auction(auction = %Auction{}) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    now = now
+      |> DateTime.truncate(:second)
+      |> DateTime.add(-now.second, :second)
+
+    Auctions.change_auction(auction, %{active: false, started_or_paused_at: now})
+    |> Repo.update()
   end
 
   defp append(string1, string2) do
