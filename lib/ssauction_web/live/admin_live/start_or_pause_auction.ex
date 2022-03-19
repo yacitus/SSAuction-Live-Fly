@@ -5,14 +5,13 @@ defmodule SSAuctionWeb.AdminLive.StartOrPauseAuction do
   alias SSAuction.Bids
 
   def mount(_params, _session, socket) do
-     socket =
+    socket =
       socket
       |> assign_locale()
       |> assign_timezone()
       |> assign_timezone_offset()
-      |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def handle_params(%{"id" => id}, _, socket) do
