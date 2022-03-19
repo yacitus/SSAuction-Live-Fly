@@ -1,0 +1,150 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Start or Pause in Auction "<%= @auction.name %>"
+</h1>
+
+<table class="w-full m-5 table-auto border-collapse border border-blue-400">
+  <tbody id="auction_info">
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Name:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @auction.name %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Active:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.active_emoji(@auction) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Bids:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/bids"}>
+          <%= Bids.number_of_bids(@auction) %> open bids
+        </a>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Rostered Players:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/rostered_players"}>
+          <%= Auctions.number_of_rostered_players(@auction) %> rostered players
+        </a>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Last Started or Paused:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                           utc_datetime: @auction.started_or_paused_at,
+                           locale: @locale,
+                           timezone: @timezone %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Years:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.dedup_years(@auction) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Players Per Team:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @auction.players_per_team %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Must Roster All Players:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= if @auction.must_roster_all_players do %>
+          Yes
+        <% else %>
+          No
+        <% end %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Dollars Per Team:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        $<%= Auctions.dollars_per_team(@auction) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Time Before Nominations Expire:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.seconds_to_string(@auction.initial_bid_timeout_seconds) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Time Before Bids Expire:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.seconds_to_string(@auction.bid_timeout_seconds) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Nominations Per Team:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @auction.nominations_per_team %> - <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/autonomination_queue"}>Auto-Nomination Queue</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Time Before Auto-nomination:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.seconds_to_string(@auction.seconds_before_autonomination) %>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<form id="start-or-pause-form" phx-submit="start-or-pause"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <button form="start-or-pause-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    <%= if @auction.active do %>
+      Pause
+    <% else %>
+      Start
+    <% end %>
+  </button>
+</form>

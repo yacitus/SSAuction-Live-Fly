@@ -103,6 +103,7 @@ defmodule SSAuctionWeb.Router do
     live "/admin/team/:id/add_user", AdminLive.AddUserToTeam
     live "/admin/auction/:id/add_admin_user", AdminLive.AddUserToAuctionAdmins
     live "/admin/confirm_user", AdminLive.ConfirmUser
+    live "/admin/auction/:id/start_or_pause", AdminLive.StartOrPauseAuction
   end
 
   scope "/", SSAuctionWeb do
