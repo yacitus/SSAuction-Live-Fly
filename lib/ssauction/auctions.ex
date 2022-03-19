@@ -204,7 +204,7 @@ defmodule SSAuction.Auctions do
 
     update_bids_to_new_start_time(auction, now)
 
-    Auctions.change_auction(auction, %{active: true, started_or_paused_at: now})
+    change_auction(auction, %{active: true, started_or_paused_at: now})
     |> Repo.update()
   end
 
@@ -225,7 +225,7 @@ defmodule SSAuction.Auctions do
       |> DateTime.truncate(:second)
       |> DateTime.add(-now.second, :second)
 
-    Auctions.change_auction(auction, %{active: false, started_or_paused_at: now})
+    change_auction(auction, %{active: false, started_or_paused_at: now})
     |> Repo.update()
   end
 
