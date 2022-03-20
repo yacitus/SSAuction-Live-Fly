@@ -4,6 +4,18 @@ defmodule SSAuctionWeb.LiveHelpers do
 
   alias Phoenix.LiveView.JS
 
+  # from pragstudio-liveview-pro-code/final_app_v0.16/lib/live_view_studio_web/live/live_helpers.ex
+  def live_modal(component, opts) do
+    live_component(
+      SSAuctionWeb.ModalComponent,
+      id: :modal,
+      component: component,
+      title: Keyword.fetch!(opts, :title),
+      return_to: Keyword.fetch!(opts, :return_to),
+      opts: opts
+    )
+  end
+
   @doc """
   Renders a live component inside a modal.
 

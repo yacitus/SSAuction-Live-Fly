@@ -327,6 +327,14 @@ defmodule SSAuction.Auctions do
   end
 
   @doc """
+  Returns true if the team is in the auction
+
+  """
+  def team_is_in_auction?(auction = %Auction{}, team = %Team{}) do
+    team.auction_id == auction.id
+  end
+
+  @doc """
   Returns the number of dollars each team has in the auction
 
   """

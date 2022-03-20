@@ -5,6 +5,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   alias SSAuction.Teams
   alias SSAuction.Auctions
   alias SSAuction.Players
+  alias SSAuction.Bids
 
   @impl true
   def mount(_params, _session, socket) do
@@ -16,6 +17,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       |> assign_timezone()
       |> assign_timezone_offset()
       |> assign(positions: [])
+      |> assign(show_modal: false)
   
     {:ok, socket, temporary_assigns: [players_available_for_nomination: [],
                                       players_in_nomination_queue: []]}
@@ -37,11 +39,13 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       {:noreply,
        socket
          |> assign(:team, team)
+         |> assign(:auction, auction)
          |> assign(:players_in_nomination_queue, Teams.players_in_nomination_queue(team))
          |> assign(:players_available_for_nomination, Teams.queueable_players(team, options))
          |> assign(:options, options)
          |> assign(:positions, positions)
          |> assign(:search, search)
+         |> assign(:show_modal, false)
          |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
                             %{label: "#{team.name}", to: "/team/#{id}"}])
       }
@@ -49,6 +53,60 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       socket = put_flash(socket, :error, "You must be a team owner to access this page.")
       {:noreply, redirect(socket, to: "/team/#{id}")}
     end
+  end
+
+  @impl true
+  def handle_event("nominate", %{"id" => id}, socket) do
+    ordered_player = Players.get_ordered_player!(id)
+    nominated_player = Players.get_player!(ordered_player.player_id)
+
+    {:noreply,
+     socket
+       |> assign(:nominated_player, nominated_player)
+       |> assign(:show_modal, true)
+    }
+  end
+
+  def handle_event("validate-nominatation", _params, socket) do
+    {:noreply, socket}
+  end
+
+  defp push_patch_to_live_path(socket) do
+    push_patch(socket,
+      to:
+        Routes.live_path(
+          socket,
+          __MODULE__,
+          socket.assigns.team.id,
+          positions: Enum.join(socket.assigns.positions, "|"),
+          search: socket.assigns.search,
+          sort_by: socket.assigns.options.sort_by,
+          sort_order: socket.assigns.options.sort_order
+        )
+    )
+  end
+
+  def handle_event("submit-nominatation", params, socket) do
+    with {:ok, _} <- Bids.validate_nomination(socket.assigns.auction,
+                                              socket.assigns.team,
+                                              socket.assigns.nominated_player,
+                                              params["changeset"]["bid_amount"],
+                                              params["changeset"]["hidden_high_bid"]),
+         {:ok, _} <- Bids.submit_nomination(socket.assigns.auction,
+                                            socket.assigns.team,
+                                            socket.assigns.nominated_player,
+                                            params["changeset"]["bid_amount"],
+                                            params["changeset"]["hidden_high_bid"]) do
+      {:noreply, push_patch_to_live_path(socket)}
+    else
+      {_, message} ->
+        {:noreply, put_flash(socket, :error, message)}
+    end
+  end
+
+  @impl true
+  def handle_event("close", _, socket) do
+    {:noreply, push_patch_to_live_path(socket)}
   end
 
   @impl true

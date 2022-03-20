@@ -272,6 +272,22 @@ defmodule SSAuction.Players do
     Player.changeset(player, attrs)
   end
 
+  @doc """
+  Returns true if the player is rostered
+
+  """
+  def is_rostered?(player = %Player{}) do
+    player.rostered_player_id != nil
+  end
+
+  @doc """
+  Returns true if the player is in the auction's bid
+
+  """
+  def in_bids?(player = %Player{}) do
+    player.bid_id != nil
+  end
+
   alias SSAuction.Players.RosteredPlayer
 
   @doc """

@@ -463,4 +463,51 @@ defmodule SSAuction.Bids do
     |> Repo.insert()
     Players.broadcast({:ok, player}, :bid_log_change)
   end
+
+  defp string_to_integer(string) do
+    case Integer.parse(string) do
+      {int, _} -> int
+      :error -> nil
+    end
+  end
+
+  def validate_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
+    bid_amount = string_to_integer(bid_amount)
+    hidden_high_bid = string_to_integer(hidden_high_bid)
+
+    cond do
+      not auction.active ->
+        { :error, "Auction is paused" }
+      not Auctions.team_is_in_auction?(auction, team) ->
+        { :error, "Team is not in auction" }
+      Players.is_rostered?(player) ->
+        { :error, "Player is already rostered" }
+      bid_amount == nil ->
+        { :error, "Bid amount invalid" }
+      not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
+        { :error, "Hidden high bid must be nothing or above bid amount" }
+      Players.in_bids?(player) ->
+        { :error, "Player already nominated" }
+      team.unused_nominations == 0 ->
+        { :error, "Team does not have an open nomination" }
+      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
+        { :error, "Bid amount not legal for team" }
+      not Teams.has_open_roster_spot?(team, auction) ->
+        { :error, "Team does not have open roster spot for another bid" }
+      true ->
+        {:ok, nil}
+    end
+  end
+
+  defp hidden_high_bid_legal?(nil, _) do
+    true
+  end
+
+  defp hidden_high_bid_legal?(hidden, bid_amount) do
+    hidden > bid_amount
+  end
+
+  def submit_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
+    {:error, "Haven't finished submit_nomination yet"}
+  end
 end

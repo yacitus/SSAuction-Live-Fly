@@ -599,4 +599,22 @@ defmodule SSAuction.Teams do
       |> Ecto.assoc(:bids)
       |> Repo.aggregate(:count, :id)
   end
+
+  @doc """
+  Returns true if the team has enough money left for the bid amount, the "keep bidding up to" amount, and the hidden high bid
+
+  """
+
+  def legal_bid_amount?(team = %Team{}, bid_amount, hidden_high_bid) do
+    max_new_dollars = calculate_max_bid(bid_amount, hidden_high_bid)
+    (dollars_remaining_for_bids_including_hidden(team) - max_new_dollars) >= 0
+  end
+
+  defp calculate_max_bid(bid_amount, nil) do
+    bid_amount
+  end
+
+  defp calculate_max_bid(bid_amount, hidden_high_bid) do
+    max(bid_amount, hidden_high_bid)
+  end
 end

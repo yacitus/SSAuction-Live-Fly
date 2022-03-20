@@ -3,6 +3,21 @@
 </h1>
 
 <div class="w-full m-5">
+  <%= if @show_modal do %>
+    <%= live_modal(SSAuctionWeb.NominateFormComponent,
+                   id: :nominate,
+                   nominated_player: @nominated_player,
+                   title: "Nominate #{@nominated_player.name} (#{@nominated_player.ssnum}) - #{@nominated_player.position}",
+                   return_to: Routes.live_path(
+                     @socket,
+                     __MODULE__,
+                     @team.id,
+                     positions: Enum.join(@positions, "|"),
+                     search: @search,
+                     sort_by: @options.sort_by,
+                     sort_order: @options.sort_order)
+                  ) %>
+  <% end %>
   <table class="w-full table-auto border-collapse border border-blue-400">
     <thead>
       <tr>
@@ -31,6 +46,12 @@
               phx-click="move-down-in-queue" phx-value-id={"#{ordered_player.id}"}}>⬇️</td>
           <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
               phx-click="move-to-bottom-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤵️</td>
+          <%= if @auction.active do %>
+            <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
+                phx-click="nominate" phx-value-id={"#{ordered_player.id}"}}>
+              Nominate
+            </td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>
