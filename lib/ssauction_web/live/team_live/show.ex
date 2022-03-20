@@ -53,7 +53,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
   end
 
   @impl true
-  def handle_info({:team_updated, team}, socket) do
+  def handle_info({:team_info_change, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
         assign(socket, :team, team)

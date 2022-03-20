@@ -98,7 +98,7 @@ defmodule SSAuction.Teams do
     team
     |> Team.changeset(attrs)
     |> Repo.update()
-    |> broadcast(:team_updated)
+    |> broadcast(:team_info_change)
   end
 
   @doc """

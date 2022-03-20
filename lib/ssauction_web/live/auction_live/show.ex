@@ -3,16 +3,20 @@ defmodule SSAuctionWeb.AuctionLive.Show do
 
   alias SSAuction.Auctions
   alias SSAuction.Bids
+  alias SSAuction.Teams
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket), do: Auctions.subscribe()
+    if connected?(socket) do
+      Auctions.subscribe()
+      Teams.subscribe()
+    end
 
-     socket =
+    socket =
       socket
-      |> assign_locale()
-      |> assign_timezone()
-      |> assign_timezone_offset()
+        |> assign_locale()
+        |> assign_timezone()
+        |> assign_timezone_offset()
 
     {:ok, socket}
   end
@@ -43,6 +47,19 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   def handle_info({:team_added, auction}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
+        assign(socket, :teams, Auctions.get_teams(auction))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:team_info_change, team}, socket) do
+    socket =
+      if team.auction_id == socket.assigns.auction.id do
+        auction = Auctions.get_auction!(team.auction_id)
         assign(socket, :teams, Auctions.get_teams(auction))
       else
         socket
