@@ -11,6 +11,7 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
   alias SSAuction.Players.RosteredPlayer
+  alias SSAuction.Players
   alias SSAuction.Bids.BidLog
   alias SSAuction.Bids.Bid
   alias SSAuction.Bids
@@ -317,6 +318,23 @@ defmodule SSAuction.Auctions do
     Repo.update!(changeset)
   end
 
+  @doc """
+  Returns a list of teams in the auction
+
+  """
+  def list_teams(auction = %Auction{}) do
+    Repo.preload(auction, [:teams]).teams
+  end
+
+  @doc """
+  Returns the number of dollars each team has in the auction
+
+  """
+
+  def dollars_per_team(auction = %Auction{}) do
+    auction.players_per_team * auction.team_dollars_per_player
+  end
+
   def get_rostered_players(%Auction{} = auction) do
     auction
       |> Ecto.assoc(:rostered_players)
@@ -384,10 +402,6 @@ defmodule SSAuction.Auctions do
     Enum.sort(Enum.map(Enum.concat(Enum.map(Repo.preload(auction, [:teams]).teams, fn t -> Repo.preload(t, [:users]).users end)), fn u -> u.id end))
   end
 
-  def dollars_per_team(%Auction{} = auction) do
-    auction.players_per_team * auction.team_dollars_per_player
-  end
-
   def players_in_autonomination_queue(%Auction{} = auction) do
     query = from op in OrderedPlayer,
               where: op.auction_id == ^auction.id,
@@ -429,5 +443,198 @@ defmodule SSAuction.Auctions do
     from player in Player,
       where: player.auction_id == ^auction.id,
       select: player
+  end
+
+  @doc """
+  Searches for expired bids in active auctions and roster them
+
+  """
+  def check_for_expired_bids() do
+    q = from a in Auction, where: a.active, select: a.id
+    Repo.all(q)
+    |> Enum.each(&check_for_expired_bids/1)
+  end
+
+  @doc """
+  Searches for expired bids in the auction and roster them
+
+  """
+  def check_for_expired_bids(auction_id) do
+    auction_bids = from a in Auction,
+                     where: a.id == ^auction_id,
+                     join: bids in assoc(a, :bids),
+                     select: bids
+    open_bids = from b in subquery(auction_bids),
+                  where: not b.closed
+    Repo.all(open_bids)
+    |> Enum.each(&check_for_expired_bid/1)
+  end
+
+  @doc """
+  If this bid is expired, close it and roster the player
+
+  """
+  def check_for_expired_bid(bid = %Bid{}) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    if DateTime.diff(now, bid.expires_at) >= 0 do
+      Bid.changeset(bid, %{closed: true}) |> Repo.update!()
+      Bids.roster_player_and_delete_bid(bid)
+    end
+  end
+
+  @doc """
+  Searches for teams ready to be given new nominations in active auctions
+
+  """
+
+  def check_for_new_nominations() do
+    q = from a in Auction, where: a.active
+    Repo.all(q)
+    |> Enum.each(&check_for_new_nominations/1)
+  end
+
+  @doc """
+  Searches for teams ready to be given new nominations in the auction
+
+  """
+
+  def check_for_new_nominations(auction = %Auction{}) do
+    if auction.new_nominations_created == "time" do
+      for team <- list_teams(auction) do
+        check_for_new_nominations(team, auction)
+      end
+    end
+  end
+
+  @doc """
+  Searches if the team is ready to be given new nominations
+
+  """
+
+  def check_for_new_nominations(team = %Team{}, auction = %Auction{}) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    if DateTime.diff(now, team.new_nominations_open_at) >= 0 do
+      Teams.give_team_new_nominations(team, auction, auction.nominations_per_team)
+    end
+  end
+
+  @doc """
+  Searches for teams with expired nominations in active auctions and auto-nominate for them
+
+  """
+
+  def check_for_expired_nominations() do
+    q = from a in Auction, where: a.active
+    Repo.all(q)
+    |> Enum.each(&check_for_expired_nominations/1)
+  end
+
+  @doc """
+  Searches for teams with expired nominations in the auction and auto-nominate for them
+
+  """
+
+  def check_for_expired_nominations(auction = %Auction{}) do
+    for team <- list_teams(auction) do
+      check_for_expired_nominations(team, auction)
+    end
+  end
+
+  @doc """
+  Auto-nominate if the team has expired nomination
+
+  """
+
+  def check_for_expired_nominations(team = %Team{}, auction = %Auction{}) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    if team.time_nominations_expire != nil and DateTime.diff(now, team.time_nominations_expire) >= 0 do
+      auto_nominate(team, auction)
+    end
+  end
+
+  defp auto_nominate(team = %Team{}, auction = %Auction{}) do
+    if team.unused_nominations > 0 do
+      for _ <- 1..team.unused_nominations do
+        if Teams.has_open_roster_spot?(team, auction) and Teams.dollars_remaining_for_bids_including_hidden(team) > 0 do
+          cond do
+            Teams.num_players_in_nomination_queue(team) > 0 ->
+              player = Teams.next_in_nomination_queue(team)
+              args = %{bid_amount: 1}
+              Bids.submit_bid_changeset(auction, team, player, args, nil)
+              remove_from_nomination_queues(auction, player)
+            num_players_in_nomination_queue(auction) > 0 ->
+              player = next_in_nomination_queue(auction)
+              args = %{bid_amount: 1}
+              Bids.submit_bid_changeset(auction, team, player, args, nil)
+              remove_from_nomination_queues(auction, player)
+            true ->
+              nil
+          end
+        end
+      end
+      team
+        |> Team.changeset(%{time_nominations_expire: nil,
+                            unused_nominations: 0})
+        |> Repo.update
+      Teams.broadcast({:ok, team}, :info_change)
+      broadcast({:ok, auction}, :teams_info_change)
+    end
+  end
+
+  defp num_players_in_nomination_queue(auction = %Auction{}) do
+    query = from a in Auction,
+              where: a.id == ^auction.id,
+              join: ordered_players in assoc(a, :ordered_players),
+              select: ordered_players.id
+    Repo.aggregate(query, :count, :id)
+  end
+
+  def remove_from_nomination_queues(auction = %Auction{}, player = %Player{}) do
+    remove_from_nomination_queue(auction, player)
+    broadcast({:ok, auction}, :nomination_queue_change)
+    for team <- list_teams(auction) do
+      Teams.remove_from_nomination_queue(team, player)
+    end
+  end
+
+  @doc """
+  Returns a the player at the top (lowest rank) of the auction's auto-nomination queue
+
+  """
+  def next_in_nomination_queue(auction = %Auction{}) do
+    rank_of_next = smallest_rank_in_nomination_queue(auction)
+    ordered_player = Repo.one!(from op in OrderedPlayer,
+                               where: op.auction_id == ^auction.id and op.rank == ^rank_of_next)
+    Players.get_player!(ordered_player.player_id)
+  end
+
+ defp smallest_rank_in_nomination_queue(auction = %Auction{}) do
+    query = from a in Auction,
+              where: a.id == ^auction.id,
+              join: ordered_players in assoc(a, :ordered_players),
+              select: ordered_players.rank,
+              order_by: ordered_players.rank
+    ranks = Repo.all(query)
+    case ranks do
+      [] ->
+        nil
+
+      _ ->
+        Enum.min(ranks)
+    end
+  end
+
+  def remove_from_nomination_queue(auction = %Auction{}, player = %Player{}) do
+    ordered_player = find_ordered_player(player, auction)
+    if ordered_player != nil do
+      ordered_player
+        |> Ecto.Changeset.change
+        |> Repo.delete
+    end
+  end
+
+  defp find_ordered_player(player = %Player{}, auction = %Auction{}) do
+    Repo.one(from op in OrderedPlayer,
+             where: op.auction_id == ^auction.id and op.player_id == ^player.id)
   end
 end

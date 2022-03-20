@@ -8,6 +8,19 @@ defmodule SSAuction.Players do
 
   alias SSAuction.Players.AllPlayer
 
+  def subscribe do
+    Phoenix.PubSub.subscribe(SSAuction.PubSub, "players")
+  end
+
+  def broadcast({:ok, player}, event) do
+    Phoenix.PubSub.broadcast(
+      SSAuction.PubSub,
+      "players",
+      {event, player}
+    )
+    {:ok, player}
+  end
+
   @doc """
   Returns the list of all_players.
 

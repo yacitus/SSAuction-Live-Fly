@@ -13,6 +13,7 @@ defmodule SSAuction.Teams do
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Accounts.User
+  alias SSAuction.Bids
 
   def subscribe do
     Phoenix.PubSub.subscribe(SSAuction.PubSub, "teams")
@@ -162,37 +163,16 @@ defmodule SSAuction.Teams do
     end
   end
 
-  def dollars_spent(%Team{} = team) do
-    rostered_players =
-      team
-      |> Ecto.assoc(:rostered_players)
-      |> Repo.all
-    Enum.sum(for p <- rostered_players, do: p.cost)
-  end
+  @doc """
+  Returns all open bids for a team
 
-  def dollars_bid(%Team{} = _team) do
-    0
-  end
-
-  def number_of_bids(%Team{} = _team) do
-    0
-  end
-
-  def dollars_remaining_for_bids(%Team{} = team) do
-    auction = Auctions.get_auction!(team.auction_id)
-    dollars_remaining_for_bids(auction, team)
-  end
-
-  def dollars_remaining_for_bids(%Auction{} = auction, %Team{} = team) do
-    dollars_left = Auctions.dollars_per_team(auction) \
-                    - (dollars_spent(team) + dollars_bid(team))
-    if auction.must_roster_all_players do
-      dollars_left - (auction.players_per_team \
-                      - number_of_rostered_players(team) \
-                      - number_of_bids(team))
-    else
-      dollars_left
-    end
+  """
+  def open_bids(team = %Team{}) do
+    team_bids = from t in Team,
+                  where: t.id == ^team.id,
+                  join: bids in assoc(t, :bids),
+                  select: bids
+    Repo.all(from b in subquery(team_bids), where: not b.closed)
   end
 
   def num_players_in_nomination_queue(team_id) do
@@ -411,6 +391,59 @@ defmodule SSAuction.Teams do
   end
 
   @doc """
+  Returns a the player at the top (lowest rank) of the teams's auto-nomination queue
+
+  """
+  def next_in_nomination_queue(team = %Team{}) do
+    rank_of_next = smallest_rank_in_nomination_queue(team)
+    ordered_player = Repo.one!(from op in OrderedPlayer,
+                               where: op.team_id == ^team.id and op.rank == ^rank_of_next)
+    Players.get_player!(ordered_player.player_id)
+  end
+
+  def remove_from_nomination_queue(team = %Team{}, player = %Player{}) do
+    ordered_player = find_ordered_player(player, team)
+    if ordered_player != nil do
+      ordered_player
+        |> Ecto.Changeset.change
+        |> Repo.delete
+    end
+    broadcast({:ok, team}, :nomination_queue_change)
+  end
+
+  defp find_ordered_player(player = %Player{}, team = %Team{}) do
+    Repo.one(from op in OrderedPlayer,
+             where: op.team_id == ^team.id and op.player_id == ^player.id)
+  end
+
+  def update_unused_nominations(team = %Team{}, auction = %Auction{}) do
+    if auction.new_nominations_created == "auction" do
+      give_team_new_nominations(team, auction, 1)
+    end
+  end
+
+  def give_team_new_nominations(team = %Team{}, auction = %Auction{}, num_nominations) do
+    open_roster_spots = open_roster_spots(team, auction)
+    new_unused_nominations = Enum.min([team.unused_nominations+num_nominations,
+                                       open_roster_spots])
+    if new_unused_nominations > 0 do
+      {:ok, now} = DateTime.now("Etc/UTC")
+      now = now
+        |> DateTime.truncate(:second)
+        |> DateTime.add(-now.second, :second)
+      team
+      |> Team.changeset(%{unused_nominations: new_unused_nominations,
+                          time_nominations_expire: DateTime.add(now, auction.seconds_before_autonomination, :second)})
+      |> Repo.update
+    end
+    team
+    |> Team.changeset(%{new_nominations_open_at: DateTime.add(team.new_nominations_open_at, 24*60*60, :second)})
+    |> Repo.update
+    broadcast({:ok, team}, :info_change)
+    Auctions.broadcast({:ok, auction}, :teams_info_change)
+  end
+
+  @doc """
   Returns a query of all players in the team's nomination queue
 
   """
@@ -422,7 +455,87 @@ defmodule SSAuction.Teams do
       select: player
   end
 
-  alias SSAuction.Bids
+  @doc """
+  Update a team's info after a nomination
+
+  """
+  def update_info_post_nomination(team = %Team{}) do
+    team
+      |> Team.changeset(%{unused_nominations: team.unused_nominations-1})
+      |> Repo.update
+    broadcast({:ok, team}, :info_change)
+  end
+
+  @doc """
+  Returns the number of open roster spots for a team
+
+  """
+  def open_roster_spots(team = %Team{}, auction = %Auction{}) do
+    auction.players_per_team - number_of_rostered_players_in_team(team) - number_of_bids_for_team(team)
+  end
+
+  @doc """
+  Returns true if the team has an open roster spot for a bid
+
+  """
+  def has_open_roster_spot?(team = %Team{}, auction = %Auction{}) do
+    open_roster_spots(team, auction) > 0
+  end
+
+  @doc """
+  Returns the number of rostered players in a team
+
+  """
+  def number_of_rostered_players_in_team(team = %Team{}) do
+    team
+    |> Ecto.assoc(:rostered_players)
+    |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
+  Returns the number of dollars the team has spent
+
+  """
+
+  def dollars_spent(team = %Team{}) do
+    rostered_players =
+      team
+      |> Ecto.assoc(:rostered_players)
+      |> Repo.all
+    Enum.sum(for p <- rostered_players, do: p.cost)
+  end
+
+  @doc """
+  Returns the number of dollars the team has in open bids (not counting hidden high bids)
+
+  """
+
+  def dollars_bid(team = %Team{}) do
+    Enum.sum(for b <- open_bids(team), do: b.bid_amount)
+  end
+
+  defp dollars_bid_including_hidden(team = %Team{}) do
+    Enum.sum(for b <- open_bids(team),
+             do: calculate_max_bid_vs_hidden_high_bid(b.bid_amount, b.hidden_high_bid))
+  end
+
+  defp calculate_max_bid_vs_hidden_high_bid(bid, nil) do
+    bid
+  end
+
+  defp calculate_max_bid_vs_hidden_high_bid(bid, hidden_high_bid) do
+    max(bid, hidden_high_bid)
+  end
+
+  @doc """
+  Returns the number of bids a team has
+
+  """
+  def number_of_bids_for_team(team = %Team{}) do
+    team
+    |> Ecto.assoc(:bids)
+    |> Repo.aggregate(:count, :id)
+  end
 
   def get_rostered_players_with_rostered_at(%Team{} = team) do
     Enum.map(get_rostered_players(team),
@@ -437,5 +550,53 @@ defmodule SSAuction.Teams do
   def get_rostered_players_with_rostered_at(%Team{} = team, %{sort_by: sort_by, sort_order: sort_order}) do
     get_rostered_players_with_rostered_at(team)
     |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
+  end
+
+  @doc """
+  Returns the number of dollars the team has left to bid (not including hidden)
+
+  """
+
+  def dollars_remaining_for_bids(team = %Team{}) do
+    auction = Auctions.get_auction!(team.auction_id)
+    team_dollars_remaining_for_bids(team, auction)
+  end
+
+  def team_dollars_remaining_for_bids(team = %Team{}, auction = %Auction{}) do
+    dollars_left = Auctions.dollars_per_team(auction) - (dollars_spent(team) + dollars_bid(team))
+    if auction.must_roster_all_players do
+      dollars_left - (auction.players_per_team - number_of_rostered_players(team) - number_of_bids(team))
+    else
+      dollars_left
+    end
+  end
+
+  @doc """
+  Returns the number of dollars the team has left to bid (including hidden)
+
+  """
+
+  def dollars_remaining_for_bids_including_hidden(team = %Team{}) do
+    auction = Auctions.get_auction!(team.auction_id)
+    dollars_remaining_for_bids_including_hidden(team, auction)
+  end
+
+  def dollars_remaining_for_bids_including_hidden(team = %Team{}, auction = %Auction{}) do
+    dollars_left = Auctions.dollars_per_team(auction) - (dollars_spent(team) + dollars_bid_including_hidden(team))
+    if auction.must_roster_all_players do
+      dollars_left - (auction.players_per_team - number_of_rostered_players(team) - number_of_bids(team))
+    else
+      dollars_left
+    end
+  end
+
+  @doc """
+  Returns the number of bids a team has
+
+  """
+  def number_of_bids(team = %Team{}) do
+    team
+      |> Ecto.assoc(:bids)
+      |> Repo.aggregate(:count, :id)
   end
 end

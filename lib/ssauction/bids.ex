@@ -8,8 +8,26 @@ defmodule SSAuction.Bids do
 
   alias SSAuction.Bids.BidLog
   alias SSAuction.Players.Player
+  alias SSAuction.Players.RosteredPlayer
   alias SSAuction.Auctions.Auction
   alias SSAuction.Teams.Team
+  alias SSAuction.Auctions
+  alias SSAuction.Teams
+  alias SSAuction.Players
+  alias SSAuction.ChangesetErrors
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(SSAuction.PubSub, "bids")
+  end
+
+  def broadcast({:ok, bid}, event) do
+    Phoenix.PubSub.broadcast(
+      SSAuction.PubSub,
+      "bids",
+      {event, bid}
+    )
+    {:ok, bid}
+  end
 
   @doc """
   Returns the list of bid_logs.
@@ -218,22 +236,6 @@ defmodule SSAuction.Bids do
   end
 
   @doc """
-  Deletes a bid.
-
-  ## Examples
-
-      iex> delete_bid(bid)
-      {:ok, %Bid{}}
-
-      iex> delete_bid(bid)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_bid(%Bid{} = bid) do
-    Repo.delete(bid)
-  end
-
-  @doc """
   Returns an `%Ecto.Changeset{}` for tracking bid changes.
 
   ## Examples
@@ -244,6 +246,134 @@ defmodule SSAuction.Bids do
   """
   def change_bid(%Bid{} = bid, attrs \\ %{}) do
     Bid.changeset(bid, attrs)
+  end
+
+  @doc """
+  Submits a new bid
+
+  """
+  def submit_new_bid(auction = %Auction{}, team = %Team{}, player = %Player{}, attrs) do
+    insert =
+      change_bid(%Bid{}, Map.put(attrs, :nominated_by, team.id))
+        |> Ecto.Changeset.put_assoc(:auction, auction)
+        |> Ecto.Changeset.put_assoc(:team, team)
+        |> Ecto.Changeset.put_assoc(:player, player)
+        |> Repo.insert()
+    case insert do
+      {:ok, bid} ->
+        log_bid(bid, auction, team, player, "N")
+    end
+    insert
+  end
+
+  @doc """
+  Updates an existing bid
+
+  """
+  def update_existing_bid(bid, new_team = %Team{}, attrs) do
+    update = bid
+      |> Repo.preload([:team, :auction, :player])
+      |> change_bid(attrs)
+      |> Ecto.Changeset.put_assoc(:team, new_team)
+      |> Repo.update()
+    case update do
+      {:ok, bid} ->
+        log_bid(bid, bid.auction, bid.team, bid.player, "B")
+    end
+    update
+  end
+
+  def submit_bid_changeset(auction, team, player, args, nil) do
+    {:ok, utc_datetime} = DateTime.now("Etc/UTC")
+    args = Map.put(args, :expires_at, DateTime.add(utc_datetime, auction.initial_bid_timeout_seconds, :second))
+
+    args = if not Map.has_key?(args, :hidden_high_bid) do
+      Map.put(args, :hidden_high_bid, nil)
+    else
+      args
+    end
+
+    case submit_new_bid(auction, team, player, args) do
+      {:error, changeset} ->
+        {
+          :error,
+          message: "Could not submit bid!",
+          details: ChangesetErrors.error_details(changeset)
+        }
+
+      {:ok, bid} ->
+        Teams.update_info_post_nomination(team)
+        Auctions.remove_from_nomination_queues(auction, player)
+        Auctions.broadcast({:ok, auction}, :nomination_queue_change)
+        Teams.broadcast({:ok, team}, :nomination_queue_change)
+        Auctions.broadcast({:ok, auction}, :bid_change)
+        Teams.broadcast({:ok, team}, :bid_change)
+        Teams.broadcast({:ok, team}, :info_change)
+        Auctions.broadcast({:ok, auction}, :teams_info_change)
+        Players.broadcast({:ok, player}, :info_change)
+        {:ok, bid}
+    end
+  end
+
+  def submit_bid_changeset(auction, team, player, args, existing_bid) do
+    args = if team.id != existing_bid.team_id do
+      {:ok, utc_datetime} = DateTime.now("Etc/UTC")
+      if DateTime.diff(existing_bid.expires_at, utc_datetime) < auction.bid_timeout_seconds do
+        Map.put(args, :expires_at, DateTime.add(utc_datetime, auction.bid_timeout_seconds, :second))
+      else
+        args
+      end
+    else
+      args
+    end
+
+    args = if not Map.has_key?(args, :hidden_high_bid) do
+      Map.put(args, :hidden_high_bid, nil)
+    else
+      args
+    end
+
+    args = if not Map.has_key?(args, :keep_bidding_up_to) do
+      Map.put(args, :keep_bidding_up_to, nil)
+    else
+      args
+    end
+
+    current_team_max_bid = if existing_bid.hidden_high_bid != nil do
+      max(existing_bid.bid_amount, existing_bid.hidden_high_bid)
+    else
+      existing_bid.bid_amount
+    end
+
+    args =
+      cond do
+        team.id == existing_bid.team_id ->
+          args
+        args.bid_amount > current_team_max_bid ->
+          args
+        true ->
+          Map.put(args, :bid_amount, current_team_max_bid + 1)
+      end
+
+    case update_existing_bid(existing_bid, team, args) do
+      {:error, changeset} ->
+        {
+          :error,
+          message: "Could not update bid!",
+          details: ChangesetErrors.error_details(changeset)
+        }
+
+      {:ok, bid} ->
+        Auctions.broadcast({:ok, auction}, :bid_change)
+        Teams.broadcast({:ok, team}, :bid_change)
+        previous_team = Teams.get_team!(existing_bid.team_id)
+        Teams.broadcast({:ok, previous_team}, :bid_change)
+        Teams.broadcast({:ok, team}, :info_change)
+        Teams.broadcast({:ok, previous_team}, :info_change)
+        Auctions.broadcast({:ok, auction}, :teams_info_change)
+        Players.broadcast({:ok, player}, :info_change)
+        {:ok, bid}
+    end
   end
 
   def number_of_bids(%Auction{} = auction) do
@@ -260,5 +390,77 @@ defmodule SSAuction.Bids do
 
   def seconds_until_bid_expires(%Bid{} = bid, %Auction{} = auction) do
     DateTime.diff(bid.expires_at, auction.started_or_paused_at)
+  end
+
+  @doc """
+  Roster the player from this bid and delete the bid
+
+  """
+  def roster_player_and_delete_bid(bid = %Bid{}) do
+    bid = Repo.preload(bid, [:player, :team, :auction])
+    auction = bid.auction
+    team = bid.team
+    player = bid.player
+    rostered_player =
+      %RosteredPlayer{
+        cost: bid.bid_amount,
+        player: player
+      }
+    rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
+    rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
+    Repo.insert!(rostered_player)
+    nominating_team = Teams.get_team!(bid.nominated_by)
+    delete_bid(bid, auction, team, player, nominating_team)
+    log_bid(bid, auction, team, player, "R")
+    Teams.update_unused_nominations(nominating_team, auction)
+    Auctions.broadcast({:ok, auction}, :roster_change)
+    Teams.broadcast({:ok, team}, :roster_change)
+    Players.broadcast({:ok, player}, :info_change)
+  end
+
+  @doc """
+  Delete the bid
+
+  """
+  def delete_bid(bid = %Bid{}) do
+    bid = Repo.preload(bid, [:player, :team, :auction])
+    auction = bid.auction
+    team = bid.team
+    player = bid.player
+    nominating_team = Teams.get_team!(bid.nominated_by)
+    delete_bid(bid, auction, team, player, nominating_team)
+  end
+
+
+  def delete_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, nominating_team = %Team{}) do
+    player
+    |> Ecto.Changeset.change(%{bid_id: nil})
+    |> Repo.update
+    bid
+    |> Ecto.Changeset.change
+    |> Repo.delete
+
+    Auctions.broadcast({:ok, auction}, :bid_change)
+    Teams.broadcast({:ok, team}, :bid_change)
+    Teams.broadcast({:ok, team}, :info_change)
+    Teams.broadcast({:ok, nominating_team}, :info_change)
+    Auctions.broadcast({:ok, auction}, :teams_info_change)
+  end
+
+  @doc """
+  Logs a bid
+
+  """
+  def log_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, type) do
+    {:ok, now} = DateTime.now("Etc/UTC")
+    %BidLog{}
+    |> BidLog.changeset(%{amount: bid.bid_amount,
+                          type: type,
+                          datetime: now})
+    |> Ecto.Changeset.put_assoc(:auction, auction)
+    |> Ecto.Changeset.put_assoc(:team, team)
+    |> Ecto.Changeset.put_assoc(:player, player)
+    |> Repo.insert()
+    Players.broadcast({:ok, player}, :bid_log_change)
   end
 end
