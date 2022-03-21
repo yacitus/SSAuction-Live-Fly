@@ -194,8 +194,8 @@ defmodule SSAuction.Teams do
       }
     ordered_player = Ecto.build_assoc(team, :ordered_players, ordered_player)
     map = Repo.insert!(ordered_player)
-    broadcast({:ok, team}, :nomination_queue_changed)
-    broadcast({:ok, team}, :queueable_players_changed)
+    broadcast({:ok, team}, :nomination_queue_change)
+    broadcast({:ok, team}, :queueable_players_change)
     map
   end
 
@@ -207,19 +207,19 @@ defmodule SSAuction.Teams do
     Enum.map(Repo.all(query),
              fn op -> Players.update_ordered_player(op, %{rank: op.rank+1}) end)
     Players.update_ordered_player(ordered_player, %{rank: smallest_rank_in_nomination_queue(team)-1})
-    broadcast({:ok, team}, :nomination_queue_changed)
+    broadcast({:ok, team}, :nomination_queue_change)
   end
 
   def move_to_bottom_of_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
     Players.update_ordered_player(ordered_player, %{rank: largest_rank_in_nomination_queue(team)+1})
-    broadcast({:ok, team}, :nomination_queue_changed)
+    broadcast({:ok, team}, :nomination_queue_change)
   end
 
   def move_up_in_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
     previous = previous_in_nomination_queue(ordered_player, team)
     if previous do
       swap_ranks(ordered_player, previous)
-      broadcast({:ok, team}, :nomination_queue_changed)
+      broadcast({:ok, team}, :nomination_queue_change)
     end
   end
 
@@ -227,7 +227,7 @@ defmodule SSAuction.Teams do
     next = next_in_nomination_queue(ordered_player, team)
     if next do
       swap_ranks(ordered_player, next)
-      broadcast({:ok, team}, :nomination_queue_changed)
+      broadcast({:ok, team}, :nomination_queue_change)
     end
   end
 

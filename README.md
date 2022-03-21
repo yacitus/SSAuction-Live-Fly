@@ -2,8 +2,11 @@
 
 ## TODO:
 
-* create auction admin page to allow auction admins to start/pause auction and change new nomination open at times for teams
-* create nomination queue page with nomination modal
+* show hidden max bid in auction and team bids tables if the signed-in user is a member of the high bid's team
+* show dollars remaining for bids in team info page if the signed-in user is a member of the team
+* click on players in auction and team bids tables to go to bid log
+* make auction and team bids tables sortable
+* display nomination and bid errors in modal, not background
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.

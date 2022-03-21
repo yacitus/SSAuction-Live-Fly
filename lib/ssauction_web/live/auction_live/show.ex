@@ -46,7 +46,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   end
 
   @impl true
-  def handle_info({:team_added, auction}, socket) do
+  def handle_info({:team_added, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
         assign(socket, :teams, Auctions.get_teams(auction))
@@ -61,8 +61,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   def handle_info({:info_change, team = %Team{}}, socket) do
     socket =
       if team.auction_id == socket.assigns.auction.id do
-        auction = Auctions.get_auction!(team.auction_id)
-        assign(socket, :teams, Auctions.get_teams(auction))
+        assign(socket, :teams, Auctions.get_teams(socket.assigns.auction))
       else
         socket
       end
@@ -92,6 +91,11 @@ defmodule SSAuctionWeb.AuctionLive.Show do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({_, _}, socket) do
+    {:noreply, socket} # ignore
   end
 
   defp sort_link(socket, text, sort_by, auction_id, options) do

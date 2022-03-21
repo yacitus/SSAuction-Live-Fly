@@ -271,7 +271,7 @@ defmodule SSAuction.Auctions do
       string
     end
     seconds = rem(seconds, 60)
-    if seconds != 0 do
+    if seconds != 0 and days == 0 and hours == 0 and minutes < 2 do
       append(string, Integer.to_string(seconds) <> " second" <> pluralize(seconds))
     else
       string

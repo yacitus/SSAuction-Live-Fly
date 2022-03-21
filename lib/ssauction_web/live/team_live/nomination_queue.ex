@@ -67,25 +67,12 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
     }
   end
 
+  @impl true
   def handle_event("validate-nominatation", _params, socket) do
     {:noreply, socket}
   end
 
-  defp push_patch_to_live_path(socket) do
-    push_patch(socket,
-      to:
-        Routes.live_path(
-          socket,
-          __MODULE__,
-          socket.assigns.team.id,
-          positions: Enum.join(socket.assigns.positions, "|"),
-          search: socket.assigns.search,
-          sort_by: socket.assigns.options.sort_by,
-          sort_order: socket.assigns.options.sort_order
-        )
-    )
-  end
-
+  @impl true
   def handle_event("submit-nominatation", params, socket) do
     with {:ok, _} <- Bids.validate_nomination(socket.assigns.auction,
                                               socket.assigns.team,
@@ -208,7 +195,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
-  def handle_info({:nomination_queue_changed, team}, socket) do
+  def handle_info({:nomination_queue_change, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
         assign(socket, :players_in_nomination_queue, Teams.players_in_nomination_queue(team))
@@ -220,7 +207,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
-  def handle_info({:queueable_players_changed, team}, socket) do
+  def handle_info({:queueable_players_change, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
         assign(socket, :players_available_for_nomination, Teams.queueable_players(team, socket.assigns.options))
@@ -229,6 +216,11 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({_, _}, socket) do
+    {:noreply, socket} # ignore
   end
 
   defp position_checkbox(assigns) do
@@ -274,4 +266,19 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
 
   defp emoji(:asc), do: " ⬇️"
   defp emoji(:desc), do: " ⬆️"
+
+  defp push_patch_to_live_path(socket) do
+    push_patch(socket,
+      to:
+        Routes.live_path(
+          socket,
+          __MODULE__,
+          socket.assigns.team.id,
+          positions: Enum.join(socket.assigns.positions, "|"),
+          search: socket.assigns.search,
+          sort_by: socket.assigns.options.sort_by,
+          sort_order: socket.assigns.options.sort_order
+        )
+    )
+  end
 end

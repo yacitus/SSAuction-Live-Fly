@@ -42,7 +42,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
   end
 
   @impl true
-  def handle_info({:user_added, team}, socket) do
+  def handle_info({:user_added, team = %Team{}}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
         assign(socket, :users, Teams.get_users(team))
@@ -63,6 +63,11 @@ defmodule SSAuctionWeb.TeamLive.Show do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({_, _}, socket) do
+    {:noreply, socket} # ignore
   end
 
   defp current_user_in_team(team, current_user) do

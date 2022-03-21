@@ -6,6 +6,7 @@ defmodule SSAuction.Bids do
   import Ecto.Query, warn: false
   alias SSAuction.Repo
 
+  alias SSAuction.Bids.Bid
   alias SSAuction.Bids.BidLog
   alias SSAuction.Players.Player
   alias SSAuction.Players.RosteredPlayer
@@ -262,6 +263,7 @@ defmodule SSAuction.Bids do
     case insert do
       {:ok, bid} ->
         log_bid(bid, auction, team, player, "N")
+        broadcast({:ok, bid}, :new_nomination)
     end
     insert
   end
@@ -283,7 +285,7 @@ defmodule SSAuction.Bids do
     update
   end
 
-  def submit_bid_changeset(auction, team, player, args, nil) do
+  def submit_bid_changeset(auction = %Auction{}, team = %Team{}, player = %Player{}, args) do
     {:ok, utc_datetime} = DateTime.now("Etc/UTC")
     args = Map.put(args, :expires_at, DateTime.add(utc_datetime, auction.initial_bid_timeout_seconds, :second))
 
@@ -295,11 +297,7 @@ defmodule SSAuction.Bids do
 
     case submit_new_bid(auction, team, player, args) do
       {:error, changeset} ->
-        {
-          :error,
-          message: "Could not submit bid!",
-          details: ChangesetErrors.error_details(changeset)
-        }
+        { :error, "Could not submit nomination: " <> ChangesetErrors.error_details(changeset) }
 
       {:ok, bid} ->
         Teams.update_info_post_nomination(team)
@@ -315,7 +313,7 @@ defmodule SSAuction.Bids do
     end
   end
 
-  def submit_bid_changeset(auction, team, player, args, existing_bid) do
+  def submit_bid_changeset(auction = %Auction{}, team = %Team{}, player = %Player{}, args, existing_bid) do
     args = if team.id != existing_bid.team_id do
       {:ok, utc_datetime} = DateTime.now("Etc/UTC")
       if DateTime.diff(existing_bid.expires_at, utc_datetime) < auction.bid_timeout_seconds do
@@ -389,7 +387,12 @@ defmodule SSAuction.Bids do
   end
 
   def seconds_until_bid_expires(%Bid{} = bid, %Auction{} = auction) do
-    DateTime.diff(bid.expires_at, auction.started_or_paused_at)
+    if auction.active do
+      {:ok, now} = DateTime.now("Etc/UTC")
+      DateTime.diff(bid.expires_at, now)
+    else
+      DateTime.diff(bid.expires_at, auction.started_or_paused_at)
+    end
   end
 
   @doc """
@@ -508,6 +511,6 @@ defmodule SSAuction.Bids do
   end
 
   def submit_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
-    {:error, "Haven't finished submit_nomination yet"}
+    submit_bid_changeset(auction, team, player, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
   end
 end
