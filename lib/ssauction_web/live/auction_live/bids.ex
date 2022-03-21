@@ -2,12 +2,16 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   use SSAuctionWeb, :live_view
 
   alias SSAuction.Auctions
+  alias SSAuction.Auctions.Auction
   alias SSAuction.Bids
   alias SSAuction.Bids.Bid
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket), do: Bids.subscribe()
+    if connected?(socket) do
+      Bids.subscribe()
+      Auctions.subscribe()
+    end
 
     socket =
       socket
@@ -24,7 +28,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
     {:noreply,
      socket
        |> assign(:auction, auction)
-       |> assign(:bids, Bids.list_bids(auction))
+       |> assign(:bids, Bids.list_bids_with_expires_in(auction))
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
     }
   end
@@ -33,7 +37,19 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_info({:new_nomination, bid = %Bid{}}, socket) do
     socket =
       if bid.auction_id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids(socket.assigns.auction))
+        assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.auction))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:bid_expiration_update, auction = %Auction{}}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.auction))
       else
         socket
       end

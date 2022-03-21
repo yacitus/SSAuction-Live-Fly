@@ -2,6 +2,7 @@
 defmodule SSAuctionWeb.ModalComponent do
   use SSAuctionWeb, :live_component
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">

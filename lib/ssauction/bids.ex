@@ -184,6 +184,24 @@ defmodule SSAuction.Bids do
               order_by: bl.expires_at)
   end
 
+  def list_bids_with_expires_in(%Auction{} = auction) do
+    bids = list_bids(auction)
+    add_expires_in_to_bids(bids, auction)
+  end
+
+  def list_bids_with_expires_in(%Team{} = team) do
+    bids = list_bids(team)
+    auction = Auctions.get_auction!(team.auction_id)
+    add_expires_in_to_bids(bids, auction)
+  end
+
+  defp add_expires_in_to_bids(bids, auction) do
+    Enum.map(bids,
+             fn bid -> Map.put(bid,
+                               :expires_in,
+                               Auctions.seconds_to_string(seconds_until_bid_expires(bid, auction))) end)
+  end
+
   @doc """
   Gets a single bid.
 
@@ -414,6 +432,7 @@ defmodule SSAuction.Bids do
     Repo.insert!(rostered_player)
     nominating_team = Teams.get_team!(bid.nominated_by)
     delete_bid(bid, auction, team, player, nominating_team)
+    broadcast({:ok, bid}, :deleted_bid)
     log_bid(bid, auction, team, player, "R")
     Teams.update_unused_nominations(nominating_team, auction)
     Auctions.broadcast({:ok, auction}, :roster_change)

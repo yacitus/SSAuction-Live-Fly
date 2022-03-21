@@ -470,6 +470,7 @@ defmodule SSAuction.Auctions do
 
   """
   def check_for_expired_bids(auction_id) do
+    broadcast({:ok, get_auction!(auction_id)}, :bid_expiration_update)
     auction_bids = from a in Auction,
                      where: a.id == ^auction_id,
                      join: bids in assoc(a, :bids),
@@ -487,7 +488,7 @@ defmodule SSAuction.Auctions do
   def check_for_expired_bid(bid = %Bid{}) do
     {:ok, now} = DateTime.now("Etc/UTC")
     if DateTime.diff(now, bid.expires_at) >= 0 do
-      Bid.changeset(bid, %{closed: true}) |> Repo.update!()
+      Bids.update_bid(bid, %{closed: true})
       Bids.roster_player_and_delete_bid(bid)
     end
   end
