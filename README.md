@@ -2,7 +2,6 @@
 
 ## TODO:
 
-* show hidden max bid in auction and team bids tables if the signed-in user is a member of the high bid's team
 * show dollars remaining for bids in team info page if the signed-in user is a member of the team
 * click on players in auction and team bids tables to go to bid log
 * make auction and team bids tables sortable
@@ -20,6 +19,6 @@
 * dedupe sort_link, toggle_sort_order, and emoji functions
 * figure out how to dedupe team_live/bids.html.heex and auction_live/bids.html.heex
 * make Teams table sortable on /admin/auction/:id/create_team page
-* link to user's Slack profikle in Owners table on Team Info page
+* link to user's Slack profile in Owners table on Team Info page
 * fix bug in /admin/team/:id/add_user page where added username is not removed from selection list after adding
 * fix bug (same as above) in /admin/confirm_user page where confirmed user is not removed from selection list after confirming

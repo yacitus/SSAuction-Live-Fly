@@ -1,23 +1,33 @@
 defmodule SSAuctionWeb.AuctionLive.Bids do
   use SSAuctionWeb, :live_view
 
+  alias SSAuction.Accounts
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Bids
   alias SSAuction.Bids.Bid
+  alias SSAuction.Teams
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     if connected?(socket) do
       Bids.subscribe()
       Auctions.subscribe()
     end
 
+    current_user =
+      if Map.has_key?(session, "user_token") do
+        Accounts.get_user_by_session_token(session["user_token"])
+      else
+        nil
+      end
+
     socket =
       socket
-      |> assign_locale()
-      |> assign_timezone()
-      |> assign_timezone_offset()
+        |> assign_locale()
+        |> assign_timezone()
+        |> assign_timezone_offset()
+        |> assign(:current_user, current_user)
   
     {:ok, socket}
   end
@@ -60,5 +70,9 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   @impl true
   def handle_info({_, _}, socket) do
     {:noreply, socket} # ignore
+  end
+
+  defp current_user_in_team(team, current_user) do
+    current_user != nil and Teams.user_in_team(team, current_user)
   end
 end

@@ -23,7 +23,11 @@
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.position %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.ssnum %></td>
           <td class="pl-5 text-left border border-blue-300">$<%= bid.bid_amount %></td>
-          <td class="pl-5 text-left border border-blue-300"></td>
+          <td class="pl-5 text-left border border-blue-300">
+            <%= if current_user_in_team(bid.team, @current_user) do %>
+              <%= bid.hidden_high_bid %>
+            <% end %>
+          </td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.expires_in %></td>
         </tr>
       <% end %>
