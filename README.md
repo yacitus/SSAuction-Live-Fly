@@ -2,7 +2,6 @@
 
 ## TODO:
 
-* make sure bidding under or equal to the hidden max bid results in a bid equal to the highest bid, not greater than
 * click on players in auction and team bids tables to go to bid log
 * show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not-including hidden max bids otherwise
 * make auction and team bids tables sortable

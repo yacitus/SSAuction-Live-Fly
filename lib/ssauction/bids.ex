@@ -608,7 +608,7 @@ defmodule SSAuction.Bids do
       bid_for_edit.hidden_high_bid != nil ->
         same_team = Teams.get_team!(bid_for_edit.team_id)
         submit_bid_changeset(auction, same_team, bid_for_edit,
-            %{bid_amount: max_bid(bid_amount, keep_bidding_up_to)+1, hidden_high_bid: bid_for_edit.hidden_high_bid})
+            %{bid_amount: max_bid(bid_amount, keep_bidding_up_to), hidden_high_bid: bid_for_edit.hidden_high_bid})
       true ->
         nil
     end
