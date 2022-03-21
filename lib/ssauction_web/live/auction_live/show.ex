@@ -2,8 +2,10 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   use SSAuctionWeb, :live_view
 
   alias SSAuction.Auctions
+  alias SSAuction.Auctions.Auction
   alias SSAuction.Bids
   alias SSAuction.Teams
+  alias SSAuction.Teams.Team
 
   @impl true
   def mount(_params, _session, socket) do
@@ -56,11 +58,23 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   end
 
   @impl true
-  def handle_info({:team_info_change, team}, socket) do
+  def handle_info({:info_change, team = %Team{}}, socket) do
     socket =
       if team.auction_id == socket.assigns.auction.id do
         auction = Auctions.get_auction!(team.auction_id)
         assign(socket, :teams, Auctions.get_teams(auction))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:info_change, auction = %Auction{}}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        assign(socket, :auction, auction)
       else
         socket
       end

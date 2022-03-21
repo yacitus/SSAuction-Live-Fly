@@ -134,7 +134,7 @@ defmodule SSAuction.Auctions do
     auction
     |> Auction.changeset(attrs)
     |> Repo.update()
-    |> broadcast(:auction_updated)
+    |> broadcast(:info_change)
   end
 
   @doc """

@@ -3,6 +3,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
 
   alias SSAuction.Accounts
   alias SSAuction.Teams
+  alias SSAuction.Teams.Team
   alias SSAuction.Bids
   alias SSAuction.Auctions
 
@@ -53,7 +54,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
   end
 
   @impl true
-  def handle_info({:team_info_change, team}, socket) do
+  def handle_info({:info_change, team = %Team{}}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
         assign(socket, :team, team)
