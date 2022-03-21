@@ -3,6 +3,17 @@
 </h1>
 
 <div class="w-full m-5">
+  <%= if @show_modal do %>
+    <%= live_modal(SSAuctionWeb.EditBidFormComponent,
+                   id: :edit_bid,
+                   bid_for_edit: @bid_for_edit,
+                   title: "Edit bid for #{@bid_for_edit.player.name} (#{@bid_for_edit.player.ssnum})",
+                   return_to: Routes.live_path(
+                     @socket,
+                     __MODULE__,
+                     @auction.id)
+                  ) %>
+  <% end %>
   <table class="w-full table-auto border-collapse border border-blue-400">
     <thead>
       <tr>
@@ -29,6 +40,12 @@
             <% end %>
           </td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.expires_in %></td>
+          <%= if @auction.active and current_user_in_team(bid.team, @current_user) do %>
+            <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
+                phx-click="edit" phx-value-id={"#{bid.id}"}}>
+              Edit
+            </td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>

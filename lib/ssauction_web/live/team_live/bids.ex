@@ -3,6 +3,7 @@ defmodule SSAuctionWeb.TeamLive.Bids do
 
   alias SSAuction.Accounts
   alias SSAuction.Teams
+  alias SSAuction.Teams.Team
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Bids
@@ -13,6 +14,7 @@ defmodule SSAuctionWeb.TeamLive.Bids do
     if connected?(socket) do
       Bids.subscribe()
       Auctions.subscribe()
+      Teams.subscribe()
     end
 
     current_user =
@@ -105,6 +107,18 @@ defmodule SSAuctionWeb.TeamLive.Bids do
     socket =
       if auction.id == socket.assigns.auction.id do
         assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.team))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:bid_change, team = %Team{}}, socket) do
+    socket =
+      if team.id == socket.assigns.team.id do
+        assign(socket, :bids, Bids.list_bids_with_expires_in(team))
       else
         socket
       end

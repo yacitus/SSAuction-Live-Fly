@@ -28,7 +28,8 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
         |> assign_timezone()
         |> assign_timezone_offset()
         |> assign(:current_user, current_user)
-  
+        |> assign(:show_modal, false)
+
     {:ok, socket}
   end
 
@@ -39,8 +40,49 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
      socket
        |> assign(:auction, auction)
        |> assign(:bids, Bids.list_bids_with_expires_in(auction))
+       |> assign(:show_modal, false)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
     }
+  end
+
+  @impl true
+  def handle_event("edit", %{"id" => id}, socket) do
+    bid_for_edit = Bids.get_bid_with_team_and_player!(id)
+
+    {:noreply,
+     socket
+       |> assign(:bid_for_edit, bid_for_edit)
+       |> assign(:show_modal, true)
+    }
+  end
+
+  @impl true
+  def handle_event("validate-edited-bid", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit-edited-bid", params, socket) do
+    with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.auction,
+                                              socket.assigns.bid_for_edit.team,
+                                              socket.assigns.bid_for_edit,
+                                              params["changeset"]["bid_amount"],
+                                              params["changeset"]["hidden_high_bid"]),
+         {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
+                                            socket.assigns.bid_for_edit.team,
+                                            socket.assigns.bid_for_edit,
+                                            params["changeset"]["bid_amount"],
+                                            params["changeset"]["hidden_high_bid"]) do
+      {:noreply, push_patch_to_live_path(socket)}
+    else
+      {_, message} ->
+        {:noreply, put_flash(socket, :error, message)}
+    end
+  end
+
+  @impl true
+  def handle_event("close", _, socket) do
+    {:noreply, push_patch_to_live_path(socket)}
   end
 
   @impl true
@@ -86,5 +128,15 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
 
   defp current_user_in_team(team, current_user) do
     current_user != nil and Teams.user_in_team(team, current_user)
+  end
+
+  defp push_patch_to_live_path(socket) do
+    push_patch(socket,
+      to:
+        Routes.live_path(
+          socket,
+          __MODULE__,
+          socket.assigns.auction.id)
+    )
   end
 end
