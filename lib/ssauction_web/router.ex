@@ -104,6 +104,7 @@ defmodule SSAuctionWeb.Router do
     live "/admin/team/:id/change_team_new_nominations_open_at", AdminLive.ChangeTeamNewNominationsOpenAt
     live "/admin/auction/:id/add_admin_user", AdminLive.AddUserToAuctionAdmins
     live "/admin/confirm_user", AdminLive.ConfirmUser
+    live "/admin/auction/:id/import_nomination_queue", AdminLive.ImportNominationQueue
     live "/admin/auction/:id/edit", AdminLive.EditAuction
     live "/admin/auction/:id/start_or_pause", AdminLive.StartOrPauseAuction
   end

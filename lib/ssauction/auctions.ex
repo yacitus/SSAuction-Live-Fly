@@ -644,6 +644,12 @@ defmodule SSAuction.Auctions do
     end
   end
 
+  def remove_all_players_in_nomination_queue(auction = %Auction{}) do
+    Repo.all(from op in OrderedPlayer, where: op.auction_id == ^auction.id)
+    |> Ecto.Changeset.change
+    |> Repo.delete
+  end
+
   defp find_ordered_player(player = %Player{}, auction = %Auction{}) do
     Repo.one(from op in OrderedPlayer,
              where: op.auction_id == ^auction.id and op.player_id == ^player.id)
