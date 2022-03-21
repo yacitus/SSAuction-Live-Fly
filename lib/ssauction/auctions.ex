@@ -568,7 +568,7 @@ defmodule SSAuction.Auctions do
       for _ <- 1..team.unused_nominations do
         if Teams.has_open_roster_spot?(team, auction) and Teams.dollars_remaining_for_bids_including_hidden(team) > 0 do
           cond do
-            Teams.num_players_in_nomination_queue(team) > 0 ->
+            Teams.num_players_in_nomination_queue(team.id) > 0 ->
               player = Teams.next_in_nomination_queue(team)
               args = %{bid_amount: 1}
               Bids.submit_bid_changeset(auction, team, player, args)
