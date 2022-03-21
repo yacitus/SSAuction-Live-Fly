@@ -3,11 +3,11 @@
 ## TODO:
 
 * make sure bidding under or equal to the hidden max bid results in a bid equal to the highest bid, not greater than
-* may be a bug where last player in nomination queue is not removed after nominating
-* show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not-including hidden max bids otherwise
 * click on players in auction and team bids tables to go to bid log
+* show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not-including hidden max bids otherwise
 * make auction and team bids tables sortable
 * color-code Bid and Edit "buttons" in bids tables to make them stand-out
+* may be a bug where last player in nomination queue is not removed after nominating
 * display nomination and bid errors in modal, not background
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
