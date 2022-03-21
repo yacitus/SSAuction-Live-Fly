@@ -2,6 +2,7 @@ defmodule SSAuctionWeb.AuctionLive.Index do
   use SSAuctionWeb, :live_view
 
   alias SSAuction.Auctions
+  alias SSAuction.Auctions.Auction
   alias SSAuctionWeb.Router.Helpers, as: Routes
 
   @impl true
@@ -17,7 +18,7 @@ defmodule SSAuctionWeb.AuctionLive.Index do
   end
 
   @impl true
-  def handle_info({_event, _auction}, socket) do
+  def handle_info({:auction_started_or_paused, _}, socket) do
     {:noreply, assign(socket, :auctions, Auctions.list_auctions())}
   end
 end

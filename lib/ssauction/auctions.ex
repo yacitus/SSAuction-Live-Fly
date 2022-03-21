@@ -207,6 +207,7 @@ defmodule SSAuction.Auctions do
 
     change_auction(auction, %{active: true, started_or_paused_at: now})
     |> Repo.update()
+    |> broadcast(:auction_started_or_paused)
   end
 
   defp update_bids_to_new_start_time(%Auction{} = auction, new_start_time) do
@@ -228,6 +229,7 @@ defmodule SSAuction.Auctions do
 
     change_auction(auction, %{active: false, started_or_paused_at: now})
     |> Repo.update()
+    |> broadcast(:auction_started_or_paused)
   end
 
   defp append(string1, string2) do

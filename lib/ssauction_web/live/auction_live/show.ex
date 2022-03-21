@@ -71,6 +71,18 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   end
 
   @impl true
+  def handle_info({:teams_info_change, auction = %Auction{}}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        assign(socket, :teams, Auctions.get_teams(auction))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:info_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
