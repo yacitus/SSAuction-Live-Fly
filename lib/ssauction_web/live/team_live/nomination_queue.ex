@@ -27,7 +27,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   def handle_params(params, _, socket) do
     id = params["id"]
     team = Teams.get_team!(id)
-    if Teams.user_in_team(team, socket.assigns.current_user) do
+    if Teams.user_in_team?(team, socket.assigns.current_user) do
       sort_by = (params["sort_by"] || "ssnum") |> String.to_atom()
       sort_order = (params["sort_order"] || "asc") |> String.to_atom()
       positions = String.split((params["positions"] || ""), "|", trim: true)

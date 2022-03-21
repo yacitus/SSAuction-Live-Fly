@@ -9,7 +9,7 @@
         Name:
       </td>
       <td class="pl-5 border border-blue-300">
-        <%= if current_user_in_team(@team, @current_user) do %>
+        <%= if current_user_in_team?(@team, @current_user) do %>
           <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/edit"}>
             <%= @team.name %>
           </a>
@@ -68,7 +68,7 @@
       </td>
     </tr>
 
-    <%= if current_user_in_team(@team, @current_user) do %>
+    <%= if current_user_in_team?(@team, @current_user) do %>
       <tr>
         <td class="pl-5 border border-blue-300">
           Nomination queue:

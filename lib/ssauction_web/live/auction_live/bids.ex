@@ -52,6 +52,19 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
     {:noreply,
      socket
        |> assign(:bid_for_edit, bid_for_edit)
+       |> assign(:different_team, false)
+       |> assign(:show_modal, true)
+    }
+  end
+
+  @impl true
+  def handle_event("bid", %{"id" => id}, socket) do
+    bid_for_new_bid = Bids.get_bid_with_team_and_player!(id)
+
+    {:noreply,
+     socket
+       |> assign(:bid_for_edit, bid_for_new_bid)
+       |> assign(:different_team, true)
        |> assign(:show_modal, true)
     }
   end
@@ -64,15 +77,17 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   @impl true
   def handle_event("submit-edited-bid", params, socket) do
     with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.auction,
-                                              socket.assigns.bid_for_edit.team,
+                                              Teams.get_team_by_user_and_auction(socket.assigns.current_user, socket.assigns.auction),
                                               socket.assigns.bid_for_edit,
                                               params["changeset"]["bid_amount"],
-                                              params["changeset"]["hidden_high_bid"]),
+                                              params["changeset"]["hidden_high_bid"],
+                                              params["changeset"]["keep_bidding_up_to"]),
          {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
-                                            socket.assigns.bid_for_edit.team,
+                                            Teams.get_team_by_user_and_auction(socket.assigns.current_user, socket.assigns.auction),
                                             socket.assigns.bid_for_edit,
                                             params["changeset"]["bid_amount"],
-                                            params["changeset"]["hidden_high_bid"]) do
+                                            params["changeset"]["hidden_high_bid"],
+                                            params["changeset"]["keep_bidding_up_to"]) do
       {:noreply, push_patch_to_live_path(socket)}
     else
       {_, message} ->
@@ -126,8 +141,12 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
     {:noreply, socket} # ignore
   end
 
-  defp current_user_in_team(team, current_user) do
-    current_user != nil and Teams.user_in_team(team, current_user)
+  defp current_user_in_team?(team, current_user) do
+    current_user != nil and Teams.user_in_team?(team, current_user)
+  end
+
+  defp current_user_in_auction?(auction, current_user) do
+    current_user != nil and Auctions.user_in_auction?(auction, current_user)
   end
 
   defp push_patch_to_live_path(socket) do

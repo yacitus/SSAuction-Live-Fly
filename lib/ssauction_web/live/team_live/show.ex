@@ -70,7 +70,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
     {:noreply, socket} # ignore
   end
 
-  defp current_user_in_team(team, current_user) do
-    current_user != nil and Teams.user_in_team(team, current_user)
+  defp current_user_in_team?(team, current_user) do
+    current_user != nil and Teams.user_in_team?(team, current_user)
   end
 end

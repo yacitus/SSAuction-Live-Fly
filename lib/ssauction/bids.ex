@@ -488,10 +488,14 @@ defmodule SSAuction.Bids do
     Players.broadcast({:ok, player}, :bid_log_change)
   end
 
-  defp string_to_integer(string) do
-    case Integer.parse(string) do
-      {int, _} -> int
-      :error -> nil
+  def string_to_integer(string) do
+    if string == nil do
+      nil
+    else
+      case Integer.parse(string) do
+        {int, _} -> int
+        :error -> nil
+      end
     end
   end
 
@@ -523,20 +527,31 @@ defmodule SSAuction.Bids do
     end
   end
 
-  def validate_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid) do
+  def validate_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid, keep_bidding_up_to) do
     bid_amount = string_to_integer(bid_amount)
     hidden_high_bid = string_to_integer(hidden_high_bid)
+    keep_bidding_up_to = string_to_integer(keep_bidding_up_to)
 
     cond do
-      bid_for_edit.bid_amount == bid_amount and bid_for_edit.hidden_high_bid == hidden_high_bid ->
+      bid_for_edit.team_id != team.id and bid_amount <= bid_for_edit.bid_amount ->
+        { :error, "Bid amount is not larger than existing bid"}
+      bid_for_edit.team_id != team.id and not keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) ->
+        { :error, "Keep bidding up to amount is not larger than bid amount"}
+      bid_for_edit.team_id != team.id and not keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) ->
+        { :error, "Hidden high bid is not larger than Keep bidding up to amount"}
+      bid_for_edit.team_id == team.id and bid_amount != nil ->
+        { :error, "Cannot change bid amount"}
+      bid_for_edit.team_id == team.id and bid_for_edit.hidden_high_bid == hidden_high_bid ->
         { :error, "Nothing is changed"}
+      bid_for_edit.team_id == team.id and keep_bidding_up_to != nil ->
+        { :error, "Keep Bidding Up To does not apply when editing bid"}
       not auction.active ->
         { :error, "Auction is paused" }
       not Auctions.team_is_in_auction?(auction, team) ->
         { :error, "Team is not in auction" }
-      bid_amount == nil ->
+      bid_for_edit.team_id != team.id and bid_amount == nil ->
         { :error, "Bid amount invalid" }
-      not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
+      bid_for_edit.team_id != team.id and not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
         { :error, "Hidden high bid must be nothing or above bid amount" }
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
         { :error, "Bid amount not legal for team" }
@@ -553,11 +568,57 @@ defmodule SSAuction.Bids do
     hidden > bid_amount
   end
 
+  defp keep_bidding_up_to_legal?(nil, _) do
+    true
+  end
+
+  defp keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) do
+    keep_bidding_up_to > bid_amount
+  end
+
+  defp keep_bidding_up_to_and_hidden_high_bid_legal?(nil, _) do
+    true
+  end
+
+  defp keep_bidding_up_to_and_hidden_high_bid_legal?(_, nil) do
+    true
+  end
+
+  defp keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) do
+    hidden_high_bid > keep_bidding_up_to
+  end
+
   def submit_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
     submit_bid_changeset(auction, team, player, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
   end
 
-  def submit_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid) do
-    submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+  def submit_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid, keep_bidding_up_to) do
+    bid_amount = string_to_integer(bid_amount)
+    hidden_high_bid = string_to_integer(hidden_high_bid)
+    keep_bidding_up_to = string_to_integer(keep_bidding_up_to)
+
+    cond do
+      team.id == bid_for_edit.team_id ->
+        submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_for_edit.bid_amount, hidden_high_bid: hidden_high_bid})
+      bid_amount > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
+        submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+      keep_bidding_up_to != nil and keep_bidding_up_to > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
+        submit_bid_changeset(auction, team, bid_for_edit,
+            %{bid_amount: max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid)+1, hidden_high_bid: hidden_high_bid})
+      bid_for_edit.hidden_high_bid != nil ->
+        same_team = Teams.get_team!(bid_for_edit.team_id)
+        submit_bid_changeset(auction, same_team, bid_for_edit,
+            %{bid_amount: max_bid(bid_amount, keep_bidding_up_to)+1, hidden_high_bid: bid_for_edit.hidden_high_bid})
+      true ->
+        nil
+    end
+  end
+
+  defp max_bid(bid, nil) do
+    bid
+  end
+
+  defp max_bid(bid, other) do
+    max(bid, other)
   end
 end

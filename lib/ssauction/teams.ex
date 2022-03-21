@@ -65,6 +65,16 @@ defmodule SSAuction.Teams do
   end
 
   @doc """
+  Returns the team in the indicated auction with the indicated user.
+
+  """
+  def get_team_by_user_and_auction(user = %User{}, auction = %Auction{}) do
+    [team] = Enum.filter(Repo.preload(user, [:teams]).teams,
+                         fn(team) -> team.auction_id == auction.id end)
+    team
+  end
+
+  @doc """
   Creates a team.
 
   ## Examples
@@ -134,7 +144,7 @@ defmodule SSAuction.Teams do
     Enum.sort_by(Repo.preload(team, [:users]).users, fn user -> user.username end)
   end
 
-  def user_in_team(%Team{} = team, %User{} = user) do
+  def user_in_team?(%Team{} = team, %User{} = user) do
     Enum.member?(Enum.map(Repo.preload(team, [:users]).users, fn u -> u.id end), user.id)
   end
 
@@ -612,6 +622,10 @@ defmodule SSAuction.Teams do
 
   defp calculate_max_bid(bid_amount, nil) do
     bid_amount
+  end
+
+  defp calculate_max_bid(nil, hidden_high_bid) do
+    hidden_high_bid
   end
 
   defp calculate_max_bid(bid_amount, hidden_high_bid) do

@@ -412,6 +412,10 @@ defmodule SSAuction.Auctions do
     Enum.sort(Enum.map(Enum.concat(Enum.map(Repo.preload(auction, [:teams]).teams, fn t -> Repo.preload(t, [:users]).users end)), fn u -> u.id end))
   end
 
+  def user_in_auction?(%Auction{} = auction, %User{} = user) do
+    Enum.member?(get_auction_user_ids(auction), user.id)
+  end
+
   def players_in_autonomination_queue(%Auction{} = auction) do
     query = from op in OrderedPlayer,
               where: op.auction_id == ^auction.id,

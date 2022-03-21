@@ -2,6 +2,7 @@
 
 ## TODO:
 
+* may be a bug where last player in nomination queue is not removed after nominating
 * show dollars remaining for bids in team info page if the signed-in user is a member of the team
 * click on players in auction and team bids tables to go to bid log
 * make auction and team bids tables sortable

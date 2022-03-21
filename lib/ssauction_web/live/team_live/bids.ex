@@ -72,12 +72,14 @@ defmodule SSAuctionWeb.TeamLive.Bids do
                                               socket.assigns.team,
                                               socket.assigns.bid_for_edit,
                                               params["changeset"]["bid_amount"],
-                                              params["changeset"]["hidden_high_bid"]),
+                                              params["changeset"]["hidden_high_bid"],
+                                              nil),
          {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
                                             socket.assigns.team,
                                             socket.assigns.bid_for_edit,
                                             params["changeset"]["bid_amount"],
-                                            params["changeset"]["hidden_high_bid"]) do
+                                            params["changeset"]["hidden_high_bid"],
+                                            nil) do
       {:noreply, push_patch_to_live_path(socket)}
     else
       {_, message} ->
@@ -131,8 +133,8 @@ defmodule SSAuctionWeb.TeamLive.Bids do
     {:noreply, socket} # ignore
   end
 
-  defp current_user_in_team(team, current_user) do
-    current_user != nil and Teams.user_in_team(team, current_user)
+  defp current_user_in_team?(team, current_user) do
+    current_user != nil and Teams.user_in_team?(team, current_user)
   end
 
   defp push_patch_to_live_path(socket) do
