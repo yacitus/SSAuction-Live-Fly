@@ -218,6 +218,11 @@ defmodule SSAuction.Bids do
   """
   def get_bid!(id), do: Repo.get!(Bid, id)
 
+  def get_bid_with_team_and_player!(id) do
+    get_bid!(id)
+      |> Repo.preload([:team, :player])
+  end
+
   @doc """
   Creates a bid.
 
@@ -331,7 +336,7 @@ defmodule SSAuction.Bids do
     end
   end
 
-  def submit_bid_changeset(auction = %Auction{}, team = %Team{}, player = %Player{}, args, existing_bid) do
+  def submit_bid_changeset(auction = %Auction{}, team = %Team{}, existing_bid = %Bid{}, args) do
     args = if team.id != existing_bid.team_id do
       {:ok, utc_datetime} = DateTime.now("Etc/UTC")
       if DateTime.diff(existing_bid.expires_at, utc_datetime) < auction.bid_timeout_seconds do
@@ -355,11 +360,12 @@ defmodule SSAuction.Bids do
       args
     end
 
-    current_team_max_bid = if existing_bid.hidden_high_bid != nil do
-      max(existing_bid.bid_amount, existing_bid.hidden_high_bid)
-    else
-      existing_bid.bid_amount
-    end
+    current_team_max_bid =
+      if existing_bid.hidden_high_bid != nil do
+        max(existing_bid.bid_amount, existing_bid.hidden_high_bid)
+      else
+        existing_bid.bid_amount
+      end
 
     args =
       cond do
@@ -373,11 +379,7 @@ defmodule SSAuction.Bids do
 
     case update_existing_bid(existing_bid, team, args) do
       {:error, changeset} ->
-        {
-          :error,
-          message: "Could not update bid!",
-          details: ChangesetErrors.error_details(changeset)
-        }
+        { :error, "Could not update bid:" <> ChangesetErrors.error_details(changeset) }
 
       {:ok, bid} ->
         Auctions.broadcast({:ok, auction}, :bid_change)
@@ -387,7 +389,7 @@ defmodule SSAuction.Bids do
         Teams.broadcast({:ok, team}, :info_change)
         Teams.broadcast({:ok, previous_team}, :info_change)
         Auctions.broadcast({:ok, auction}, :teams_info_change)
-        Players.broadcast({:ok, player}, :info_change)
+        Players.broadcast({:ok, existing_bid.player}, :info_change)
         {:ok, bid}
     end
   end
@@ -521,6 +523,28 @@ defmodule SSAuction.Bids do
     end
   end
 
+  def validate_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid) do
+    bid_amount = string_to_integer(bid_amount)
+    hidden_high_bid = string_to_integer(hidden_high_bid)
+
+    cond do
+      bid_for_edit.bid_amount == bid_amount and bid_for_edit.hidden_high_bid == hidden_high_bid ->
+        { :error, "Nothing is changed"}
+      not auction.active ->
+        { :error, "Auction is paused" }
+      not Auctions.team_is_in_auction?(auction, team) ->
+        { :error, "Team is not in auction" }
+      bid_amount == nil ->
+        { :error, "Bid amount invalid" }
+      not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
+        { :error, "Hidden high bid must be nothing or above bid amount" }
+      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
+        { :error, "Bid amount not legal for team" }
+      true ->
+        {:ok, nil}
+    end
+  end
+
   defp hidden_high_bid_legal?(nil, _) do
     true
   end
@@ -531,5 +555,9 @@ defmodule SSAuction.Bids do
 
   def submit_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
     submit_bid_changeset(auction, team, player, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+  end
+
+  def submit_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid) do
+    submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
   end
 end

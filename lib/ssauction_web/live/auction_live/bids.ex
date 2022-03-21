@@ -68,6 +68,18 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   end
 
   @impl true
+  def handle_info({:bid_change, auction = %Auction{}}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.auction))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({_, _}, socket) do
     {:noreply, socket} # ignore
   end
