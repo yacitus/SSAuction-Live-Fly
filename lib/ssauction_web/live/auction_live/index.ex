@@ -2,7 +2,6 @@ defmodule SSAuctionWeb.AuctionLive.Index do
   use SSAuctionWeb, :live_view
 
   alias SSAuction.Auctions
-  alias SSAuction.Auctions.Auction
   alias SSAuctionWeb.Router.Helpers, as: Routes
 
   @impl true
