@@ -34,7 +34,7 @@
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.position %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.ssnum %></td>
-          <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
+          <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
             $<%= bid.bid_amount %>
           </td>
           <td class="pl-5 text-left border border-blue-300">
