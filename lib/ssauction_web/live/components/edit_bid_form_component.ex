@@ -42,7 +42,7 @@ defmodule SSAuctionWeb.EditBidFormComponent do
           <%= number_input f, :hidden_high_bid, value: @bid_for_edit.hidden_high_bid %>
         <% end %>
 
-        <button form="edit-bid-form" type="submit" phx-disable-with="Submitting..."
+        <button form="edit-bid-form" type="submit"
           class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
                   active:bg-indigo-700
                   hover:bg-indigo-500
