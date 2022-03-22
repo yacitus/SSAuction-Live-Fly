@@ -4,7 +4,7 @@
 
 * make auction and team bids tables sortable
 * show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not including hidden max bids otherwise
-* color-code Bid and Edit "buttons" in bids tables to make them stand-out
+* change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
 * may be a bug where last player in nomination queue is not removed after nominating
 * display nomination and bid errors in modal, not background
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
