@@ -46,7 +46,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   end
 
   @impl true
-  def handle_event("bid", %{"id" => id}, socket) do
+  def handle_event("bid-log", %{"id" => id}, socket) do
     bid = Bids.get_bid_with_team_and_player!(id)
     {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, bid.player.id))}
   end
