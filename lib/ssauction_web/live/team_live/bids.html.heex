@@ -29,7 +29,7 @@
     </thead>
     <tbody id="queue">
       <%= for bid <- @bids do %>
-        <tr>
+        <tr class="hover:bg-sky-100" id={"bid-#{bid.id}"} phx-click="bid" phx-value-id={"#{bid.id}"}}>
           <td class="pl-5 text-left border border-blue-300"><%= bid.team.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.position %></td>

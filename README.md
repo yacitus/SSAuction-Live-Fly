@@ -2,9 +2,8 @@
 
 ## TODO:
 
-* click on players in auction and team bids tables to go to bid log
-* show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not-including hidden max bids otherwise
 * make auction and team bids tables sortable
+* show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not including hidden max bids otherwise
 * color-code Bid and Edit "buttons" in bids tables to make them stand-out
 * may be a bug where last player in nomination queue is not removed after nominating
 * display nomination and bid errors in modal, not background

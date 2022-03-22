@@ -31,23 +31,25 @@
       </td>
     </tr>
 
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Rostered By:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= @rostered_player.team.name %>
-      </td>
-    </tr>
+    <%= if @rostered_player != nil do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Rostered By:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= @rostered_player.team.name %>
+        </td>
+      </tr>
 
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Purchase Price:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        $<%= @rostered_player.cost %>
-      </td>
-    </tr>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Purchase Price:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @rostered_player.cost %>
+        </td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 

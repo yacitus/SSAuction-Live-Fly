@@ -51,6 +51,12 @@ defmodule SSAuctionWeb.TeamLive.Bids do
   end
 
   @impl true
+  def handle_event("bid", %{"id" => id}, socket) do
+    bid = Bids.get_bid_with_team_and_player!(id)
+    {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, bid.player.id, back_to: "team"))}
+  end
+
+  @impl true
   def handle_event("edit", %{"id" => id}, socket) do
     bid_for_edit = Bids.get_bid_with_team_and_player!(id)
 
