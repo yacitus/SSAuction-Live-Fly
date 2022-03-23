@@ -18,13 +18,27 @@
   <table class="w-full table-auto border-collapse border border-blue-400">
     <thead>
       <tr>
-        <th class="border border-blue-300">Team</th>
-        <th class="border border-blue-300">Player</th>
-        <th class="border border-blue-300">Position</th>
-        <th class="border border-blue-300">S. num</th>
-        <th class="border border-blue-300">$ Bid</th>
-        <th class="border border-blue-300">$ Hidden Max Bid</th>
-        <th class="border border-blue-300">Expires In</th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "Team", :team_name, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "Player", :player_name, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "Position", :player_position, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "S. num", :player_ssnum, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "$ Bid", :bid_amount, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          $ Hidden Max Bid
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "Expires In", :expires_at, @auction.id, @options) %>
+        </th>
       </tr>
     </thead>
     <tbody id="queue">

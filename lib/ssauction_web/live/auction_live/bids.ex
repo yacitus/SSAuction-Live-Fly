@@ -34,13 +34,19 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
-    auction = Auctions.get_auction!(id)
+  def handle_params(params, _, socket) do
+    auction = Auctions.get_auction!(params["id"])
+
+    sort_by = (params["sort_by"] || "expires_at") |> String.to_atom()
+    sort_order = (params["sort_order"] || "asc") |> String.to_atom()
+    sort_options = %{sort_by: sort_by, sort_order: sort_order}
+
     {:noreply,
      socket
        |> assign(:auction, auction)
-       |> assign(:bids, Bids.list_bids_with_expires_in(auction))
+       |> assign(:bids, Bids.list_bids_with_expires_in(auction, sort_options))
        |> assign(:show_modal, false)
+       |> assign(:options, sort_options)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
     }
   end
@@ -164,4 +170,30 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
           socket.assigns.auction.id)
     )
   end
+
+  defp sort_link(socket, text, sort_by, auction_id, options) do
+    text =
+      if sort_by == options.sort_by do
+        text <> emoji(options.sort_order)
+      else
+        text
+      end
+
+    live_patch(text,
+      to:
+        Routes.live_path(
+          socket,
+          __MODULE__,
+          auction_id,
+          sort_by: sort_by,
+          sort_order: toggle_sort_order(options.sort_order)
+        )
+    )
+  end
+
+  defp toggle_sort_order(:asc), do: :desc
+  defp toggle_sort_order(:desc), do: :asc
+
+  defp emoji(:asc), do: " ⬇️"
+  defp emoji(:desc), do: " ⬆️"
 end

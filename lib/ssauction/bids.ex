@@ -195,11 +195,29 @@ defmodule SSAuction.Bids do
     add_expires_in_to_bids(bids, auction)
   end
 
+  def list_bids_with_expires_in(%Auction{} = auction, sort_options) do
+    list_bids_with_expires_in(auction)
+      |> sort_bids(sort_options)
+  end
+
+  def list_bids_with_expires_in(%Team{} = team, sort_options) do
+    list_bids_with_expires_in(team)
+      |> sort_bids(sort_options)
+  end
+
   defp add_expires_in_to_bids(bids, auction) do
     Enum.map(bids,
-             fn bid -> Map.put(bid,
-                               :expires_in,
-                               Auctions.seconds_to_string(seconds_until_bid_expires(bid, auction))) end)
+             fn bid -> bid
+                       |> Map.put(:expires_in, Auctions.seconds_to_string(seconds_until_bid_expires(bid, auction)))
+                       |> Map.put(:team_name, bid.team.name)
+                       |> Map.put(:player_name, bid.player.name)
+                       |> Map.put(:player_position, bid.player.position)
+                       |> Map.put(:player_ssnum, bid.player.ssnum)
+             end)
+  end
+
+  defp sort_bids(bids, %{sort_by: sort_by, sort_order: sort_order}) do
+    Enum.sort_by(bids, fn bid -> Map.get(bid, sort_by) end, sort_order)
   end
 
   @doc """
