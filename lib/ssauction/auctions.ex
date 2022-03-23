@@ -218,7 +218,6 @@ defmodule SSAuction.Auctions do
 
   defp add_seconds_to_expires_at(seconds, %Bid{} = bid) do
     Bids.update_bid(bid, %{expires_at: DateTime.add(bid.expires_at, seconds, :second)})
-    |> Repo.update()
   end
 
   def pause_auction(auction = %Auction{}) do
