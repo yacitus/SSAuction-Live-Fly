@@ -2,12 +2,18 @@
 
 ## TODO:
 
+* when clicking on columns to sort (especially bids table), don't reverse sort order unless clicking on same heading as already sorted by
+* fix bug where bid table sort changes after bid or edit
+* rostered times displaying incorrectly on auction rostered players list
+* error message about nominations not open when nominating from page opened before nominations granted
+* should be able to make hidden max bid and keep bidding up to amount the same when bidding
 * show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not including hidden max bids otherwise
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
 * may be a bug where last player in nomination queue is not removed after nominating
 * display nomination and bid errors in modal, not background
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
+* add a feature to allow entry of per-team "my values" for players, and add that to the Bids table with a sortable "surplus" column (my-value minus bid) - the "my values" would only be visible to the team who entered them - this makes this unnecessary: allow teams to "favorite" or "ignore" players that would be indicated in the players available to nominate and the bids table (and sortable there)
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
 * display player page (with breadcrumbs) when clicking on player in auto-nomination queue page
