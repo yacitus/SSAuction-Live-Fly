@@ -28,14 +28,25 @@
       </td>
     </tr>
 
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        $ Remaining for bids:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        $<%= Teams.dollars_remaining_for_bids(@team) %>
-      </td>
-    </tr>
+    <%= if current_user_in_team?(@team, @current_user) do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Remaining for bids (including hidden high bids):
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= Teams.dollars_remaining_for_bids_including_hidden(@team) %>
+        </td>
+      </tr>
+    <% else %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Remaining for bids:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= Teams.dollars_remaining_for_bids(@team) %>
+        </td>
+      </tr>
+    <% end %>
 
     <tr>
       <td class="pl-5 border border-blue-300">
