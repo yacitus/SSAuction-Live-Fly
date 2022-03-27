@@ -356,7 +356,7 @@ defmodule SSAuction.Auctions do
   def get_rostered_players_with_rostered_at(%Auction{} = auction) do
     get_rostered_players(auction)
     |> Enum.map(fn rp -> rp
-                         |> Map.put(:rostered_at, Bids.rostered_bid_log(rp.player).updated_at)
+                         |> Map.put(:rostered_at, Bids.rostered_bid_log(rp.player).datetime)
                          |> Map.put(:team_name, rp.team.name)
                          |> Map.put(:player_name, rp.player.name)
                          |> Map.put(:player_position, rp.player.position)

@@ -23,7 +23,7 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
     team = Teams.get_team!(id)
     auction = Auctions.get_auction!(team.auction_id)
 
-    sort_by = (params["sort_by"] || "id") |> String.to_atom()
+    sort_by = (params["sort_by"] || "rostered_at") |> String.to_atom()
     sort_order = (params["sort_order"] || "asc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
 
