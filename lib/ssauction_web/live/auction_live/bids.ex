@@ -167,16 +167,19 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
         Routes.live_path(
           socket,
           __MODULE__,
-          socket.assigns.auction.id)
+          socket.assigns.auction.id,
+          sort_by: socket.assigns.options.sort_by,
+          sort_order: socket.assigns.options.sort_order
+        )
     )
   end
 
   defp sort_link(socket, text, sort_by, auction_id, options) do
-    text =
+    {text, sort_order} =
       if sort_by == options.sort_by do
-        text <> emoji(options.sort_order)
+        {text <> emoji(options.sort_order), toggle_sort_order(options.sort_order)}
       else
-        text
+        {text, options.sort_order}
       end
 
     live_patch(text,
@@ -186,14 +189,8 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
           __MODULE__,
           auction_id,
           sort_by: sort_by,
-          sort_order: toggle_sort_order(options.sort_order)
+          sort_order: sort_order
         )
     )
   end
-
-  defp toggle_sort_order(:asc), do: :desc
-  defp toggle_sort_order(:desc), do: :asc
-
-  defp emoji(:asc), do: " ⬇️"
-  defp emoji(:desc), do: " ⬆️"
 end

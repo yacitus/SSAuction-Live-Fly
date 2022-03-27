@@ -88,4 +88,10 @@ defmodule SSAuctionWeb.LiveHelpers do
     timezone_offset = get_connect_params(socket)["timezone_offset"] || @default_timezone_offset
     assign(socket, timezone_offset: timezone_offset)
   end
+
+  def toggle_sort_order(:asc), do: :desc
+  def toggle_sort_order(:desc), do: :asc
+
+  def emoji(:asc), do: " ⬇️"
+  def emoji(:desc), do: " ⬆️"
 end

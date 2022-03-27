@@ -2,12 +2,12 @@
 
 ## TODO:
 
-* when clicking on columns to sort (especially bids table), don't reverse sort order unless clicking on same heading as already sorted by
-* fix bug where bid table sort changes after bid or edit
 * rostered times displaying incorrectly on auction rostered players list
 * error message about nominations not open when nominating from page opened before nominations granted
 * should be able to make hidden max bid and keep bidding up to amount the same when bidding
 * show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not including hidden max bids otherwise
+* bids under hidden max not logged
+* allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
 * may be a bug where last player in nomination queue is not removed after nominating
