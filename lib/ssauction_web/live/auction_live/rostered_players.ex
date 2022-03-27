@@ -2,11 +2,16 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
   use SSAuctionWeb, :live_view
 
   alias SSAuction.Auctions
+  alias SSAuction.Auctions.Auction
   alias SSAuction.Players
   alias SSAuction.Repo
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Auctions.subscribe()
+    end
+
     socket =
       socket
       |> assign_locale()
@@ -38,6 +43,23 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
   def handle_event("rostered_player", %{"id" => id}, socket) do
     rostered_player = Players.get_rostered_player!(id) |> Repo.preload([:player])
     {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, rostered_player.player.id))}
+  end
+
+  @impl true
+  def handle_info({:roster_change, auction = %Auction{}}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        assign(socket, :rostered_players, Auctions.get_rostered_players_with_rostered_at(auction, socket.assigns.sort_options))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({_, _}, socket) do
+    {:noreply, socket} # ignore
   end
 
   defp sort_link(socket, text, sort_by, auction_id, options) do
