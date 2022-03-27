@@ -556,7 +556,7 @@ defmodule SSAuction.Bids do
       bid_for_edit.team_id != team.id and not keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) ->
         { :error, "Keep bidding up to amount is not larger than bid amount"}
       bid_for_edit.team_id != team.id and not keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) ->
-        { :error, "Hidden high bid is not larger than Keep bidding up to amount"}
+        { :error, "Hidden high bid is less than keep bidding up to amount"}
       bid_for_edit.team_id == team.id and bid_amount != nil ->
         { :error, "Cannot change bid amount"}
       bid_for_edit.team_id == team.id and bid_for_edit.hidden_high_bid == hidden_high_bid ->
@@ -603,7 +603,7 @@ defmodule SSAuction.Bids do
   end
 
   defp keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) do
-    hidden_high_bid > keep_bidding_up_to
+    hidden_high_bid >= keep_bidding_up_to
   end
 
   def submit_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do

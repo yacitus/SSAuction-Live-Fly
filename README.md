@@ -2,8 +2,7 @@
 
 ## TODO:
 
-* error message about nominations not open when nominating from page opened before nominations granted
-* should be able to make hidden max bid and keep bidding up to amount the same when bidding
+* error message about nominations not open when nominating from page opened before nominations granted?
 * show dollars remaining for bids (including hidden max bids) in team info page if the signed-in user is a member of the team, not including hidden max bids otherwise
 * bids under hidden max not logged
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
