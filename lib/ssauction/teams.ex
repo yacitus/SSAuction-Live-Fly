@@ -469,7 +469,8 @@ defmodule SSAuction.Teams do
   Update a team's info after a nomination
 
   """
-  def update_info_post_nomination(team = %Team{}) do
+  def update_info_post_nomination(team_id) do
+    team = get_team!(team_id)
     team
       |> Team.changeset(%{unused_nominations: team.unused_nominations-1})
       |> Repo.update

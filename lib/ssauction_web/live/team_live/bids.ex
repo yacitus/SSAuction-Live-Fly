@@ -74,9 +74,9 @@ defmodule SSAuctionWeb.TeamLive.Bids do
 
   @impl true
   def handle_event("submit-edited-bid", params, socket) do
-    with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.auction,
-                                              socket.assigns.team,
-                                              socket.assigns.bid_for_edit,
+    with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.bid_for_edit,
+                                              socket.assigns.auction.id,
+                                              socket.assigns.team.id,
                                               params["changeset"]["bid_amount"],
                                               params["changeset"]["hidden_high_bid"],
                                               nil),

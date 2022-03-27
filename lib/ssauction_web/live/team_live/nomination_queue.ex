@@ -74,9 +74,9 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
 
   @impl true
   def handle_event("submit-nominatation", params, socket) do
-    with {:ok, _} <- Bids.validate_nomination(socket.assigns.auction,
-                                              socket.assigns.team,
-                                              socket.assigns.nominated_player,
+    with {:ok, _} <- Bids.validate_nomination(socket.assigns.auction.id,
+                                              socket.assigns.team.id,
+                                              socket.assigns.nominated_player.id,
                                               params["changeset"]["bid_amount"],
                                               params["changeset"]["hidden_high_bid"]),
          {:ok, _} <- Bids.submit_nomination(socket.assigns.auction,

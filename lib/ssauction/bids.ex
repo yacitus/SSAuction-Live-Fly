@@ -336,7 +336,7 @@ defmodule SSAuction.Bids do
         { :error, "Could not submit nomination: " <> ChangesetErrors.error_details(changeset) }
 
       {:ok, bid} ->
-        Teams.update_info_post_nomination(team)
+        Teams.update_info_post_nomination(team.id)
         Auctions.remove_from_nomination_queues(auction, player)
         Auctions.broadcast({:ok, auction}, :nomination_queue_change)
         Teams.broadcast({:ok, team}, :nomination_queue_change)
@@ -512,7 +512,11 @@ defmodule SSAuction.Bids do
     end
   end
 
-  def validate_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
+  def validate_nomination(auction_id, team_id, player_id, bid_amount, hidden_high_bid) do
+    auction = Auctions.get_auction!(auction_id)
+    team = Teams.get_team!(team_id)
+    player = Players.get_player!(player_id)
+
     bid_amount = string_to_integer(bid_amount)
     hidden_high_bid = string_to_integer(hidden_high_bid)
 
@@ -540,7 +544,10 @@ defmodule SSAuction.Bids do
     end
   end
 
-  def validate_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid, keep_bidding_up_to) do
+  def validate_edited_bid(bid_for_edit = %Bid{}, auction_id, team_id, bid_amount, hidden_high_bid, keep_bidding_up_to) do
+    auction = Auctions.get_auction!(auction_id)
+    team = Teams.get_team!(team_id)
+
     bid_amount = string_to_integer(bid_amount)
     hidden_high_bid = string_to_integer(hidden_high_bid)
     keep_bidding_up_to = string_to_integer(keep_bidding_up_to)
