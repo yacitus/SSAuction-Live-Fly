@@ -3,7 +3,6 @@
 ## TODO:
 
 * error message about nominations not open when nominating from page opened before nominations granted?
-* default sort teams on auction page by new nominations open at time (ascending)
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
