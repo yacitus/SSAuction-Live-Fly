@@ -525,7 +525,7 @@ defmodule SSAuction.Teams do
     Enum.sum(for b <- open_bids(team), do: b.bid_amount)
   end
 
-  defp dollars_bid_including_hidden(team = %Team{}) do
+  def dollars_bid_including_hidden(team = %Team{}) do
     Enum.sum(for b <- open_bids(team),
              do: calculate_max_bid_vs_hidden_high_bid(b.bid_amount, b.hidden_high_bid))
   end

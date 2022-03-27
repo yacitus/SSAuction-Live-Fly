@@ -31,6 +31,26 @@
     <%= if current_user_in_team?(@team, @current_user) do %>
       <tr>
         <td class="pl-5 border border-blue-300">
+          $ Bid (including hidden high bids):
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= Teams.dollars_bid_including_hidden(@team) %>
+        </td>
+      </tr>
+    <% else %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Bid:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= Teams.dollars_bid(@team) %>
+        </td>
+      </tr>
+    <% end %>
+
+    <%= if current_user_in_team?(@team, @current_user) do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
           $ Remaining for bids (including hidden high bids):
         </td>
         <td class="pl-5 border border-blue-300">

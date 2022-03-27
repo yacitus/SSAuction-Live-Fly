@@ -379,6 +379,7 @@ defmodule SSAuction.Auctions do
     Repo.preload(auction, [:teams]).teams
     |> Enum.map(fn team -> team
                            |> Map.put(:dollars_spent, Teams.dollars_spent(team))
+                           |> Map.put(:dollars_bid, Teams.dollars_bid(team))
                            |> Map.put(:time_nominations_expire, Teams.time_nominations_expire(team))
                            |> Map.put(:number_of_rostered_players, Teams.number_of_rostered_players(team))
                 end)
