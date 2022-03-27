@@ -303,7 +303,7 @@ defmodule SSAuction.Bids do
         |> Repo.insert()
     case insert do
       {:ok, bid} ->
-        log_bid(bid, auction, team, player, "N")
+        log_bid(auction, team, player, bid.bid_amount, "N")
         broadcast({:ok, bid}, :new_nomination)
     end
     insert
@@ -314,16 +314,11 @@ defmodule SSAuction.Bids do
 
   """
   def update_existing_bid(bid, new_team = %Team{}, attrs) do
-    update = bid
+    bid
       |> Repo.preload([:team, :auction, :player])
       |> change_bid(attrs)
       |> Ecto.Changeset.put_assoc(:team, new_team)
       |> Repo.update()
-    case update do
-      {:ok, bid} ->
-        log_bid(bid, bid.auction, bid.team, bid.player, "B")
-    end
-    update
   end
 
   def submit_bid_changeset(auction = %Auction{}, team = %Team{}, player = %Player{}, args) do
@@ -453,7 +448,7 @@ defmodule SSAuction.Bids do
     nominating_team = Teams.get_team!(bid.nominated_by)
     delete_bid(bid, auction, team, player, nominating_team)
     broadcast({:ok, bid}, :deleted_bid)
-    log_bid(bid, auction, team, player, "R")
+    log_bid(auction, team, player, bid.bid_amount, "R")
     Teams.update_unused_nominations(nominating_team, auction)
     Auctions.broadcast({:ok, auction}, :roster_change)
     Teams.broadcast({:ok, team}, :roster_change)
@@ -493,10 +488,10 @@ defmodule SSAuction.Bids do
   Logs a bid
 
   """
-  def log_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, type) do
+  def log_bid(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, type) do
     {:ok, now} = DateTime.now("Etc/UTC")
     %BidLog{}
-    |> BidLog.changeset(%{amount: bid.bid_amount,
+    |> BidLog.changeset(%{amount: bid_amount,
                           type: type,
                           datetime: now})
     |> Ecto.Changeset.put_assoc(:auction, auction)
@@ -620,13 +615,17 @@ defmodule SSAuction.Bids do
         submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_for_edit.bid_amount, hidden_high_bid: hidden_high_bid})
       bid_amount > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
         submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+        log_bid(auction, team, bid_for_edit.player, bid_amount, "B")
       keep_bidding_up_to != nil and keep_bidding_up_to > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
-        submit_bid_changeset(auction, team, bid_for_edit,
-            %{bid_amount: max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid)+1, hidden_high_bid: hidden_high_bid})
+        bid_amount = max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid)+1
+        submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+        log_bid(auction, team, bid_for_edit.player, bid_amount, "B")
       bid_for_edit.hidden_high_bid != nil ->
+        bid_amount = max_bid(bid_amount, keep_bidding_up_to)
+        log_bid(auction, team, bid_for_edit.player, bid_amount, "U")
         same_team = Teams.get_team!(bid_for_edit.team_id)
-        submit_bid_changeset(auction, same_team, bid_for_edit,
-            %{bid_amount: max_bid(bid_amount, keep_bidding_up_to), hidden_high_bid: bid_for_edit.hidden_high_bid})
+        submit_bid_changeset(auction, same_team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: bid_for_edit.hidden_high_bid})
+        log_bid(auction, same_team, bid_for_edit.player, bid_amount, "H")
       true ->
         nil
     end
