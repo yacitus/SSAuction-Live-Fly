@@ -2,6 +2,9 @@
 
 ## TODO:
 
+* don't log when hidden high bid is changed
+* no error message and bid not accepted when bid and keep bidding up to are the same
+* the number of bids doesn't auto-update on team info page
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
