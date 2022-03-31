@@ -207,8 +207,10 @@ defmodule SSAuction.Bids do
 
   defp add_expires_in_to_bids(bids, auction) do
     Enum.map(bids,
-             fn bid -> bid
-                       |> Map.put(:expires_in, Auctions.seconds_to_string(seconds_until_bid_expires(bid, auction)))
+             fn bid -> seconds_until_bid_expires = seconds_until_bid_expires(bid, auction)
+                       bid
+                       |> Map.put(:seconds_until_bid_expires, seconds_until_bid_expires)
+                       |> Map.put(:expires_in, Auctions.seconds_to_string(seconds_until_bid_expires))
                        |> Map.put(:team_name, bid.team.name)
                        |> Map.put(:player_name, bid.player.name)
                        |> Map.put(:player_position, bid.player.position)

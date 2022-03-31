@@ -155,10 +155,10 @@
           <%= sort_link(@socket, "Unused Nominations", :unused_nominations, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
-          <%= sort_link(@socket, "Time Nominations Expire", :time_nominations_expire, @auction.id, @options) %>
+          <%= sort_link(@socket, "Time Nominations Expire", :seconds_until_nominations_expire, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
-          <%= sort_link(@socket, "New Nominations Open At", :new_nominations_open_at, @auction.id, @options) %>
+          <%= sort_link(@socket, "New Nominations Open At", :seconds_until_new_nominations_open, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
           <%= sort_link(@socket, "Players Rostered", :number_of_rostered_players, @auction.id, @options) %>

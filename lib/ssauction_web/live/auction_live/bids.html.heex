@@ -37,7 +37,7 @@
           $ Hidden Max Bid
         </th>
         <th class="border border-blue-300">
-          <%= sort_link(@socket, "Expires In", :expires_at, @auction.id, @options) %>
+          <%= sort_link(@socket, "Expires In", :seconds_until_bid_expires, @auction.id, @options) %>
         </th>
       </tr>
     </thead>

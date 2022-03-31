@@ -376,11 +376,17 @@ defmodule SSAuction.Auctions do
   end
 
   def get_teams(%Auction{} = auction) do
+    {:ok, now} = DateTime.now("Etc/UTC")
     Repo.preload(auction, [:teams]).teams
-    |> Enum.map(fn team -> team
+    |> Enum.map(fn team -> seconds_until_new_nominations_open = DateTime.diff(team.new_nominations_open_at, now)
+                           time_nominations_expire = Teams.time_nominations_expire(team)
+                           seconds_until_nominations_expire = DateTime.diff(time_nominations_expire, now)
+                           team
+                           |> Map.put(:seconds_until_new_nominations_open, seconds_until_new_nominations_open)
+                           |> Map.put(:seconds_until_nominations_expire, seconds_until_nominations_expire)
                            |> Map.put(:dollars_spent, Teams.dollars_spent(team))
                            |> Map.put(:dollars_bid, Teams.dollars_bid(team))
-                           |> Map.put(:time_nominations_expire, Teams.time_nominations_expire(team))
+                           |> Map.put(:time_nominations_expire, time_nominations_expire)
                            |> Map.put(:number_of_rostered_players, Teams.number_of_rostered_players(team))
                 end)
   end

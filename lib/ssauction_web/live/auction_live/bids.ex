@@ -37,7 +37,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_params(params, _, socket) do
     auction = Auctions.get_auction!(params["id"])
 
-    sort_by = (params["sort_by"] || "expires_at") |> String.to_atom()
+    sort_by = (params["sort_by"] || "seconds_until_bid_expires") |> String.to_atom()
     sort_order = (params["sort_order"] || "asc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
 
