@@ -380,7 +380,12 @@ defmodule SSAuction.Auctions do
     Repo.preload(auction, [:teams]).teams
     |> Enum.map(fn team -> seconds_until_new_nominations_open = DateTime.diff(team.new_nominations_open_at, now)
                            time_nominations_expire = Teams.time_nominations_expire(team)
-                           seconds_until_nominations_expire = DateTime.diff(time_nominations_expire, now)
+                           seconds_until_nominations_expire =
+                              if time_nominations_expire == nil do
+                                0
+                              else
+                                DateTime.diff(time_nominations_expire, now)
+                              end
                            team
                            |> Map.put(:seconds_until_new_nominations_open, seconds_until_new_nominations_open)
                            |> Map.put(:seconds_until_nominations_expire, seconds_until_nominations_expire)
