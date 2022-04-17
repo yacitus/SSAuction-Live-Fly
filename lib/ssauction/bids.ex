@@ -575,7 +575,7 @@ defmodule SSAuction.Bids do
         { :error, "Bid amount invalid" }
       bid_for_edit.team_id != team.id and not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
         { :error, "Hidden high bid must be nothing or above bid amount" }
-      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
+      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid, bid_for_edit.hidden_high_bid) ->
         { :error, "Bid amount not legal for team" }
       true ->
         {:ok, nil}

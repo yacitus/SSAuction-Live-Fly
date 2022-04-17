@@ -2,11 +2,11 @@
 
 ## TODO:
 
-* can't lower (or raise) hidden high bid because it's treated like a new bid and added to the existing bids to go over the limit
-* no error message displayed though bid not accepted when bid and keep bidding up to are the same
+* "$ Remaining for bids (including hidden high bids)" not auto-updated after new bid
 * no way to remove a player from nomination queue
 * intemittently logging when hidden high bid is changed?
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
+* add ability to grant extra $ to a team
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
 * may be a bug where last player in nomination queue is not removed after nominating

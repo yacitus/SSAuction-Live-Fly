@@ -617,8 +617,12 @@ defmodule SSAuction.Teams do
   """
 
   def legal_bid_amount?(team = %Team{}, bid_amount, hidden_high_bid) do
+    legal_bid_amount?(team, bid_amount, hidden_high_bid, 0)
+  end
+
+  def legal_bid_amount?(team = %Team{}, bid_amount, hidden_high_bid, existing_hidden_high_bid) do
     max_new_dollars = calculate_max_bid(bid_amount, hidden_high_bid)
-    (dollars_remaining_for_bids_including_hidden(team) - max_new_dollars) >= 0
+    (dollars_remaining_for_bids_including_hidden(team) + existing_hidden_high_bid - max_new_dollars) >= 0
   end
 
   defp calculate_max_bid(bid_amount, nil) do
