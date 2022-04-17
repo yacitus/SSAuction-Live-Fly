@@ -46,6 +46,8 @@
               phx-click="move-down-in-queue" phx-value-id={"#{ordered_player.id}"}}>⬇️</td>
           <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
               phx-click="move-to-bottom-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤵️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="remove-from-queue" phx-value-id={"#{ordered_player.id}"}}>❌</td>
           <%= if @auction.active do %>
             <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
                 phx-click="nominate" phx-value-id={"#{ordered_player.id}"}}>

@@ -209,6 +209,19 @@ defmodule SSAuction.Teams do
     map
   end
 
+  def remove_from_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
+    Players.delete_ordered_player(ordered_player)
+    broadcast({:ok, team}, :nomination_queue_change)
+    broadcast({:ok, team}, :queueable_players_change)
+  end
+
+  def remove_from_nomination_queue(team = %Team{}, player = %Player{}) do
+    ordered_player = find_ordered_player(player, team)
+    if ordered_player != nil do
+      remove_from_nomination_queue(ordered_player, team)
+    end
+  end
+
   def move_to_top_of_nomination_queue(ordered_player = %OrderedPlayer{}, team = %Team{}) do
     query = from op in OrderedPlayer,
              where: op.team_id == ^team.id,
@@ -409,16 +422,6 @@ defmodule SSAuction.Teams do
     ordered_player = Repo.one!(from op in OrderedPlayer,
                                where: op.team_id == ^team.id and op.rank == ^rank_of_next)
     Players.get_player!(ordered_player.player_id)
-  end
-
-  def remove_from_nomination_queue(team = %Team{}, player = %Player{}) do
-    ordered_player = find_ordered_player(player, team)
-    if ordered_player != nil do
-      ordered_player
-        |> Ecto.Changeset.change
-        |> Repo.delete
-    end
-    broadcast({:ok, team}, :nomination_queue_change)
   end
 
   defp find_ordered_player(player = %Player{}, team = %Team{}) do

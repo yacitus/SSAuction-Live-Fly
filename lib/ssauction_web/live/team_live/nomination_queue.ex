@@ -195,6 +195,14 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
+  def handle_event("remove-from-queue", %{"id" => id}, socket) do
+    ordered_player = Players.get_ordered_player!(id)
+    Teams.remove_from_nomination_queue(ordered_player, socket.assigns.team)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:nomination_queue_change, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
