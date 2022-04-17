@@ -36,6 +36,11 @@ defmodule SSAuctionWeb.TeamLive.Show do
     {:noreply,
      socket
        |> assign(:team, team)
+       |> assign(:dollars_spent, Teams.dollars_spent(team))
+       |> assign(:dollars_bid_including_hidden, Teams.dollars_bid_including_hidden(team))
+       |> assign(:dollars_bid, Teams.dollars_bid(team))
+       |> assign(:number_of_bids, Bids.number_of_bids(team))
+       |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
        |> assign(:users, users)
     }
@@ -57,7 +62,31 @@ defmodule SSAuctionWeb.TeamLive.Show do
   def handle_info({:info_change, team = %Team{}}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
-        assign(socket, :team, Teams.get_team!(team.id))
+        socket
+          |> assign(:team, Teams.get_team!(team.id))
+          |> assign(:dollars_spent, Teams.dollars_spent(team))
+          |> assign(:dollars_bid_including_hidden, Teams.dollars_bid_including_hidden(team))
+          |> assign(:dollars_bid, Teams.dollars_bid(team))
+          |> assign(:number_of_bids, Bids.number_of_bids(team))
+          |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:bid_change, team = %Team{}}, socket) do
+    socket =
+      if team.id == socket.assigns.team.id do
+        socket
+          |> assign(:team, Teams.get_team!(team.id))
+          |> assign(:dollars_spent, Teams.dollars_spent(team))
+          |> assign(:dollars_bid_including_hidden, Teams.dollars_bid_including_hidden(team))
+          |> assign(:dollars_bid, Teams.dollars_bid(team))
+          |> assign(:number_of_bids, Bids.number_of_bids(team))
+          |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
       else
         socket
       end

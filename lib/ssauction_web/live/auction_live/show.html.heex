@@ -28,7 +28,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/bids"}>
-          <%= Bids.number_of_bids(@auction) %> open bids
+          <%= @number_of_bids %> open bids
         </a>
       </td>
     </tr>
@@ -39,7 +39,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/rostered_players"}>
-          <%= Auctions.number_of_rostered_players(@auction) %> rostered players
+          <%= @number_of_rostered_players %> rostered players
         </a>
       </td>
     </tr>

@@ -24,7 +24,7 @@
         $ spent:
       </td>
       <td class="pl-5 border border-blue-300">
-        $<%= Teams.dollars_spent(@team) %>
+        $<%= @dollars_spent %>
       </td>
     </tr>
 
@@ -34,7 +34,7 @@
           $ Bid (including hidden high bids):
         </td>
         <td class="pl-5 border border-blue-300">
-          $<%= Teams.dollars_bid_including_hidden(@team) %>
+          $<%= @dollars_bid_including_hidden %>
         </td>
       </tr>
     <% else %>
@@ -43,7 +43,7 @@
           $ Bid:
         </td>
         <td class="pl-5 border border-blue-300">
-          $<%= Teams.dollars_bid(@team) %>
+          $<%= @dollars_bid %>
         </td>
       </tr>
     <% end %>
@@ -74,7 +74,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/bids"}>
-          <%= Bids.number_of_bids(@team) %> open bids
+          <%= @number_of_bids %> open bids
         </a>
       </td>
     </tr>
@@ -85,7 +85,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/rostered_players"}>
-          <%= Teams.number_of_rostered_players(@team) %> rostered players
+          <%= @number_of_rostered_players %> rostered players
         </a>
       </td>
     </tr>
@@ -132,15 +132,6 @@
                            utc_datetime: @team.new_nominations_open_at,
                            locale: @locale,
                            timezone: @timezone %>
-      </td>
-    </tr>
-
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Players rostered:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= Teams.number_of_rostered_players(@team) %>
       </td>
     </tr>
   </tbody>
