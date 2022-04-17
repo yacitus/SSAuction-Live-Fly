@@ -41,6 +41,8 @@ defmodule SSAuctionWeb.TeamLive.Show do
        |> assign(:dollars_bid, Teams.dollars_bid(team))
        |> assign(:number_of_bids, Bids.number_of_bids(team))
        |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
+       |> assign(:dollars_remaining_for_bids_including_hidden, Teams.dollars_remaining_for_bids_including_hidden(team))
+       |> assign(:dollars_remaining_for_bids, Teams.dollars_remaining_for_bids(team))
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
        |> assign(:users, users)
     }
@@ -87,6 +89,8 @@ defmodule SSAuctionWeb.TeamLive.Show do
           |> assign(:dollars_bid, Teams.dollars_bid(team))
           |> assign(:number_of_bids, Bids.number_of_bids(team))
           |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
+          |> assign(:dollars_remaining_for_bids_including_hidden, Teams.dollars_remaining_for_bids_including_hidden(team))
+          |> assign(:dollars_remaining_for_bids, Teams.dollars_remaining_for_bids(team))
       else
         socket
       end

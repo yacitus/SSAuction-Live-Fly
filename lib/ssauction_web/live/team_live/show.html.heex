@@ -54,7 +54,7 @@
           $ Remaining for bids (including hidden high bids):
         </td>
         <td class="pl-5 border border-blue-300">
-          $<%= Teams.dollars_remaining_for_bids_including_hidden(@team) %>
+          $<%= @dollars_remaining_for_bids_including_hidden %>
         </td>
       </tr>
     <% else %>
@@ -63,7 +63,7 @@
           $ Remaining for bids:
         </td>
         <td class="pl-5 border border-blue-300">
-          $<%= Teams.dollars_remaining_for_bids(@team) %>
+          $<%= @dollars_remaining_for_bids %>
         </td>
       </tr>
     <% end %>

@@ -2,7 +2,6 @@
 
 ## TODO:
 
-* "$ Remaining for bids (including hidden high bids)" not auto-updated after new bid
 * no way to remove a player from nomination queue
 * intemittently logging when hidden high bid is changed?
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
