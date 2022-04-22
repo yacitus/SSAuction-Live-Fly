@@ -289,6 +289,21 @@ defmodule SSAuction.Players do
     player.bid_id != nil
   end
 
+  alias SSAuction.Auctions.Auction
+
+  def num_players_in_auction(auction = %Auction{}) do
+    Repo.aggregate(from(p in Player, where: p.auction_id == ^auction.id), :count, :id)
+  end
+
+  def players_not_in_auction(auction = %Auction{}) do
+    player_ssnums_in_auction = Repo.all(from p in Player,
+                                        where: p.auction_id == ^auction.id,
+                                        order_by: [asc: :ssnum],
+                                        select: p.ssnum)
+    all_players = list_all_players(auction.year_range)
+    Enum.filter(all_players, fn ap -> not Enum.member?(player_ssnums_in_auction, ap.ssnum) end)
+  end
+
   alias SSAuction.Players.RosteredPlayer
 
   @doc """

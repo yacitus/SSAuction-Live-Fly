@@ -344,6 +344,21 @@ defmodule SSAuction.Auctions do
     auction.players_per_team * auction.team_dollars_per_player
   end
 
+  def add_players_not_in_auction(auction = %Auction{}) do
+    Players.players_not_in_auction(auction)
+    |> Enum.each(fn player -> %Player{}
+                              |> Player.changeset(%{
+                                   year_range: player.year_range,
+                                   name: player.name,
+                                   ssnum: player.ssnum,
+                                   position: player.position,
+                                   auction_id: auction.id
+                                 })
+                              |> Repo.insert!
+                 end)
+    broadcast({:ok, auction}, :queueable_auction_players_change)
+  end
+
   def get_rostered_players(%Auction{} = auction) do
     auction
       |> Ecto.assoc(:rostered_players)
