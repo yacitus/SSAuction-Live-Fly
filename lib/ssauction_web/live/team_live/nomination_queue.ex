@@ -9,7 +9,10 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket), do: Teams.subscribe()
+    if connected?(socket) do
+      Teams.subscribe()
+      Auctions.subscribe()
+    end
 
     socket =
       socket
@@ -219,6 +222,18 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
     socket =
       if team.id == socket.assigns.team.id do
         assign(socket, :players_available_for_nomination, Teams.queueable_players(team, socket.assigns.options))
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:queueable_auction_players_change, auction}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        assign(socket, :players_available_for_nomination, Teams.queueable_players(socket.assigns.team, socket.assigns.options))
       else
         socket
       end
