@@ -36,6 +36,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
     {:noreply,
      socket
        |> assign(:team, team)
+       |> assign(:dollars_available, Teams.total_dollars(team))
        |> assign(:dollars_spent, Teams.dollars_spent(team))
        |> assign(:dollars_bid_including_hidden, Teams.dollars_bid_including_hidden(team))
        |> assign(:dollars_bid, Teams.dollars_bid(team))

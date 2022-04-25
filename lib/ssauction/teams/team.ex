@@ -7,6 +7,7 @@ defmodule SSAuction.Teams.Team do
     field :new_nominations_open_at, :utc_datetime
     field :time_nominations_expire, :utc_datetime
     field :unused_nominations, :integer
+    field :total_supplemental_dollars, :integer
 
     belongs_to :auction, SSAuction.Auctions.Auction
     has_many :bids, SSAuction.Bids.Bid, on_replace: :nilify

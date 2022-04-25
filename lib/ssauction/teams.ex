@@ -140,6 +140,12 @@ defmodule SSAuction.Teams do
     Team.changeset(team, attrs)
   end
 
+  def total_dollars(%Team{} = team) do
+    auction = Auctions.get_auction!(team.auction_id)
+
+    Auctions.dollars_per_team(auction) + team.total_supplemental_dollars
+  end
+
   def get_users(%Team{} = team) do
     Enum.sort_by(Repo.preload(team, [:users]).users, fn user -> user.username end)
   end
@@ -577,7 +583,7 @@ defmodule SSAuction.Teams do
   end
 
   def team_dollars_remaining_for_bids(team = %Team{}, auction = %Auction{}) do
-    dollars_left = Auctions.dollars_per_team(auction) - (dollars_spent(team) + dollars_bid(team))
+    dollars_left = total_dollars(team) - (dollars_spent(team) + dollars_bid(team))
     if auction.must_roster_all_players do
       dollars_left - (auction.players_per_team - number_of_rostered_players(team) - number_of_bids(team))
     else
@@ -596,7 +602,7 @@ defmodule SSAuction.Teams do
   end
 
   def dollars_remaining_for_bids_including_hidden(team = %Team{}, auction = %Auction{}) do
-    dollars_left = Auctions.dollars_per_team(auction) - (dollars_spent(team) + dollars_bid_including_hidden(team))
+    dollars_left = total_dollars(team) - (dollars_spent(team) + dollars_bid_including_hidden(team))
     if auction.must_roster_all_players do
       dollars_left - (auction.players_per_team - number_of_rostered_players(team) - number_of_bids(team))
     else
