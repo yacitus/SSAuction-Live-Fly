@@ -33,6 +33,11 @@
         <th class="border border-blue-300">
           <%= sort_link(@socket, "$ Bid", :bid_amount, @auction.id, @options) %>
         </th>
+        <%= if @current_team != nil do %>
+          <th class="border border-blue-300">
+            <%= sort_link(@socket, "My surplus", :surplus, @auction.id, @options) %>
+          </th>
+        <% end %>
         <th class="border border-blue-300">
           $ Hidden Max Bid
         </th>
@@ -51,6 +56,11 @@
           <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
             $<%= bid.bid_amount %>
           </td>
+          <%= if @current_team != nil do %>
+            <td class="pl-5 text-left border border-blue-300">
+              $<%= bid.surplus %>
+            </td>
+          <% end %>
           <td class="pl-5 text-left border border-blue-300">
             <%= if current_user_in_team?(bid.team, @current_user) and bid.hidden_high_bid != nil do %>
               $<%= bid.hidden_high_bid %>

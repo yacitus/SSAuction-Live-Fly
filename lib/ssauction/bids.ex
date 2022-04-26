@@ -205,6 +205,12 @@ defmodule SSAuction.Bids do
       |> sort_bids(sort_options)
   end
 
+  def list_bids_with_expires_in_and_surplus(%Auction{} = auction, %Team{} = team, sort_options) do
+    list_bids_with_expires_in(auction)
+      |> add_surplus_to_bids(team)
+      |> sort_bids(sort_options)
+  end
+
   defp add_expires_in_to_bids(bids, auction) do
     Enum.map(bids,
              fn bid -> seconds_until_bid_expires = seconds_until_bid_expires(bid, auction)
@@ -215,6 +221,14 @@ defmodule SSAuction.Bids do
                        |> Map.put(:player_name, bid.player.name)
                        |> Map.put(:player_position, bid.player.position)
                        |> Map.put(:player_ssnum, bid.player.ssnum)
+             end)
+  end
+
+  defp add_surplus_to_bids(bids, team) do
+    Enum.map(bids,
+             fn bid -> value_struct = Players.get_value(bid.player, team)
+                       value = if value_struct == nil, do: 0, else: value_struct.value
+                       Map.put(bid, :surplus, value - bid.bid_amount)
              end)
   end
 

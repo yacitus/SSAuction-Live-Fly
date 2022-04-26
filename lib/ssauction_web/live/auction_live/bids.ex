@@ -37,6 +37,13 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_params(params, _, socket) do
     auction = Auctions.get_auction!(params["id"])
 
+    current_team =
+      if socket.assigns.current_user != nil do
+        Teams.get_team_by_user_and_auction(socket.assigns.current_user, auction)
+      else
+        nil
+      end
+
     sort_by = (params["sort_by"] || "seconds_until_bid_expires") |> String.to_atom()
     sort_order = (params["sort_order"] || "asc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
@@ -44,7 +51,8 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
     {:noreply,
      socket
        |> assign(:auction, auction)
-       |> assign(:bids, Bids.list_bids_with_expires_in(auction, sort_options))
+       |> assign(:current_team, current_team)
+       |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(auction, current_team, sort_options))
        |> assign(:show_modal, false)
        |> assign(:options, sort_options)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
