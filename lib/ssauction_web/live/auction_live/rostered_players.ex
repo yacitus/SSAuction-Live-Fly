@@ -1,23 +1,33 @@
 defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
   use SSAuctionWeb, :live_view
 
+  alias SSAuction.Accounts
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Players
+  alias SSAuction.Teams
   alias SSAuction.Repo
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     if connected?(socket) do
       Auctions.subscribe()
     end
+
+    current_user =
+      if Map.has_key?(session, "user_token") do
+        Accounts.get_user_by_session_token(session["user_token"])
+      else
+        nil
+      end
 
     socket =
       socket
       |> assign_locale()
       |> assign_timezone()
       |> assign_timezone_offset()
-  
+      |> assign(:current_user, current_user)
+
     {:ok, socket, temporary_assigns: [rostered_players: []]}
   end
 
@@ -26,6 +36,13 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
     id = params["id"]
     auction = Auctions.get_auction!(id)
 
+    current_team =
+      if socket.assigns.current_user != nil do
+        Teams.get_team_by_user_and_auction(socket.assigns.current_user, auction)
+      else
+        nil
+      end
+
     sort_by = (params["sort_by"] || "rostered_at") |> String.to_atom()
     sort_order = (params["sort_order"] || "desc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
@@ -33,7 +50,8 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
     {:noreply,
      socket
        |> assign(:auction, auction)
-       |> assign(:rostered_players, Auctions.get_rostered_players_with_rostered_at(auction, sort_options))
+       |> assign(:current_team, current_team)
+       |> assign(:rostered_players, Auctions.get_rostered_players_with_rostered_at_and_surplus(auction, current_team, sort_options))
        |> assign(:options, sort_options)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
     }
@@ -49,7 +67,7 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
   def handle_info({:roster_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
-        assign(socket, :rostered_players, Auctions.get_rostered_players_with_rostered_at(auction, socket.assigns.sort_options))
+        assign(socket, :rostered_players, Auctions.get_rostered_players_with_rostered_at_and_surplus(auction, socket.assigns.current_team, socket.assigns.sort_options))
       else
         socket
       end
