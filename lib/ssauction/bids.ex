@@ -210,10 +210,18 @@ defmodule SSAuction.Bids do
       |> add_surplus_to_bids(current_team)
   end
 
+  def list_bids_with_expires_in_and_surplus(%Team{} = team, nil) do
+    list_bids_with_expires_in(team)
+  end
+
   def list_bids_with_expires_in_and_surplus(%Auction{} = auction, %Team{} = team, sort_options) do
     list_bids_with_expires_in(auction)
       |> add_surplus_to_bids(team)
       |> sort_bids(sort_options)
+  end
+
+  def list_bids_with_expires_in_and_surplus(%Auction{} = auction, nil, sort_options) do
+    list_bids_with_expires_in(auction, sort_options)
   end
 
   defp add_expires_in_to_bids(bids, auction) do
