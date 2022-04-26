@@ -9,17 +9,7 @@ defmodule Ssauction.Repo.Migrations.CreatePlayerValues do
 
       timestamps()
     end
-
-    # alter table("players") do
-    #   add :player_value_id, references(:player_values)
-    # end
-
-    # alter table("auctions") do
-    #   add :player_value_id, references(:player_values)
-    # end
+    create index("player_values", :player_id)
+    create index("player_values", :team_id)
   end
-
-  # def down do
-  #   drop table("player_values")
-  # end
 end

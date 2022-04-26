@@ -519,6 +519,10 @@ defmodule SSAuction.Players do
     |> Repo.update()
   end
 
+  def get_value(%Player{} = player, %Team{} = team) do
+    Repo.one(from v in Value, where: v.player_id == ^player.id and v.team_id == ^team.id)
+  end
+
   def delete_value(%Value{} = value) do
     Repo.delete(value)
   end
