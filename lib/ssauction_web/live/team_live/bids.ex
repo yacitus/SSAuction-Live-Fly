@@ -39,11 +39,20 @@ defmodule SSAuctionWeb.TeamLive.Bids do
   def handle_params(%{"id" => id}, _, socket) do
     team = Teams.get_team!(id)
     auction = Auctions.get_auction!(team.auction_id)
+
+    current_team =
+      if socket.assigns.current_user != nil do
+        Teams.get_team_by_user_and_auction(socket.assigns.current_user, auction)
+      else
+        nil
+      end
+
     {:noreply,
      socket
        |> assign(:team, team)
        |> assign(:auction, auction)
-       |> assign(:bids, Bids.list_bids_with_expires_in(team))
+       |> assign(:current_team, current_team)
+       |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(team, current_team))
        |> assign(:show_modal, false)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
                           %{label: "#{team.name}", to: "/team/#{id}"}])

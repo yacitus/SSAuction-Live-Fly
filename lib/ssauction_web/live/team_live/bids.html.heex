@@ -23,6 +23,9 @@
         <th class="border border-blue-300">Position</th>
         <th class="border border-blue-300">S. num</th>
         <th class="border border-blue-300">$ Bid</th>
+        <%= if @current_team != nil do %>
+          <th class="border border-blue-300">My surplus</th>
+        <% end %>
         <th class="border border-blue-300">$ Hidden Max Bid</th>
         <th class="border border-blue-300">Expires In</th>
       </tr>
@@ -37,6 +40,11 @@
           <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
             $<%= bid.bid_amount %>
           </td>
+          <%= if @current_team != nil do %>
+            <td class="pl-5 text-left border border-blue-300">
+              $<%= bid.surplus %>
+            </td>
+          <% end %>
           <td class="pl-5 text-left border border-blue-300">
             <%= if current_user_in_team?(@team, @current_user) and bid.hidden_high_bid != nil do %>
               $<%= bid.hidden_high_bid %>
