@@ -578,6 +578,24 @@ defmodule SSAuction.Teams do
     |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
   end
 
+  def get_rostered_players_with_rostered_at_and_surplus(%Team{} = team, %Team{} = current_team, %{sort_by: sort_by, sort_order: sort_order}) do
+    get_rostered_players_with_rostered_at(team)
+    |> add_surplus_to_rostered_players(current_team)
+    |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
+  end
+
+  def get_rostered_players_with_rostered_at_and_surplus(%Team{} = team, nil, sort_options) do
+    get_rostered_players_with_rostered_at(team, sort_options)
+  end
+
+  defp add_surplus_to_rostered_players(rostered_players, team) do
+    Enum.map(rostered_players,
+             fn rostered_player -> value_struct = Players.get_value(rostered_player.player, team)
+                                   value = if value_struct == nil, do: 0, else: value_struct.value
+                                   Map.put(rostered_player, :surplus, value - rostered_player.cost)
+             end)
+  end
+
   @doc """
   Returns the number of dollars the team has left to bid (not including hidden)
 
