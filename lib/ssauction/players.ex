@@ -495,4 +495,35 @@ defmodule SSAuction.Players do
   def change_ordered_player(%OrderedPlayer{} = ordered_player, attrs \\ %{}) do
     OrderedPlayer.changeset(ordered_player, attrs)
   end
+
+  alias SSAuction.Players.Value
+  alias SSAuction.Teams.Team
+
+  def list_values do
+    Repo.all(Value)
+  end
+
+  def get_value!(id), do: Repo.get!(Value, id)
+
+  def create_value(%Player{} = player, %Team{} = team, value) do
+    %Value{}
+    |> Value.changeset(%{value: value})
+    |> Ecto.Changeset.put_assoc(:player, player)
+    |> Ecto.Changeset.put_assoc(:team, team)
+    |> Repo.insert()
+  end
+
+  def update_value(%Value{} = value, attrs) do
+    value
+    |> Value.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_value(%Value{} = value) do
+    Repo.delete(value)
+  end
+
+  def change_value(%Value{} = value, attrs \\ %{}) do
+    Value.changeset(value, attrs)
+  end
 end

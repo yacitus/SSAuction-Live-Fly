@@ -14,6 +14,7 @@ defmodule SSAuction.Teams.Team do
     has_many :rostered_players, SSAuction.Players.RosteredPlayer
     has_many :ordered_players, SSAuction.Players.OrderedPlayer
     has_many :bid_logs, SSAuction.Bids.BidLog
+    has_many :player_values, SSAuction.Players.Value
 
     many_to_many :users, SSAuction.Accounts.User, join_through: "teams_users"
   end
