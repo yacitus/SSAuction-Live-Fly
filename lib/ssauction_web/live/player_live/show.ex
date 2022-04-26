@@ -23,6 +23,7 @@ defmodule SSAuctionWeb.PlayerLive.Show do
       |> assign_timezone()
       |> assign_timezone_offset()
       |> assign(:current_user, current_user)
+      |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
 
     {:ok, socket}
   end
@@ -81,5 +82,28 @@ defmodule SSAuctionWeb.PlayerLive.Show do
        |> assign(:current_team, current_team)
        |> assign(:current_value, current_value)
     }
+  end
+
+  @impl true
+  def handle_event("validate-change", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("change", params, socket) do
+    new_value = String.to_integer(params["changeset"]["value"])
+
+    {:ok, current_value} =
+      if socket.assigns.current_value != nil do
+        Players.update_value(socket.assigns.current_value, %{value: new_value})
+      else
+        Players.create_value(socket.assigns.player, socket.assigns.current_team, new_value)
+      end
+
+    {:noreply, assign(socket, :current_value, current_value)}
+  end
+
+  defp get_current_value(value_struct) do
+    if value_struct != nil, do: value_struct.value, else: 0
   end
 end

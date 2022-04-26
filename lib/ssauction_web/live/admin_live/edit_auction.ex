@@ -20,7 +20,6 @@ defmodule SSAuctionWeb.AdminLive.EditAuction do
     {:noreply, assign(socket, :auction, auction)}
   end
 
-
   def handle_event("validate-change", _params, socket) do
     {:noreply, socket}
   end
