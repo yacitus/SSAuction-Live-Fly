@@ -27,8 +27,11 @@ defmodule SSAuctionWeb.AdminLive.EditAuction do
 
   def handle_event("change", params, socket) do
     nominations_per_team = params["changeset"]["nominations_per_team"]
+    seconds_before_autonomination = String.to_integer(params["changeset"]["seconds_before_autonomination"])
 
-    {:ok, auction} = Auctions.update_auction(socket.assigns.auction, %{nominations_per_team: nominations_per_team})
+    {:ok, auction} = Auctions.update_auction(socket.assigns.auction,
+                                             %{nominations_per_team: nominations_per_team,
+                                               seconds_before_autonomination: seconds_before_autonomination})
 
     {:noreply, assign(socket, :auction, auction)}
   end

@@ -555,7 +555,8 @@ defmodule SSAuction.Auctions do
   def check_for_new_nominations(team = %Team{}, auction = %Auction{}) do
     {:ok, now} = DateTime.now("Etc/UTC")
     if DateTime.diff(now, team.new_nominations_open_at) >= 0 do
-      Teams.give_team_new_nominations(team, auction, auction.nominations_per_team)
+      num_nominations = auction.nominations_per_team - team.unused_nominations
+      Teams.give_team_new_nominations(team, auction, num_nominations)
     end
   end
 

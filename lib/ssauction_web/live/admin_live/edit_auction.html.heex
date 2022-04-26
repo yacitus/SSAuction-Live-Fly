@@ -128,7 +128,11 @@
         Time Before Auto-nomination:
       </td>
       <td class="pl-5 border border-blue-300">
-        <%= Auctions.seconds_to_string(@auction.seconds_before_autonomination) %>
+        <%= if @auction.seconds_before_autonomination == 0 do %>
+          auto-nomination OFF
+        <% else %>
+          <%= Auctions.seconds_to_string(@auction.seconds_before_autonomination) %>
+        <% end %>
       </td>
     </tr>
   </tbody>
@@ -141,6 +145,11 @@
     <%= label f, :nominations_per_team, "Nominations Per Team"%>
   </div>
   <%= number_input f, :nominations_per_team, value: @auction.nominations_per_team %>
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :seconds_before_autonomination, "Seconds Before Autonomination"%>
+  </div>
+  <%= number_input f, :seconds_before_autonomination, value: @auction.seconds_before_autonomination %>
 
   <button form="change-form" type="submit"
     class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out

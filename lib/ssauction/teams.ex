@@ -446,13 +446,19 @@ defmodule SSAuction.Teams do
     new_unused_nominations = Enum.min([team.unused_nominations+num_nominations,
                                        open_roster_spots])
     if new_unused_nominations > 0 do
-      {:ok, now} = DateTime.now("Etc/UTC")
-      now = now
-        |> DateTime.truncate(:second)
-        |> DateTime.add(-now.second, :second)
+      time_nominations_expire
+        = if auction.seconds_before_autonomination == 0 do
+          nil
+        else
+          {:ok, now} = DateTime.now("Etc/UTC")
+          now
+            |> DateTime.truncate(:second)
+            |> DateTime.add(-now.second, :second)
+            |> DateTime.add(auction.seconds_before_autonomination, :second)
+        end
       team
       |> Team.changeset(%{unused_nominations: new_unused_nominations,
-                          time_nominations_expire: DateTime.add(now, auction.seconds_before_autonomination, :second)})
+                          time_nominations_expire: time_nominations_expire})
       |> Repo.update
     end
     team
