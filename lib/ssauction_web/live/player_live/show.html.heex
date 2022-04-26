@@ -50,6 +50,27 @@
         </td>
       </tr>
     <% end %>
+
+    <%= if @current_value != nil do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          My value:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @current_value.value %>
+        </td>
+      </tr>
+      <%= if @rostered_player != nil do %>
+        <tr>
+          <td class="pl-5 border border-blue-300">
+            My surplus:
+          </td>
+          <td class="pl-5 border border-blue-300">
+            $<%= @current_value.value - @rostered_player.cost %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
   </tbody>
 </table>
 

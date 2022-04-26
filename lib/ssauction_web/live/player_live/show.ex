@@ -1,18 +1,28 @@
 defmodule SSAuctionWeb.PlayerLive.Show do
   use SSAuctionWeb, :live_view
 
+  alias SSAuction.Accounts
   alias SSAuction.Players
   alias SSAuction.Auctions
+  alias SSAuction.Teams
   alias SSAuction.Bids
   alias SSAuction.Repo
 
   @impl true
-  def mount(_params, _session, socket) do
-     socket =
+  def mount(_params, session, socket) do
+    current_user =
+      if Map.has_key?(session, "user_token") do
+        Accounts.get_user_by_session_token(session["user_token"])
+      else
+        nil
+      end
+
+    socket =
       socket
       |> assign_locale()
       |> assign_timezone()
       |> assign_timezone_offset()
+      |> assign(:current_user, current_user)
 
     {:ok, socket}
   end
@@ -48,12 +58,28 @@ defmodule SSAuctionWeb.PlayerLive.Show do
            %{label: "bids", to: "/auction/#{auction.id}/bids"}]
       end
 
+    current_team =
+      if socket.assigns.current_user != nil do
+        Teams.get_team_by_user_and_auction(socket.assigns.current_user, auction)
+      else
+        nil
+      end
+
+    current_value =
+      if socket.assigns.current_user != nil do
+        Players.get_value(player, current_team)
+      else
+        nil
+      end
+
     {:noreply,
      socket
        |> assign(:player, player)
        |> assign(:rostered_player, rostered_player)
        |> assign(:bid_logs, Bids.list_bid_logs(player))
        |> assign(:links, links)
+       |> assign(:current_team, current_team)
+       |> assign(:current_value, current_value)
     }
   end
 end
