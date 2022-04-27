@@ -422,6 +422,7 @@ defmodule SSAuction.Auctions do
                            team
                            |> Map.put(:seconds_until_new_nominations_open, seconds_until_new_nominations_open)
                            |> Map.put(:seconds_until_nominations_expire, seconds_until_nominations_expire)
+                           |> Map.put(:total_dollars, Teams.total_dollars(team))
                            |> Map.put(:dollars_spent, Teams.dollars_spent(team))
                            |> Map.put(:dollars_bid, Teams.dollars_bid(team))
                            |> Map.put(:time_nominations_expire, time_nominations_expire)

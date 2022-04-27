@@ -150,6 +150,9 @@
           <%= sort_link(@socket, "Team", :name, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
+          <%= sort_link(@socket, "Total $", :total_dollars, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
           <%= sort_link(@socket, "$ Spent", :dollars_spent, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
@@ -173,6 +176,7 @@
       <%= for team <- @teams do %>
         <tr class="hover:bg-sky-100 hover:cursor-pointer" id={"team-#{team.id}"} phx-click="team" phx-value-id={"#{team.id}"}}>
           <td class="pl-2 text-left border border-blue-300"><%= team.name %></td>
+          <td class="pl-2 text-left border border-blue-300">$<%= team.total_dollars %></td>
           <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_spent %></td>
           <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_bid %></td>
           <td class="text-center border border-blue-300"><%= team.unused_nominations %></td>
