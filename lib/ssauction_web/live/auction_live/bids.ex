@@ -124,7 +124,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_info({:new_nomination, bid = %Bid{}}, socket) do
     socket =
       if bid.auction_id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.auction, socket.assigns.options))
+        assign(socket, :bids, Bids.list_bids_with_expires_in_and_surplus(socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
       else
         socket
       end
@@ -136,7 +136,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_info({:bid_expiration_update, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.auction, socket.assigns.options))
+        assign(socket, :bids, Bids.list_bids_with_expires_in_and_surplus(socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
       else
         socket
       end
@@ -148,7 +148,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_info({:bid_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids_with_expires_in(socket.assigns.auction, socket.assigns.options))
+        assign(socket, :bids, Bids.list_bids_with_expires_in_and_surplus(socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
       else
         socket
       end
