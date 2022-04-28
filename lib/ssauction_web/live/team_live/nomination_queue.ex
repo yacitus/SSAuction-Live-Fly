@@ -43,7 +43,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
        socket
          |> assign(:team, team)
          |> assign(:auction, auction)
-         |> assign(:players_in_nomination_queue, Teams.players_in_nomination_queue(team))
+         |> assign(:players_in_nomination_queue, Teams.players_in_nomination_queue_with_values(team))
          |> assign(:players_available_for_nomination, Teams.queueable_players(team, options))
          |> assign(:options, options)
          |> assign(:positions, positions)
@@ -206,10 +206,15 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
   end
 
   @impl true
+  def handle_event("player-value", %{"id" => id}, socket) do
+    {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, id, back_to: "nomination_queue-#{socket.assigns.team.id}"))}
+  end
+
+  @impl true
   def handle_info({:nomination_queue_change, team}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
-        assign(socket, :players_in_nomination_queue, Teams.players_in_nomination_queue(team))
+        assign(socket, :players_in_nomination_queue, Teams.players_in_nomination_queue_with_values(team))
       else
         socket
       end

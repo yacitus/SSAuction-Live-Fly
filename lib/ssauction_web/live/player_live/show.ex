@@ -42,6 +42,12 @@ defmodule SSAuctionWeb.PlayerLive.Show do
     back_to = params["back_to"] || "auction"
     links =
       cond do
+        String.starts_with?(back_to, "nomination_queue-") ->
+          "nomination_queue-" <> team_id = back_to
+          team = Teams.get_team!(String.to_integer(team_id))
+          [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
+           %{label: "#{team.name}", to: "/team/#{team.id}"},
+           %{label: "nomination queue", to: "/team/#{team.id}/nomination_queue"}]
         player.rostered_player_id != nil and back_to == "team" ->
           [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
            %{label: "#{rostered_player.team.name}", to: "/team/#{rostered_player.team.id}"},

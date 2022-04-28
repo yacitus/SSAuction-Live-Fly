@@ -2,16 +2,14 @@
 
 ## TODO:
 
+* auction page doesn't auto-update when it's paused or resume
 * player not removed from nomination queue table (unless page refreshed) after removed if only player in table
 * intemittently logging when hidden high bid is changed?
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
-* add ability to grant extra $ to a team
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
-* may be a bug where last player in nomination queue is not removed after nominating
 * display nomination and bid errors in modal, not background
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
-* add a feature to allow entry of per-team "my values" for players, and add that to the Bids table with a sortable "surplus" column (my-value minus bid) - the "my values" would only be visible to the team who entered them - this makes this unnecessary: allow teams to "favorite" or "ignore" players that would be indicated in the players available to nominate and the bids table (and sortable there)
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
 * display player page (with breadcrumbs) when clicking on player in auto-nomination queue page

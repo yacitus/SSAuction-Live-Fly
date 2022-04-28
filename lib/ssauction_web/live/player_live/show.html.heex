@@ -93,6 +93,8 @@
 </.form>
 <% end %>
 
+<%= if length(@bid_logs) > 0 do %>
+
 <h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
   Bids
 </h1>
@@ -126,3 +128,5 @@
     </tbody>
   </table>
 </div>
+
+<% end %>

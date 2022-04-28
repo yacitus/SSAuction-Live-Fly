@@ -30,6 +30,9 @@
         <th class="border border-blue-300 hover:bg-sky-100">
           Position
         </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          My Value
+        </th>
       </tr>
     </thead>
     <tbody id="teams">
@@ -38,6 +41,9 @@
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.ssnum %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.position %></td>
+          <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="player-value" phx-value-id={"#{ordered_player.player.id}"}}>
+            $<%= ordered_player.value %>
+          </td>
           <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
               phx-click="move-to-top-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤴️</td>
           <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"

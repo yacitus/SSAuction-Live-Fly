@@ -202,6 +202,19 @@ defmodule SSAuction.Teams do
              preload: [:player])
   end
 
+  def players_in_nomination_queue_with_values(%Team{} = team) do
+    players_in_nomination_queue(team)
+    |> add_value_to_ordered_players(team)
+  end
+
+  defp add_value_to_ordered_players(ordered_players, team) do
+    Enum.map(ordered_players,
+             fn ordered_player -> value_struct = Players.get_value(ordered_player.player, team)
+                                   value = if value_struct == nil, do: 0, else: value_struct.value
+                                   Map.put(ordered_player, :value, value)
+             end)
+  end
+
   def add_to_nomination_queue(player = %Player{}, team = %Team{}) do
     ordered_player =
       %OrderedPlayer{
