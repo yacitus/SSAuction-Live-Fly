@@ -63,9 +63,9 @@
   <%= multiple_select f, :must_roster_all_players, ["Yes": 1, "No": 2], selected: [2] %>
 
   <div class="block mb-2 text-sm font-medium text-slate-700">
-    <%= label f, :team_dollars_per_player, "Team Dollars Per Player"%>
+    <%= label f, :dollars_per_team, "Dollars Per Team"%>
   </div>
-  <%= number_input f, :team_dollars_per_player, value: "20" %>
+  <%= number_input f, :dollars_per_team, value: "1000" %>
 
   <button form="create-form" type="submit"
     class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out

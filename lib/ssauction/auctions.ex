@@ -66,7 +66,7 @@ defmodule SSAuction.Auctions do
                      bid_timeout_seconds: bid_timeout_seconds,
                      players_per_team: players_per_team,
                      must_roster_all_players: must_roster_all_players,
-                     team_dollars_per_player: team_dollars_per_player) do
+                     dollars_per_team: dollars_per_team) do
 
     {:ok, now} = DateTime.now("Etc/UTC")
     now = now
@@ -85,7 +85,7 @@ defmodule SSAuction.Auctions do
         bid_timeout_seconds: bid_timeout_seconds,
         players_per_team: players_per_team,
         must_roster_all_players: must_roster_all_players,
-        team_dollars_per_player: team_dollars_per_player,
+        dollars_per_team: dollars_per_team,
         started_or_paused_at: now
         } |> Repo.insert!
 
@@ -341,7 +341,7 @@ defmodule SSAuction.Auctions do
   """
 
   def dollars_per_team(auction = %Auction{}) do
-    auction.players_per_team * auction.team_dollars_per_player
+    auction.dollars_per_team
   end
 
   def add_players_not_in_auction(auction = %Auction{}) do
