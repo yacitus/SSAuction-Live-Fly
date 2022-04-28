@@ -419,12 +419,18 @@ defmodule SSAuction.Auctions do
                               else
                                 DateTime.diff(time_nominations_expire, now)
                               end
+                           total_dollars = Teams.total_dollars(team)
+                           dollars_spent = Teams.dollars_spent(team)
+                           dollars_bid = Teams.dollars_bid(team)
+                           dollars_available = total_dollars - dollars_spent
                            team
                            |> Map.put(:seconds_until_new_nominations_open, seconds_until_new_nominations_open)
                            |> Map.put(:seconds_until_nominations_expire, seconds_until_nominations_expire)
-                           |> Map.put(:total_dollars, Teams.total_dollars(team))
-                           |> Map.put(:dollars_spent, Teams.dollars_spent(team))
-                           |> Map.put(:dollars_bid, Teams.dollars_bid(team))
+                           |> Map.put(:total_dollars, total_dollars)
+                           |> Map.put(:dollars_spent, dollars_spent)
+                           |> Map.put(:dollars_available, dollars_available)
+                           |> Map.put(:dollars_bid, dollars_bid)
+                           |> Map.put(:dollars_remaining, dollars_available - dollars_bid)
                            |> Map.put(:time_nominations_expire, time_nominations_expire)
                            |> Map.put(:number_of_rostered_players, Teams.number_of_rostered_players(team))
                 end)

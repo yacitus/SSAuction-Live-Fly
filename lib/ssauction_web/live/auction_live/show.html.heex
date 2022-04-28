@@ -156,7 +156,13 @@
           <%= sort_link(@socket, "$ Spent", :dollars_spent, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
+          <%= sort_link(@socket, "$ Available", :dollars_available, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
           <%= sort_link(@socket, "$ Bid", :dollars_bid, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "$ Remaining", :dollars_remaining, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
           <%= sort_link(@socket, "Unused Nominations", :unused_nominations, @auction.id, @options) %>
@@ -178,7 +184,9 @@
           <td class="pl-2 text-left border border-blue-300"><%= team.name %></td>
           <td class="pl-2 text-left border border-blue-300">$<%= team.total_dollars %></td>
           <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_spent %></td>
+          <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_available %></td>
           <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_bid %></td>
+          <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_remaining %></td>
           <td class="text-center border border-blue-300"><%= team.unused_nominations %></td>
           <td class="text-center border border-blue-300">
             <%= live_component SSAuctionWeb.FormattedTimeComponent,
