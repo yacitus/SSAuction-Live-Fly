@@ -41,7 +41,7 @@
             $<%= bid.bid_amount %>
           </td>
           <%= if @current_team != nil do %>
-            <td class="pl-5 text-left border border-blue-300">
+            <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
               $<%= bid.surplus %>
             </td>
           <% end %>
