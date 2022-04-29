@@ -380,11 +380,13 @@ defmodule SSAuction.Auctions do
   end
 
   def get_rostered_players_with_rostered_at(%Auction{} = auction, %{sort_by: sort_by, sort_order: sort_order}) do
+    sort_order = if sort_by == :rostered_at, do: {sort_order, DateTime}, else: sort_order
     get_rostered_players_with_rostered_at(auction)
     |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
   end
 
   def get_rostered_players_with_rostered_at_and_surplus(%Auction{} = auction, %Team{} = team, %{sort_by: sort_by, sort_order: sort_order}) do
+    sort_order = if sort_by == :rostered_at, do: {sort_order, DateTime}, else: sort_order
     get_rostered_players_with_rostered_at(auction)
     |> add_surplus_to_rostered_players(team)
     |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)

@@ -587,11 +587,13 @@ defmodule SSAuction.Teams do
   end
 
   def get_rostered_players_with_rostered_at(%Team{} = team, %{sort_by: sort_by, sort_order: sort_order}) do
+    sort_order = if sort_by == :rostered_at, do: {sort_order, DateTime}, else: sort_order
     get_rostered_players_with_rostered_at(team)
     |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
   end
 
   def get_rostered_players_with_rostered_at_and_surplus(%Team{} = team, %Team{} = current_team, %{sort_by: sort_by, sort_order: sort_order}) do
+    sort_order = if sort_by == :rostered_at, do: {sort_order, DateTime}, else: sort_order
     get_rostered_players_with_rostered_at(team)
     |> add_surplus_to_rostered_players(current_team)
     |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
