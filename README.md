@@ -2,12 +2,14 @@
 
 ## TODO:
 
+* add My Value column to Players Available to Nominate table on nomination queue page
 * auction page doesn't auto-update when it's paused or resume
 * player not removed from nomination queue table (unless page refreshed) after removed if only player in table
 * intemittently logging when hidden high bid is changed?
 * allow a team to be "done" with the auction and stop giving them nominations (but stop allowing them to bid)
 * make team bids tables sortable
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
+* allow setting player values by uploading a CSV of ssnums and values
 * display nomination and bid errors in modal, not background
 * create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
