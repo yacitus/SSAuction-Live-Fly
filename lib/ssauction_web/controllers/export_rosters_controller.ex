@@ -20,7 +20,7 @@ defmodule SSAuctionWeb.ExportRostersController do
   end
 
   defp team_roster(team) do
-    rostered_players = Teams.get_rostered_players_with_rostered_at(team)
+    rostered_players = Teams.get_rostered_players_with_rostered_at(team, %{sort_by: :rostered_at, sort_order: :desc})
     Enum.reduce(rostered_players, "",
                 fn rostered_player, text
                 -> "#{text}#{rostered_player.player_ssnum} #{rostered_player.player_name}\n" end)

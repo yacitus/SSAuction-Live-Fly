@@ -2,7 +2,6 @@
 
 ## TODO:
 
-* sort exported players by rostered_at
 * add option to only export players rostered on or after date (and then include rostered_at in export)
 * add My Value column to Players Available to Nominate table on nomination queue page
 * auction page doesn't auto-update when it's paused or resume
