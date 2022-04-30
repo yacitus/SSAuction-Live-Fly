@@ -45,7 +45,7 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
       end
 
     sort_by = (params["sort_by"] || "rostered_at") |> String.to_atom()
-    sort_order = (params["sort_order"] || "asc") |> String.to_atom()
+    sort_order = (params["sort_order"] || "desc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
 
     {:noreply,
