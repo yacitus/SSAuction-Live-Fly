@@ -5,6 +5,10 @@ defmodule SSAuction.Application do
 
   use Application
 
+  defp append_if(list, condition, item) do
+    if condition, do: list ++ [item], else: list
+  end
+
   @impl true
   def start(_type, _args) do
     children = [
@@ -19,6 +23,7 @@ defmodule SSAuction.Application do
       # Start a worker by calling: SSAuction.Worker.start_link(arg)
       # {SSAuction.Worker, arg}
     ]
+    |> append_if(System.get_env("PERIODIC_CHECK") == "ON", SSAuction.PeriodicCheck)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

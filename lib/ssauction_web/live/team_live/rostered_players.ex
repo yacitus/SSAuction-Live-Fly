@@ -1,19 +1,33 @@
 defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
   use SSAuctionWeb, :live_view
 
+  alias SSAuction.Accounts
   alias SSAuction.Teams
+  alias SSAuction.Teams.Team
   alias SSAuction.Auctions
   alias SSAuction.Players
   alias SSAuction.Repo
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    if connected?(socket) do
+      Teams.subscribe()
+    end
+
+    current_user =
+      if Map.has_key?(session, "user_token") do
+        Accounts.get_user_by_session_token(session["user_token"])
+      else
+        nil
+      end
+
     socket =
       socket
       |> assign_locale()
       |> assign_timezone()
       |> assign_timezone_offset()
-  
+      |> assign(:current_user, current_user)
+
     {:ok, socket, temporary_assigns: [rostered_players: []]}
   end
 
@@ -23,14 +37,22 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
     team = Teams.get_team!(id)
     auction = Auctions.get_auction!(team.auction_id)
 
-    sort_by = (params["sort_by"] || "id") |> String.to_atom()
-    sort_order = (params["sort_order"] || "asc") |> String.to_atom()
+    current_team =
+      if socket.assigns.current_user != nil do
+        Teams.get_team_by_user_and_auction(socket.assigns.current_user, auction)
+      else
+        nil
+      end
+
+    sort_by = (params["sort_by"] || "rostered_at") |> String.to_atom()
+    sort_order = (params["sort_order"] || "desc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
 
     {:noreply,
      socket
        |> assign(:team, team)
-       |> assign(:rostered_players, Teams.get_rostered_players_with_rostered_at(team, sort_options))
+       |> assign(:current_team, current_team)
+       |> assign(:rostered_players, Teams.get_rostered_players_with_rostered_at_and_surplus(team, current_team, sort_options))
        |> assign(:options, sort_options)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
                           %{label: "#{team.name}", to: "/team/#{id}"}])
@@ -43,12 +65,29 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
     {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, rostered_player.player.id, back_to: "team"))}
   end
 
-  defp sort_link(socket, text, sort_by, team_id, options) do
-    text =
-      if sort_by == options.sort_by do
-        text <> emoji(options.sort_order)
+  @impl true
+  def handle_info({:roster_change, team = %Team{}}, socket) do
+    socket =
+      if team.id == socket.assigns.team.id do
+        assign(socket, :rostered_players, Teams.get_rostered_players_with_rostered_at_and_surplus(team, socket.assigns.current_team, socket.assigns.sort_options))
       else
-        text
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({_, _}, socket) do
+    {:noreply, socket} # ignore
+  end
+
+  defp sort_link(socket, text, sort_by, team_id, options) do
+    {text, sort_order} =
+      if sort_by == options.sort_by do
+        {text <> emoji(options.sort_order), toggle_sort_order(options.sort_order)}
+      else
+        {text, options.sort_order}
       end
 
     live_patch(text,
@@ -58,14 +97,8 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
           __MODULE__,
           team_id,
           sort_by: sort_by,
-          sort_order: toggle_sort_order(options.sort_order)
+          sort_order: sort_order
         )
     )
   end
-
-  defp toggle_sort_order(:asc), do: :desc
-  defp toggle_sort_order(:desc), do: :asc
-
-  defp emoji(:asc), do: " ⬇️"
-  defp emoji(:desc), do: " ⬆️"
 end

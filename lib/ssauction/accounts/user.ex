@@ -65,7 +65,6 @@ defmodule SSAuction.Accounts.User do
     |> validate_required([:slack_display_name])
     |> validate_length(:slack_display_name, max: 60)
     |> unsafe_validate_unique(:slack_display_name, SSAuction.Repo)
-    |> unique_constraint(:slack_display_name)
   end
 
   defp validate_password(changeset, opts) do

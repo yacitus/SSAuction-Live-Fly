@@ -28,7 +28,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/bids"}>
-          <%= Bids.number_of_bids(@auction) %> open bids
+          <%= @number_of_bids %> open bids
         </a>
       </td>
     </tr>
@@ -39,7 +39,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/rostered_players"}>
-          <%= Auctions.number_of_rostered_players(@auction) %> rostered players
+          <%= @number_of_rostered_players %> rostered players
         </a>
       </td>
     </tr>
@@ -128,7 +128,11 @@
         Time Before Auto-nomination:
       </td>
       <td class="pl-5 border border-blue-300">
-        <%= Auctions.seconds_to_string(@auction.seconds_before_autonomination) %>
+        <%= if @auction.seconds_before_autonomination == 0 do %>
+          auto-nomination OFF
+        <% else %>
+          <%= Auctions.seconds_to_string(@auction.seconds_before_autonomination) %>
+        <% end %>
       </td>
     </tr>
   </tbody>
@@ -146,16 +150,30 @@
           <%= sort_link(@socket, "Team", :name, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
+          <%= sort_link(@socket, "Total $", :total_dollars, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
           <%= sort_link(@socket, "$ Spent", :dollars_spent, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "$ Available", :dollars_available, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "$ Bid", :dollars_bid, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300">
+          <%= sort_link(@socket, "$ Remaining", :dollars_remaining, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
           <%= sort_link(@socket, "Unused Nominations", :unused_nominations, @auction.id, @options) %>
         </th>
+        <%= if @auction.seconds_before_autonomination != 0 do %>
+          <th class="border border-blue-300">
+            <%= sort_link(@socket, "Time Nominations Expire", :seconds_until_nominations_expire, @auction.id, @options) %>
+          </th>
+        <% end %>
         <th class="border border-blue-300">
-          <%= sort_link(@socket, "Time Nominations Expire", :time_nominations_expire, @auction.id, @options) %>
-        </th>
-        <th class="border border-blue-300">
-          <%= sort_link(@socket, "New Nominations Open At", :new_nominations_open_at, @auction.id, @options) %>
+          <%= sort_link(@socket, "New Nominations Open At", :seconds_until_new_nominations_open, @auction.id, @options) %>
         </th>
         <th class="border border-blue-300">
           <%= sort_link(@socket, "Players Rostered", :number_of_rostered_players, @auction.id, @options) %>
@@ -164,16 +182,22 @@
     </thead>
     <tbody id="teams">
       <%= for team <- @teams do %>
-        <tr class="hover:bg-sky-100" id={"team-#{team.id}"} phx-click="team" phx-value-id={"#{team.id}"}}>
+        <tr class="hover:bg-sky-100 hover:cursor-pointer" id={"team-#{team.id}"} phx-click="team" phx-value-id={"#{team.id}"}}>
           <td class="pl-2 text-left border border-blue-300"><%= team.name %></td>
-          <td class="pl-2 text-left border border-blue-300"><%= team.dollars_spent %></td>
+          <td class="pl-2 text-left border border-blue-300">$<%= team.total_dollars %></td>
+          <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_spent %></td>
+          <td class="pl-2 text-left border border-blue-300 font-bold">$<%= team.dollars_available %></td>
+          <td class="pl-2 text-left border border-blue-300">$<%= team.dollars_bid %></td>
+          <td class="pl-2 text-left border border-blue-300 font-bold">$<%= team.dollars_remaining %></td>
           <td class="text-center border border-blue-300"><%= team.unused_nominations %></td>
-          <td class="text-center border border-blue-300">
-            <%= live_component SSAuctionWeb.FormattedTimeComponent,
-                               utc_datetime: team.time_nominations_expire,
-                               locale: @locale,
-                               timezone: @timezone %>
-          </td>
+          <%= if @auction.seconds_before_autonomination != 0 do %>
+            <td class="text-center border border-blue-300">
+              <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                                 utc_datetime: team.time_nominations_expire,
+                                 locale: @locale,
+                                 timezone: @timezone %>
+            </td>
+          <% end %>
           <td class="text-center border border-blue-300">
             <%= live_component SSAuctionWeb.FormattedTimeComponent,
                                utc_datetime: team.new_nominations_open_at,

@@ -31,25 +31,69 @@
       </td>
     </tr>
 
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Rostered By:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= @rostered_player.team.name %>
-      </td>
-    </tr>
+    <%= if @rostered_player != nil do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Rostered By:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= @rostered_player.team.name %>
+        </td>
+      </tr>
 
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Purchase Price:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        $<%= @rostered_player.cost %>
-      </td>
-    </tr>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Purchase Price:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @rostered_player.cost %>
+        </td>
+      </tr>
+    <% end %>
+
+    <%= if @current_value != nil do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          My value:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @current_value.value %>
+        </td>
+      </tr>
+      <%= if @rostered_player != nil do %>
+        <tr>
+          <td class="pl-5 border border-blue-300">
+            My surplus:
+          </td>
+          <td class="pl-5 border border-blue-300">
+            $<%= @current_value.value - @rostered_player.cost %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
   </tbody>
 </table>
+
+<%= if @current_team != nil do %>
+<.form let={f} for={@changeset} as={:changeset} id="change-form" phx-submit="change" phx-change="validate-change"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :value, "My value"%>
+  </div>
+  <%= number_input f, :value, value: get_current_value(@current_value) %>
+
+  <button form="change-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    Update Value
+  </button>
+</.form>
+<% end %>
+
+<%= if length(@bid_logs) > 0 do %>
 
 <h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
   Bids
@@ -84,3 +128,5 @@
     </tbody>
   </table>
 </div>
+
+<% end %>

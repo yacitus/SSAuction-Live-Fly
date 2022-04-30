@@ -4,6 +4,18 @@ defmodule SSAuctionWeb.LiveHelpers do
 
   alias Phoenix.LiveView.JS
 
+  # from pragstudio-liveview-pro-code/final_app_v0.16/lib/live_view_studio_web/live/live_helpers.ex
+  def live_modal(component, opts) do
+    live_component(
+      SSAuctionWeb.ModalComponent,
+      id: :modal,
+      component: component,
+      title: Keyword.fetch!(opts, :title),
+      return_to: Keyword.fetch!(opts, :return_to),
+      opts: opts
+    )
+  end
+
   @doc """
   Renders a live component inside a modal.
 
@@ -76,4 +88,10 @@ defmodule SSAuctionWeb.LiveHelpers do
     timezone_offset = get_connect_params(socket)["timezone_offset"] || @default_timezone_offset
     assign(socket, timezone_offset: timezone_offset)
   end
+
+  def toggle_sort_order(:asc), do: :desc
+  def toggle_sort_order(:desc), do: :asc
+
+  def emoji(:asc), do: " ⬇️"
+  def emoji(:desc), do: " ⬆️"
 end

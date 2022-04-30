@@ -9,6 +9,11 @@
         <th class="border border-blue-300 hover:bg-sky-100">
           <%= sort_link(@socket, "Cost", :cost, @team.id, @options) %>
         </th>
+        <%= if @current_team != nil do %>
+          <th class="border border-blue-300">
+            <%= sort_link(@socket, "My surplus", :surplus, @team.id, @options) %>
+          </th>
+        <% end %>
         <th class="border border-blue-300 hover:bg-sky-100">
           <%= sort_link(@socket, "Player", :player_name, @team.id, @options) %>
         </th>
@@ -27,6 +32,11 @@
       <%= for rostered_player <- @rostered_players do %>
         <tr class="hover:bg-sky-100" id={"rostered_players-#{rostered_player.id}"} phx-click="rostered_players" phx-value-id={"#{rostered_player.id}"}}>
           <td class="pl-5 text-left border border-blue-300">$<%= rostered_player.cost %></td>
+          <%= if @current_team != nil do %>
+            <td class="pl-5 text-left border border-blue-300">
+              $<%= rostered_player.surplus %>
+            </td>
+          <% end %>
           <td class="pl-5 text-left border border-blue-300"><%= rostered_player.player_name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= rostered_player.player_position %></td>
           <td class="pl-5 text-left border border-blue-300"><%= rostered_player.player_ssnum %></td>

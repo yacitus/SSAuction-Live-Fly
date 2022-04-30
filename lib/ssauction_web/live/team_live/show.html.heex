@@ -9,7 +9,7 @@
         Name:
       </td>
       <td class="pl-5 border border-blue-300">
-        <%= if current_user_in_team(@team, @current_user) do %>
+        <%= if current_user_in_team?(@team, @current_user) do %>
           <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/edit"}>
             <%= @team.name %>
           </a>
@@ -21,21 +21,70 @@
 
     <tr>
       <td class="pl-5 border border-blue-300">
-        $ spent:
+        Total $ available:
       </td>
       <td class="pl-5 border border-blue-300">
-        $<%= Teams.dollars_spent(@team) %>
+        $<%= @dollars_available %>
       </td>
     </tr>
 
     <tr>
       <td class="pl-5 border border-blue-300">
-        $ Remaining for bids:
+        Total supplemental $:
       </td>
       <td class="pl-5 border border-blue-300">
-        $<%= Teams.dollars_remaining_for_bids(@team) %>
+        $<%= @team.total_supplemental_dollars %>
       </td>
     </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        $ spent:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        $<%= @dollars_spent %>
+      </td>
+    </tr>
+
+    <%= if current_user_in_team?(@team, @current_user) do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Bid (including hidden high bids):
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @dollars_bid_including_hidden %>
+        </td>
+      </tr>
+    <% else %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Bid:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @dollars_bid %>
+        </td>
+      </tr>
+    <% end %>
+
+    <%= if current_user_in_team?(@team, @current_user) do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Remaining for bids (including hidden high bids):
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @dollars_remaining_for_bids_including_hidden %>
+        </td>
+      </tr>
+    <% else %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          $ Remaining for bids:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @dollars_remaining_for_bids %>
+        </td>
+      </tr>
+    <% end %>
 
     <tr>
       <td class="pl-5 border border-blue-300">
@@ -43,7 +92,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/bids"}>
-          <%= Bids.number_of_bids(@team) %> open bids
+          <%= @number_of_bids %> open bids
         </a>
       </td>
     </tr>
@@ -54,7 +103,7 @@
       </td>
       <td class="pl-5 border border-blue-300">
         <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/rostered_players"}>
-          <%= Teams.number_of_rostered_players(@team) %> rostered players
+          <%= @number_of_rostered_players %> rostered players
         </a>
       </td>
     </tr>
@@ -67,6 +116,18 @@
         <%= @team.unused_nominations %>
       </td>
     </tr>
+
+    <%= if current_user_in_team?(@team, @current_user) do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Nomination queue:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= @team.num_players_in_nomination_queue %> players in <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/nomination_queue"}>nomination queue</a>
+        </td>
+      </tr>
+    <% end %>
+
 
     <tr>
       <td class="pl-5 border border-blue-300">
@@ -89,15 +150,6 @@
                            utc_datetime: @team.new_nominations_open_at,
                            locale: @locale,
                            timezone: @timezone %>
-      </td>
-    </tr>
-
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Players rostered:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= Teams.number_of_rostered_players(@team) %>
       </td>
     </tr>
   </tbody>

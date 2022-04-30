@@ -3,7 +3,19 @@
 </h1>
 
 <div class="w-full m-5">
-  <table class="w-full table-auto border-collapse border border-blue-400">
+  <%= if @show_modal do %>
+    <%= live_modal(SSAuctionWeb.EditBidFormComponent,
+                   id: :edit_bid,
+                   bid_for_edit: @bid_for_edit,
+                   different_team: false,
+                   title: "Edit bid for #{@bid_for_edit.player.name} (#{@bid_for_edit.player.ssnum})",
+                   return_to: Routes.live_path(
+                     @socket,
+                     __MODULE__,
+                     @team.id)
+                  ) %>
+  <% end %>
+  <table class="w-full table-auto border-collapse">
     <thead>
       <tr>
         <th class="border border-blue-300">Team</th>
@@ -11,22 +23,40 @@
         <th class="border border-blue-300">Position</th>
         <th class="border border-blue-300">S. num</th>
         <th class="border border-blue-300">$ Bid</th>
+        <%= if @current_team != nil do %>
+          <th class="border border-blue-300">My surplus</th>
+        <% end %>
         <th class="border border-blue-300">$ Hidden Max Bid</th>
         <th class="border border-blue-300">Expires In</th>
       </tr>
     </thead>
     <tbody id="queue">
       <%= for bid <- @bids do %>
-        <tr>
+        <tr class="hover:bg-sky-100" id={"bid-#{bid.id}"}>
           <td class="pl-5 text-left border border-blue-300"><%= bid.team.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.position %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.ssnum %></td>
-          <td class="pl-5 text-left border border-blue-300">$<%= bid.bid_amount %></td>
-          <td class="pl-5 text-left border border-blue-300"></td>
-          <td class="pl-5 text-left border border-blue-300">
-            <%= Auctions.seconds_to_string(Bids.seconds_until_bid_expires(bid, @auction)) %>
+          <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
+            $<%= bid.bid_amount %>
           </td>
+          <%= if @current_team != nil do %>
+            <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
+              $<%= bid.surplus %>
+            </td>
+          <% end %>
+          <td class="pl-5 text-left border border-blue-300">
+            <%= if current_user_in_team?(@team, @current_user) and bid.hidden_high_bid != nil do %>
+              $<%= bid.hidden_high_bid %>
+            <% end %>
+          </td>
+          <td class="pl-5 text-left border border-blue-300"><%= bid.expires_in %></td>
+          <%= if @auction.active do %>
+            <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
+                phx-click="edit" phx-value-id={"#{bid.id}"}}>
+              Edit
+            </td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>

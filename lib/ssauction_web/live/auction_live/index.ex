@@ -17,7 +17,12 @@ defmodule SSAuctionWeb.AuctionLive.Index do
   end
 
   @impl true
-  def handle_info({_event, _auction}, socket) do
+  def handle_info({:auction_started_or_paused, _}, socket) do
     {:noreply, assign(socket, :auctions, Auctions.list_auctions())}
+  end
+
+  @impl true
+  def handle_info({_, _}, socket) do
+    {:noreply, socket} # ignore
   end
 end

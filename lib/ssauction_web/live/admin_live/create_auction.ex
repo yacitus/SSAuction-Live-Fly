@@ -30,7 +30,7 @@ defmodule SSAuctionWeb.AdminLive.CreateAuction do
                             bid_timeout_seconds: String.to_integer(params["changeset"]["bid_timeout_seconds"]),
                             players_per_team: String.to_integer(params["changeset"]["players_per_team"]),
                             must_roster_all_players: (params["changeset"]["must_roster_all_players"] == ["1"]),
-                            team_dollars_per_player: String.to_integer(params["changeset"]["team_dollars_per_player"]))
+                            dollars_per_team: String.to_integer(params["changeset"]["dollars_per_team"]))
 
     {:noreply, socket}
   end

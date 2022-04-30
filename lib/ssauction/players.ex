@@ -8,6 +8,19 @@ defmodule SSAuction.Players do
 
   alias SSAuction.Players.AllPlayer
 
+  def subscribe do
+    Phoenix.PubSub.subscribe(SSAuction.PubSub, "players")
+  end
+
+  def broadcast({:ok, player}, event) do
+    Phoenix.PubSub.broadcast(
+      SSAuction.PubSub,
+      "players",
+      {event, player}
+    )
+    {:ok, player}
+  end
+
   @doc """
   Returns the list of all_players.
 
@@ -46,6 +59,7 @@ defmodule SSAuction.Players do
   def list_all_players(year_and_league) do
     Repo.all(from p in AllPlayer,
               where: p.year_range == ^year_and_league,
+              order_by: [asc: :ssnum],
               select: p)
   end
 
@@ -259,6 +273,37 @@ defmodule SSAuction.Players do
     Player.changeset(player, attrs)
   end
 
+  @doc """
+  Returns true if the player is rostered
+
+  """
+  def is_rostered?(player = %Player{}) do
+    player.rostered_player_id != nil
+  end
+
+  @doc """
+  Returns true if the player is in the auction's bid
+
+  """
+  def in_bids?(player = %Player{}) do
+    player.bid_id != nil
+  end
+
+  alias SSAuction.Auctions.Auction
+
+  def num_players_in_auction(auction = %Auction{}) do
+    Repo.aggregate(from(p in Player, where: p.auction_id == ^auction.id), :count, :id)
+  end
+
+  def players_not_in_auction(auction = %Auction{}) do
+    player_ssnums_in_auction = Repo.all(from p in Player,
+                                        where: p.auction_id == ^auction.id,
+                                        order_by: [asc: :ssnum],
+                                        select: p.ssnum)
+    all_players = list_all_players(auction.year_range)
+    Enum.filter(all_players, fn ap -> not Enum.member?(player_ssnums_in_auction, ap.ssnum) end)
+  end
+
   alias SSAuction.Players.RosteredPlayer
 
   @doc """
@@ -449,5 +494,40 @@ defmodule SSAuction.Players do
   """
   def change_ordered_player(%OrderedPlayer{} = ordered_player, attrs \\ %{}) do
     OrderedPlayer.changeset(ordered_player, attrs)
+  end
+
+  alias SSAuction.Players.Value
+  alias SSAuction.Teams.Team
+
+  def list_values do
+    Repo.all(Value)
+  end
+
+  def get_value!(id), do: Repo.get!(Value, id)
+
+  def create_value(%Player{} = player, %Team{} = team, value) do
+    %Value{}
+    |> Value.changeset(%{value: value})
+    |> Ecto.Changeset.put_assoc(:player, player)
+    |> Ecto.Changeset.put_assoc(:team, team)
+    |> Repo.insert()
+  end
+
+  def update_value(%Value{} = value, attrs) do
+    value
+    |> Value.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def get_value(%Player{} = player, %Team{} = team) do
+    Repo.one(from v in Value, where: v.player_id == ^player.id and v.team_id == ^team.id)
+  end
+
+  def delete_value(%Value{} = value) do
+    Repo.delete(value)
+  end
+
+  def change_value(%Value{} = value, attrs \\ %{}) do
+    Value.changeset(value, attrs)
   end
 end

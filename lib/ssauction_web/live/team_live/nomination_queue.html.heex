@@ -1,0 +1,117 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Nomination Queue
+</h1>
+
+<div class="w-full m-5">
+  <%= if @show_modal do %>
+    <%= live_modal(SSAuctionWeb.NominateFormComponent,
+                   id: :nominate,
+                   nominated_player: @nominated_player,
+                   title: "Nominate #{@nominated_player.name} (#{@nominated_player.ssnum}) - #{@nominated_player.position}",
+                   return_to: Routes.live_path(
+                     @socket,
+                     __MODULE__,
+                     @team.id,
+                     positions: Enum.join(@positions, "|"),
+                     search: @search,
+                     sort_by: @options.sort_by,
+                     sort_order: @options.sort_order)
+                  ) %>
+  <% end %>
+  <table class="w-full table-auto border-collapse border border-blue-400">
+    <thead>
+      <tr>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          Scoresheet num
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          Player
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          Position
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          My Value
+        </th>
+      </tr>
+    </thead>
+    <tbody id="teams">
+      <%= for ordered_player <- @players_in_nomination_queue do %>
+        <tr class="hover:bg-sky-100" id={"queued_player-#{ordered_player.player.id}"}>
+          <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.ssnum %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= ordered_player.player.position %></td>
+          <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="player-value" phx-value-id={"#{ordered_player.player.id}"}}>
+            $<%= ordered_player.value %>
+          </td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-to-top-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤴️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-up-in-queue" phx-value-id={"#{ordered_player.id}"}}>⬆️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-down-in-queue" phx-value-id={"#{ordered_player.id}"}}>⬇️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="move-to-bottom-of-queue" phx-value-id={"#{ordered_player.id}"}}>⤵️</td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="remove-from-queue" phx-value-id={"#{ordered_player.id}"}}>❌</td>
+          <%= if @auction.active do %>
+            <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
+                phx-click="nominate" phx-value-id={"#{ordered_player.id}"}}>
+              Nominate
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-4xl font-bold text-center">
+  Players Available to Nominate
+</h2>
+
+<div class="w-full max-w-md mx-auto">
+  <form id="change-filter" phx-change="filter" phx-submit="filter-submit">
+    <div class="filters">
+      <div class="flex">
+        <%= for position <- ["SP", "RP", "C", "1B", "2B", "3B", "SS", "OF", "DH"]  do %>
+          <%= position_checkbox(position: position, checked: position in @positions) %>
+        <% end %>
+        <input class="ml-3 min-w-max"
+          type="search" id="search" name="search" autofocus autocomplete="off"
+          value={@search} >
+        <input class="h-10 px-4 py-2 bg-transparent border border-cool-gray-400 border-l-0 rounded-r-md transition ease-in-out duration-150 outline-none hover:bg-blue-400 hover:cursor-pointer"
+          type="image" src="/images/search.svg"/>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="w-full m-5">
+  <table class="w-full table-auto border-collapse">
+    <thead>
+      <tr>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Scoresheet num", :ssnum, @team.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Player", :name, @team.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Position", :position, @team.id, @options) %>
+        </th>
+      </tr>
+    </thead>
+    <tbody id="teams">
+      <%= for player <- @players_available_for_nomination do %>
+        <tr class="hover:bg-sky-100" id={"available_player-#{player.id}"}>
+          <td class="pl-5 text-left border border-blue-300"><%= player.ssnum %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= player.name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= player.position %></td>
+          <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+              phx-click="add-player-to-queue" phx-value-id={"#{player.id}"}}>⤴️</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

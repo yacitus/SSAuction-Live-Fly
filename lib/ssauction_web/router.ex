@@ -32,6 +32,8 @@ defmodule SSAuctionWeb.Router do
     live "/team/:id/rostered_players", TeamLive.RosteredPlayers
 
     live "/player/:id", PlayerLive.Show, :show
+
+    get "/export_rosters", ExportRostersController, :create
   end
 
   # Other scopes may use custom stacks.
@@ -92,6 +94,7 @@ defmodule SSAuctionWeb.Router do
     live "/auction/:id/edit", AuctionLive.Edit
 
     live "/team/:id/edit", TeamLive.Edit
+    live "/team/:id/nomination_queue", TeamLive.NominationQueue
   end
 
   scope "/", SSAuctionWeb do
@@ -102,8 +105,15 @@ defmodule SSAuctionWeb.Router do
     live "/admin/create_auction", AdminLive.CreateAuction
     live "/admin/auction/:id/create_team", AdminLive.CreateTeam
     live "/admin/team/:id/add_user", AdminLive.AddUserToTeam
+    live "/admin/team/:id/change_team_new_nominations_open_at", AdminLive.ChangeTeamNewNominationsOpenAt
+    live "/admin/team/:id/change_team_total_supplemental_dollars", AdminLive.ChangeTeamTotalSupplementalDollars
     live "/admin/auction/:id/add_admin_user", AdminLive.AddUserToAuctionAdmins
     live "/admin/confirm_user", AdminLive.ConfirmUser
+    live "/admin/auction/:id/import_nomination_queue", AdminLive.ImportNominationQueue
+    live "/admin/auction/:id/edit", AdminLive.EditAuction
+    live "/admin/auction/:id/start_or_pause", AdminLive.StartOrPauseAuction
+    live "/admin/auction/:id/add_new_players", AdminLive.AddNewPlayersToAuction
+    live "/admin/auction/:id/export_rosters", AdminLive.ExportRosters
   end
 
   scope "/", SSAuctionWeb do
