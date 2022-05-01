@@ -11,7 +11,6 @@
 * change background hover color of Bid and Edit "button" table cells in bids tables to make them stand-out (and use a subtler background hover color for the bid amounts for going to bid logs)
 * allow setting player values by uploading a CSV of ssnums and values
 * display nomination and bid errors in modal, not background
-* create admin master page with links to other admin pages, link to it in footer if user is "super"
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
 * display player page (with breadcrumbs) when clicking on player in auto-nomination queue page
