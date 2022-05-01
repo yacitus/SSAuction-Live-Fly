@@ -21,6 +21,11 @@
           <% end %>
         </span>
       <% end %>
+      <%= if assigns[:current_user] && @current_user.super do %>
+        <span class="text-2xl font-medium text-slate-800 ml-auto hover:text-blue-800">
+          <%= link "ADMIN", to: "/admin" %>
+        </span>
+      <% end %>
     </div>
   </section>
 </header>

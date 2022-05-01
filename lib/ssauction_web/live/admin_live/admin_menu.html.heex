@@ -1,0 +1,63 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Admin Menu
+</h1>
+
+<div class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <p class="ml-2 hover:text-blue-800">
+    <%= link "Import Players", to: "/admin/import_players" %>
+  </p>
+  <p class="ml-2 hover:text-blue-800">
+    <%= link "All Players", to: "/admin/allplayers" %>
+  </p>
+  <p class="ml-2 hover:text-blue-800">
+    <%= link "Confirm User", to: "/admin/confirm_user" %>
+  </p>
+  <p class="ml-2 hover:text-blue-800">
+    <%= link "Create Auction", to: "/admin/create_auction" %>
+  </p>
+</div>
+
+<.form let={f} for={@changeset} as={:changeset} id="change-form" phx-submit="change" phx-change="validate-change"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+
+  <div class="block mb-2 text-xl font-black text-slate-700">
+    <%= label f, :auctions, "Auction"%>
+  </div>
+  <%= for auction <- @auctions do %>
+    <p>
+      <%= label do %>
+        <%= radio_button f, String.to_atom("auction-#{auction.id}"), auction.name, checked: auction.id == @selected_auction_id %>
+        <%= auction.name %>
+      <% end %>
+    </p>
+  <% end %>
+
+  <div class="my-4">
+    <%= for auction_link <- @auction_links do %>
+      <p class="ml-2 hover:text-blue-800">
+        <%= link Enum.at(auction_link, 0), to: Enum.at(auction_link, 1) %>
+      </p>
+    <% end %>
+  </div>
+
+  <div class="block mb-2 text-xl font-black text-slate-700">
+    <%= label f, :teams, "Team"%>
+  </div>
+  <%= for team <- @teams do %>
+    <p>
+      <%= label do %>
+        <%= radio_button f, String.to_atom("team-#{team.id}"), team.name, checked: team.id == @selected_team_id %>
+        <%= team.name %>
+      <% end %>
+    </p>
+  <% end %>
+
+  <div class="my-4">
+    <%= for team_link <- @team_links do %>
+      <p class="ml-2 hover:text-blue-800">
+        <%= link Enum.at(team_link, 0), to: Enum.at(team_link, 1) %>
+      </p>
+    <% end %>
+  </div>
+
+</.form>

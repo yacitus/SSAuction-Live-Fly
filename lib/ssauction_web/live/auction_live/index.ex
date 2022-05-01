@@ -1,14 +1,27 @@
 defmodule SSAuctionWeb.AuctionLive.Index do
   use SSAuctionWeb, :live_view
 
+  alias SSAuction.Accounts
   alias SSAuction.Auctions
   alias SSAuctionWeb.Router.Helpers, as: Routes
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     if connected?(socket), do: Auctions.subscribe()
 
-    {:ok, assign(socket, :auctions, Auctions.list_auctions())}
+    current_user =
+      if Map.has_key?(session, "user_token") do
+        Accounts.get_user_by_session_token(session["user_token"])
+      else
+        nil
+      end
+
+    socket =
+      socket
+      |> assign(:current_user, current_user)
+      |> assign(:auctions, Auctions.list_auctions())
+
+    {:ok, socket}
   end
 
   @impl true
