@@ -550,6 +550,13 @@ defmodule SSAuction.Auctions do
     end
   end
 
+  def stop_nominations(auction = %Auction{}, reset_nominations_open_at_date) do
+    Repo.preload(auction, [:teams]).teams
+    |> Enum.map(fn team -> Teams.set_unused_nominations(team, 0)
+                           Teams.change_nominations_open_at_date(team, reset_nominations_open_at_date)
+                end)
+   end
+
   @doc """
   Searches for teams ready to be given new nominations in active auctions
 

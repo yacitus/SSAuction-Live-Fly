@@ -3,7 +3,6 @@
 ## TODO:
 
 * add admin page to change a single team's number of unused nominations
-* add admin page to set all teams in an auction number of unused nominations to zero and move their new nominations open at date to a specified date in the future (but at the same time)
 * add My Value column to Players Available to Nominate table on nomination queue page
 * auction page doesn't auto-update when it's paused or resume
 * player not removed from nomination queue table (unless page refreshed) after removed if only player in table

@@ -59,7 +59,8 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
                   ["edit", "Edit Auction"],
                   ["start_or_pause", "Start Or Pause Auction"],
                   ["add_new_players", "Add New Players To Auction"],
-                  ["export_rosters", "Export Rosters"]]
+                  ["export_rosters", "Export Rosters"],
+                  ["stop_nominations", "Stop Nominations"]]
 
     Enum.map(link_pairs, 
              fn [link_end, link_name] ->

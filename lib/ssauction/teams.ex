@@ -474,11 +474,22 @@ defmodule SSAuction.Teams do
                           time_nominations_expire: time_nominations_expire})
       |> Repo.update
     end
+    set_new_nominations_open_at(team, DateTime.add(team.new_nominations_open_at, 24*60*60, :second))
+  end
+
+  def set_new_nominations_open_at(team = %Team{}, new_nominations_open_at) do
     team
-    |> Team.changeset(%{new_nominations_open_at: DateTime.add(team.new_nominations_open_at, 24*60*60, :second)})
+    |> Team.changeset(%{new_nominations_open_at: new_nominations_open_at})
     |> Repo.update
     broadcast({:ok, team}, :info_change)
+    auction = Auctions.get_auction!(team.auction_id)
     Auctions.broadcast({:ok, auction}, :teams_info_change)
+  end
+
+  def change_nominations_open_at_date(team = %Team{}, new_nominations_open_at_date) do
+    {_, time} = String.split_at(DateTime.to_iso8601(team.new_nominations_open_at), 11)
+    {:ok, new_nominations_open_at, 0} = DateTime.from_iso8601(Date.to_iso8601(new_nominations_open_at_date) <> "T" <> time)
+    set_new_nominations_open_at(team, new_nominations_open_at)
   end
 
   @doc """
@@ -499,10 +510,16 @@ defmodule SSAuction.Teams do
   """
   def update_info_post_nomination(team_id) do
     team = get_team!(team_id)
+    set_unused_nominations(team, team.unused_nominations-1)
+  end
+
+  def set_unused_nominations(team = %Team{}, num_unused_nominations) do
     team
-      |> Team.changeset(%{unused_nominations: team.unused_nominations-1})
+      |> Team.changeset(%{unused_nominations: num_unused_nominations})
       |> Repo.update
     broadcast({:ok, team}, :info_change)
+    auction = Auctions.get_auction!(team.auction_id)
+    Auctions.broadcast({:ok, auction}, :teams_info_change)
   end
 
   @doc """
