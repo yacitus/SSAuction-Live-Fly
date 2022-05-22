@@ -1,5 +1,5 @@
 <h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
-  AllPlayers
+  All Players
 </h1>
 
 <div class="w-full m-5 border-2 border-blue-200 text-slate-900 text-2xl">
@@ -10,6 +10,22 @@
     <% end %>
   </p>
 </div>
+
+<.form let={f} for={@changeset} as={:changeset} id="param-form" phx-submit="change-param" phx-change="validate-change-param"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :year_and_league, "Year and League Type"%>
+  </div>
+  <%= text_input f, :year_and_league, value: "2022-AL" %>
+
+  <button form="param-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    Use
+  </button>
+</.form>
 
 <%= if Enum.count(@all_players) != 0 do %>
   <h2 class="w-full m-5 border-4 border-blue-400 text-blue-600 text-4xl font-bold text-center">
