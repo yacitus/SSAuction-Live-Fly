@@ -36,7 +36,9 @@
     <table class="w-full table-auto border-collapse border border-blue-400">
       <thead>
         <tr>
-          <th class="border border-blue-300">SS Num</th>
+          <th class="border border-blue-300">
+            <%= sort_link(@socket, "SS Num", @year_and_league, @sort_order) %>
+          </th>
           <th class="border border-blue-300">Name</th>
           <th class="border border-blue-300">Position</th>
         </tr>

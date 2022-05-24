@@ -57,9 +57,19 @@ defmodule SSAuction.Players do
 
   """
   def list_all_players(year_and_league) do
+    list_all_players(year_and_league, :asc)
+  end
+
+  def list_all_players(year_and_league, sort_order) do
+    order_by
+      = if sort_order == :asc do
+          [asc: :ssnum]
+        else
+          [desc: :ssnum]
+        end
     Repo.all(from p in AllPlayer,
               where: p.year_range == ^year_and_league,
-              order_by: [asc: :ssnum],
+              order_by: ^order_by,
               select: p)
   end
 
