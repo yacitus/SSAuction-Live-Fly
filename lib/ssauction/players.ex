@@ -254,6 +254,11 @@ defmodule SSAuction.Players do
     |> Repo.update()
   end
 
+  alias SSAuction.Bids
+  alias SSAuction.Bids.BidLog
+  alias SSAuction.Players.OrderedPlayer
+  alias SSAuction.Players.Value
+
   @doc """
   Deletes a player.
 
@@ -267,6 +272,15 @@ defmodule SSAuction.Players do
 
   """
   def delete_player(%Player{} = player) do
+    if in_bids?(player) do
+      Bids.delete_bid(Bids.get_bid!(player.bid_id))
+    end
+    if is_rostered?(player) do
+      delete_rostered_player(get_rostered_player!(player.rostered_player_id))
+    end
+    Repo.delete_all(from bl in BidLog, where: bl.player_id == ^player.id)
+    Repo.delete_all(from op in OrderedPlayer, where: op.player_id == ^player.id)
+    Repo.delete_all(from v in Value, where: v.player_id == ^player.id)
     Repo.delete(player)
   end
 
