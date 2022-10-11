@@ -1,6 +1,7 @@
 .DS_Store
 
 ssauction_dump.sql
+fly_ssauction-db_dump.sql
 wireguard.conf
 
 rel/
