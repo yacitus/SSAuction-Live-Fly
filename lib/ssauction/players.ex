@@ -328,6 +328,10 @@ defmodule SSAuction.Players do
     Enum.filter(all_players, fn ap -> not Enum.member?(player_ssnums_in_auction, ap.ssnum) end)
   end
 
+  def get_player_from_ssnum(auction = %Auction{}, ssnum) do
+    Repo.one(from p in Player, where: p.auction_id == ^auction.id and p.ssnum == ^ssnum)
+  end
+
   alias SSAuction.Players.RosteredPlayer
 
   @doc """

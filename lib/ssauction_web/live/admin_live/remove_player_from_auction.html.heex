@@ -1,0 +1,138 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Remove a Player from Auction "<%= @auction.name %>" (<%= @auction.id %>)
+</h1>
+
+<table class="w-full m-5 table-auto border-collapse border border-blue-400">
+  <tbody id="auction_info">
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Name:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @auction.name %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Active:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.active_emoji(@auction) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Last Started or Paused:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                           utc_datetime: @auction.started_or_paused_at,
+                           locale: @locale,
+                           timezone: @timezone %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Years:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= Auctions.dedup_years(@auction) %>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="pl-5 border border-blue-300">
+        Total Players in Auction:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <%= @num_players_in_auction %>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<.form let={f} for={@changeset} as={:changeset} id="find-form" phx-submit="find" phx-change="validate-find"
+    class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+  <div class="block mb-2 text-sm font-medium text-slate-700">
+    <%= label f, :ssnum, "Player SSNum"%>
+  </div>
+  <%= number_input f, :ssnum %>
+
+  <button form="find-form" type="submit"
+    class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+            active:bg-indigo-700
+            hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+    Find Player
+  </button>
+</.form>
+
+
+<%= if ! is_nil(@player) do %>
+  <table class="w-full m-5 table-auto border-collapse border border-red-400">
+    <tbody id="auction_info">
+      <tr>
+        <td class="pl-5 border border-red-300">
+          SS Num:
+        </td>
+        <td class="pl-5 border border-red-300">
+          <%= @player.ssnum %>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="pl-5 border border-red-300">
+          Name:
+        </td>
+        <td class="pl-5 border border-red-300">
+          <%= @player.name %>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="pl-5 border border-red-300">
+          Position:
+        </td>
+        <td class="pl-5 border border-red-300">
+          <%= @player.position %>
+        </td>
+      </tr>
+
+      <%= if ! is_nil(@player.bid) do %>
+      <tr>
+        <td class="pl-5 border border-red-300 text-red-700 font-bold">
+          Bid:
+        </td>
+        <td class="pl-5 border border-red-300 text-red-700 font-bold">
+          $<%= @player.bid.bid_amount %>
+        </td>
+      </tr>
+      <% end %>
+
+      <%= if ! is_nil(@player.rostered_player) do %>
+      <tr>
+        <td class="pl-5 border border-red-300 text-red-700 font-bold">
+          Rostered:
+        </td>
+        <td class="pl-5 border border-red-300 text-red-700 font-bold">
+          $<%= @player.rostered_player.cost %>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <.form for={@changeset} as={:changeset} id="delete-form" phx-submit="delete" phx-change="validate-delete"
+      class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+    <button form="delete-form" type="submit"
+      class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 transition duration-150 ease-in-out
+              active:bg-red-700
+              hover:bg-trf-500
+              focus:outline-none focus:border-trf-700 focus:ring focus:ring-red-300">
+      Remove
+    </button>
+  </.form>
+<% end %>
