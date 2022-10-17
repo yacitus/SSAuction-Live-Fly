@@ -1,0 +1,1 @@
+call "%~dp0\ssauction" eval Ssauction.Release.migrate

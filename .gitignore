@@ -4,8 +4,6 @@ ssauction_dump.sql
 fly_ssauction-db_dump.sql
 wireguard.conf
 
-rel/
-
 # The directory Mix will write compiled artifacts to.
 /_build/
 
