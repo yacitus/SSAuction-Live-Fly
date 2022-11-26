@@ -94,6 +94,19 @@ defmodule SSAuctionWeb.AuctionLive.Show do
   end
 
   @impl true
+  def handle_info({:auction_started_or_paused, auction = %Auction{}}, socket) do
+    socket =
+      if auction.id == socket.assigns.auction.id do
+        socket
+          |> assign(:auction, auction)
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:info_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
