@@ -148,30 +148,30 @@
       </tr>
     <% end %>
 
-
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Time nominations expire:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= live_component SSAuctionWeb.FormattedTimeComponent,
-                           utc_datetime: Teams.time_nominations_expire(@team),
-                           locale: @locale,
-                           timezone: @timezone %>
-      </td>
-    </tr>
-
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        New nominations open at:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= live_component SSAuctionWeb.FormattedTimeComponent,
-                           utc_datetime: @team.new_nominations_open_at,
-                           locale: @locale,
-                           timezone: @timezone %>
-      </td>
-    </tr>
+    <%= if @auction.seconds_before_autonomination != 0 do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Time nominations expire:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                            utc_datetime: Teams.time_nominations_expire(@team),
+                            locale: @locale,
+                            timezone: @timezone %>
+        </td>
+      </tr>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          New nominations open at:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                            utc_datetime: @team.new_nominations_open_at,
+                            locale: @locale,
+                            timezone: @timezone %>
+        </td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 
