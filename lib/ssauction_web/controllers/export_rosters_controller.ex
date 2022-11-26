@@ -15,9 +15,9 @@ defmodule SSAuctionWeb.ExportRostersController do
         _ ->
           nil
       end
-    teams = Auctions.list_teams(auction)
+    teams = Auctions.list_teams_with_ssnum(auction)
     txt_data = Enum.reduce(teams, "",
-                           fn team, text -> "#{text}#{team.id} - #{team.name}\n\n#{team_roster(team, start_date)}\n\n" end)
+                           fn team, text -> "#{text}#{team.ssnum} - #{team.name}\n\n#{team_roster(team, start_date)}\n\n" end)
 
     conn
     |> put_resp_content_type("text/txt")

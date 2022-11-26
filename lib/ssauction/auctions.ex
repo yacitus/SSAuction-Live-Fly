@@ -332,7 +332,7 @@ defmodule SSAuction.Auctions do
 
   """
   def list_teams_with_ssnum(auction = %Auction{}) do
-    Repo.all(from t in Team, where: t.auction_id == ^auction.id and not is_nil(t.ssnum))
+    Repo.all(from t in Team, where: t.auction_id == ^auction.id and not is_nil(t.ssnum), order_by: t.ssnum)
   end
 
   @doc """
