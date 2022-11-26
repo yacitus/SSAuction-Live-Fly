@@ -73,6 +73,7 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
   defp team_links(selected_team_id) do
     link_base = "/admin/team"
     link_pairs = [["add_user", "Add User To Team"],
+                  ["set_team_ssnum", "Set Team Scoresheet Number"],
                   ["change_team_new_nominations_open_at", "Change Team New Nominations Open At"],
                   ["change_team_total_supplemental_dollars", "Change Team Total Supplemental Dollars"]]
 

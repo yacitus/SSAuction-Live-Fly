@@ -44,6 +44,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
     {:noreply,
      socket
        |> assign(:auction, auction)
+       |> assign(:ssnum_used, length(Auctions.list_teams_with_ssnum(auction)) > 0)
        |> assign(:number_of_bids, Bids.number_of_bids(auction))
        |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
        |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))

@@ -4,6 +4,7 @@ defmodule SSAuction.Teams.Team do
 
   schema "teams" do
     field :name, :string
+    field :ssnum, :integer
     field :new_nominations_open_at, :utc_datetime
     field :time_nominations_expire, :utc_datetime
     field :unused_nominations, :integer
@@ -23,7 +24,7 @@ defmodule SSAuction.Teams.Team do
   @doc false
   def changeset(team, attrs) do
     required_fields = [:name, :unused_nominations, :new_nominations_open_at]
-    optional_fields = [:time_nominations_expire, :total_supplemental_dollars]
+    optional_fields = [:time_nominations_expire, :total_supplemental_dollars, :ssnum]
 
     team
     |> cast(attrs, required_fields ++ optional_fields)

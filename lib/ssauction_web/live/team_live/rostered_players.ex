@@ -86,7 +86,7 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
   end
 
   @impl true
-  def handle_event("submit-cut-player", params, socket) do
+  def handle_event("submit-cut-player", _params, socket) do
     Players.cut_player_and_remove_from_rostered_players(socket.assigns.player_to_cut)
     {:noreply, push_patch_to_live_path(socket)}
   end

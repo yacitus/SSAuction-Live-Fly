@@ -328,6 +328,14 @@ defmodule SSAuction.Auctions do
   end
 
   @doc """
+  Returns a list of teams in the auction with ssnum set
+
+  """
+  def list_teams_with_ssnum(auction = %Auction{}) do
+    Repo.all(from t in Team, where: t.auction_id == ^auction.id and not is_nil(t.ssnum))
+  end
+
+  @doc """
   Returns true if the team is in the auction
 
   """

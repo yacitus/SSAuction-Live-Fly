@@ -19,6 +19,7 @@
 * Auto-Nomination Queue page: highlight top N players where N = Nominations Per Team
 * don't allow adding a team to an auction that already has a team with that name
 * don't allow renaming a team in an auction that already has a team with that name
+* refactor common code out of reroster_cut_player & roster_player_and_delete_bid in lib/ssauction/bids.ex
 * dedupe sort_link, toggle_sort_order, and emoji functions
 * figure out how to dedupe team_live/bids.html.heex and auction_live/bids.html.heex
 * make Teams table sortable on /admin/auction/:id/create_team page
