@@ -199,10 +199,10 @@
           <th class="border border-blue-300">
             <%= sort_link(@socket, "Time Nominations Expire", :seconds_until_nominations_expire, @auction.id, @options) %>
           </th>
+          <th class="border border-blue-300">
+            <%= sort_link(@socket, "New Nominations Open At", :seconds_until_new_nominations_open, @auction.id, @options) %>
+          </th>
         <% end %>
-        <th class="border border-blue-300">
-          <%= sort_link(@socket, "New Nominations Open At", :seconds_until_new_nominations_open, @auction.id, @options) %>
-        </th>
         <th class="border border-blue-300">
           <%= sort_link(@socket, "Players Rostered", :number_of_rostered_players, @auction.id, @options) %>
         </th>
@@ -225,13 +225,13 @@
                                  locale: @locale,
                                  timezone: @timezone %>
             </td>
+            <td class="text-center border border-blue-300">
+              <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                                utc_datetime: team.new_nominations_open_at,
+                                locale: @locale,
+                                timezone: @timezone %>
+            </td>
           <% end %>
-          <td class="text-center border border-blue-300">
-            <%= live_component SSAuctionWeb.FormattedTimeComponent,
-                               utc_datetime: team.new_nominations_open_at,
-                               locale: @locale,
-                               timezone: @timezone %>
-          </td>
           <td class="pr-8 text-center border border-blue-300"><%= team.number_of_rostered_players %></td>
         </tr>
       <% end %>
