@@ -12,6 +12,7 @@ defmodule SSAuction.Teams.Team do
     belongs_to :auction, SSAuction.Auctions.Auction
     has_many :bids, SSAuction.Bids.Bid, on_replace: :nilify
     has_many :rostered_players, SSAuction.Players.RosteredPlayer
+    has_many :cut_players, SSAuction.Players.CutPlayer
     has_many :ordered_players, SSAuction.Players.OrderedPlayer
     has_many :bid_logs, SSAuction.Bids.BidLog
     has_many :player_values, SSAuction.Players.Value

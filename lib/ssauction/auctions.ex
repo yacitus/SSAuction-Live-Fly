@@ -410,6 +410,37 @@ defmodule SSAuction.Auctions do
       |> Repo.aggregate(:count, :id)
   end
 
+  def get_cut_players_with_cut_at_and_cost(%Auction{} = auction) do
+    get_cut_players(auction)
+    |> Enum.map(fn cp -> cp
+                         |> Map.put(:cut_at, Bids.cut_bid_log(cp.player).datetime)
+                         |> Map.put(:cost, Teams.cut_player_dollar_cost(cp))
+                         |> Map.put(:team_name, cp.team.name)
+                         |> Map.put(:player_name, cp.player.name)
+                         |> Map.put(:player_position, cp.player.position)
+                         |> Map.put(:player_ssnum, cp.player.ssnum)
+                end)
+  end
+
+  def get_cut_players_with_cut_at_and_cost(%Auction{} = auction, %{sort_by: sort_by, sort_order: sort_order}) do
+    sort_order = if sort_by == :cut_at, do: {sort_order, DateTime}, else: sort_order
+    get_cut_players_with_cut_at_and_cost(auction)
+    |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
+  end
+
+  def get_cut_players(%Auction{} = auction) do
+    auction
+      |> Ecto.assoc(:cut_players)
+      |> Repo.all
+      |> Repo.preload([:player, :team])
+  end
+
+  def number_of_cut_players(%Auction{} = auction) do
+    auction
+      |> Ecto.assoc(:cut_players)
+      |> Repo.aggregate(:count, :id)
+  end
+
   def get_teams(%Auction{} = auction) do
     {:ok, now} = DateTime.now("Etc/UTC")
     Repo.preload(auction, [:teams]).teams

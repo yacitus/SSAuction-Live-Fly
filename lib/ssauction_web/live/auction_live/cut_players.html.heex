@@ -1,0 +1,47 @@
+<h1 class="w-full m-5 border-4 border-blue-600 text-blue-700 text-5xl font-bold text-center">
+  Cut Players
+</h1>
+
+<div class="w-full m-5">
+  <table class="w-full table-auto border-collapse border border-blue-400">
+    <thead>
+      <tr>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Cutting Team", :team_name, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Cost", :cost, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Player", :player_name, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Position", :player_position, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Scoresheet num", :player_ssnum, @auction.id, @options) %>
+        </th>
+        <th class="border border-blue-300 hover:bg-sky-100">
+          <%= sort_link(@socket, "Cut", :cut_at, @auction.id, @options) %>
+        </th>
+      </tr>
+    </thead>
+    <tbody id="teams">
+      <%= for cut_player <- @cut_players do %>
+        <tr class="hover:bg-sky-100" id={"cut_players-#{cut_player.id}"} phx-click="cut_player" phx-value-id={"#{cut_player.id}"}}>
+          <td class="pl-5 text-left border border-blue-300"><%= cut_player.team_name %></td>
+          <td class="pl-5 text-left border border-blue-300">$<%= cut_player.cost %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= cut_player.player_name %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= cut_player.player_position %></td>
+          <td class="pl-5 text-left border border-blue-300"><%= cut_player.player_ssnum %></td>
+          <td class="pl-5 text-left border border-blue-300">
+            <%= live_component SSAuctionWeb.FormattedTimeComponent,
+                           utc_datetime: cut_player.cut_at,
+                           locale: @locale,
+                           timezone: @timezone %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

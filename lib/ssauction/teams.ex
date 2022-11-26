@@ -10,6 +10,7 @@ defmodule SSAuction.Teams do
   alias SSAuction.Players
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
+  alias SSAuction.Players.CutPlayer
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Accounts.User
@@ -558,7 +559,60 @@ defmodule SSAuction.Teams do
       team
       |> Ecto.assoc(:rostered_players)
       |> Repo.all
-    Enum.sum(for p <- rostered_players, do: p.cost)
+    rostered_dollars = Enum.sum(for p <- rostered_players, do: p.cost)
+
+    rostered_dollars + dollars_on_cut_players(team)
+  end
+
+  @doc """
+  Returns the number of dollars the team has spent on cut players
+
+  """
+
+  def dollars_on_cut_players(team = %Team{}) do
+    cut_players =
+      team
+      |> Ecto.assoc(:cut_players)
+      |> Repo.all
+    Enum.sum(for p <- cut_players, do: cut_player_dollar_cost(p))
+  end
+
+  @doc """
+  Returns the number of dollars a cut player costs (or might cost) a team
+
+  """
+
+  def cut_player_dollar_cost(cut_player = %CutPlayer{}) do
+    cut_player_dollar_cost(cut_player.cost)
+  end
+
+  def cut_player_dollar_cost(cost) do
+    div(cost + 1, 2)
+  end
+
+  def get_cut_players_with_cut_at_and_cost(%Team{} = team) do
+    get_cut_players(team)
+    |> Enum.map(fn cp -> cp
+                         |> Map.put(:cut_at, Bids.cut_bid_log(cp.player).datetime)
+                         |> Map.put(:cost, cut_player_dollar_cost(cp))
+                         |> Map.put(:team_name, cp.team.name)
+                         |> Map.put(:player_name, cp.player.name)
+                         |> Map.put(:player_position, cp.player.position)
+                         |> Map.put(:player_ssnum, cp.player.ssnum)
+                end)
+  end
+
+  def get_cut_players_with_cut_at_and_cost(%Team{} = team, %{sort_by: sort_by, sort_order: sort_order}) do
+    sort_order = if sort_by == :cut_at, do: {sort_order, DateTime}, else: sort_order
+    get_cut_players_with_cut_at_and_cost(team)
+    |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
+  end
+
+  def get_cut_players(%Team{} = team) do
+    team
+      |> Ecto.assoc(:cut_players)
+      |> Repo.all
+      |> Repo.preload([:player, :team])
   end
 
   @doc """

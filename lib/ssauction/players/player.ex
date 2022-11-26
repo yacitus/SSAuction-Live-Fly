@@ -11,6 +11,7 @@ defmodule SSAuction.Players.Player do
     belongs_to :auction, SSAuction.Auctions.Auction
     belongs_to :bid, SSAuction.Bids.Bid
     belongs_to :rostered_player, SSAuction.Players.RosteredPlayer
+    belongs_to :cut_player, SSAuction.Players.CutPlayer
     has_many :ordered_players, SSAuction.Players.OrderedPlayer
     has_many :bid_logs, SSAuction.Bids.BidLog
     has_many :player_values, SSAuction.Players.Value

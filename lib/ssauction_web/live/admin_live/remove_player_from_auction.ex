@@ -42,7 +42,7 @@ defmodule SSAuctionWeb.AdminLive.RemovePlayerFromAuction do
     {:noreply, socket}
   end
 
-  def handle_event("delete", params, socket) do
+  def handle_event("delete", _params, socket) do
     Players.delete_player(socket.assigns.player)
     {:noreply,
      socket

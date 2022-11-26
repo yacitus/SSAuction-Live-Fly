@@ -46,6 +46,15 @@
       </td>
     </tr>
 
+    <%= if @auction.allow_player_cuts do %>
+      <td class="pl-5 border border-blue-300">
+        $ on cut players:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        $<%= @dollars_on_cut_players %>
+      </td>
+    <% end %>
+
     <%= if current_user_in_team?(@team, @current_user) do %>
       <tr>
         <td class="pl-5 border border-blue-300">
@@ -107,6 +116,17 @@
         </a>
       </td>
     </tr>
+
+    <%= if @auction.allow_player_cuts do %>
+      <td class="pl-5 border border-blue-300">
+        Cut Players:
+      </td>
+      <td class="pl-5 border border-blue-300">
+        <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/team/#{@team.id}/cut_players"}>
+          <%= @number_of_cut_players %> cut players
+        </a>
+      </td>
+    <% end %>
 
     <tr>
       <td class="pl-5 border border-blue-300">

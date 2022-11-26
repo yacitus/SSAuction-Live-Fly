@@ -20,6 +20,6 @@ defmodule SSAuction.Bids.BidLog do
     bid_log
     |> cast(params, required_fields)
     |> validate_required(required_fields)
-    |> validate_inclusion(:type, ["N", "B", "U", "H", "R"]) # N - nomination; B - bid; U - bid under hidden high bid; H - hidden high bid; R - rostered
+    |> validate_inclusion(:type, ["N", "B", "U", "H", "R", "C"]) # N - nomination; B - bid; U - bid under hidden high bid; H - hidden high bid; R - rostered; C - cut
   end
 end

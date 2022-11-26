@@ -60,6 +60,7 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
                   ["start_or_pause", "Start Or Pause Auction"],
                   ["add_new_players", "Add New Players To Auction"],
                   ["remove_player", "Remove Player From Auction"],
+                  ["uncut_player", "Un-cut Player"],
                   ["export_rosters", "Export Rosters"],
                   ["stop_nominations", "Stop Nominations"]]
 

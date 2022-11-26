@@ -3,6 +3,20 @@
 </h1>
 
 <div class="w-full m-5">
+  <%= if @show_modal do %>
+    <%= live_modal(SSAuctionWeb.CutPlayerFormComponent,
+                   id: :cut_player,
+                   player_to_cut: @player_to_cut,
+                   title: "Cut #{@player_to_cut.player.name} (#{@player_to_cut.player.ssnum}) - #{@player_to_cut.player.position} ?",
+                   cost: @player_to_cut_cost,
+                   return_to: Routes.live_path(
+                     @socket,
+                     __MODULE__,
+                     @team.id,
+                     sort_by: @options.sort_by,
+                     sort_order: @options.sort_order)
+                  ) %>
+  <% end %>
   <table class="w-full table-auto border-collapse border border-blue-400">
     <thead>
       <tr>
@@ -46,6 +60,10 @@
                            locale: @locale,
                            timezone: @timezone %>
           </td>
+          <%= if @auction.allow_player_cuts do %>
+            <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
+                phx-click="cut-player" phx-value-id={"#{rostered_player.id}"}}>❌</td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>

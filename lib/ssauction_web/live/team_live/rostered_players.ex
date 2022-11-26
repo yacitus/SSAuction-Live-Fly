@@ -27,6 +27,7 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
       |> assign_timezone()
       |> assign_timezone_offset()
       |> assign(:current_user, current_user)
+      |> assign(show_modal: false)
 
     {:ok, socket, temporary_assigns: [rostered_players: []]}
   end
@@ -51,9 +52,11 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
     {:noreply,
      socket
        |> assign(:team, team)
+       |> assign(:auction, auction)
        |> assign(:current_team, current_team)
        |> assign(:rostered_players, Teams.get_rostered_players_with_rostered_at_and_surplus(team, current_team, sort_options))
        |> assign(:options, sort_options)
+       |> assign(:show_modal, false)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
                           %{label: "#{team.name}", to: "/team/#{id}"}])
     }
@@ -63,6 +66,34 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
   def handle_event("rostered_players", %{"id" => id}, socket) do
     rostered_player = Players.get_rostered_player!(id) |> Repo.preload([:player])
     {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, rostered_player.player.id, back_to: "team"))}
+  end
+
+  @impl true
+  def handle_event("cut-player", %{"id" => id}, socket) do
+    player_to_cut = Players.get_rostered_player!(id) |> Repo.preload([:player])
+
+    {:noreply,
+     socket
+       |> assign(:player_to_cut, player_to_cut)
+       |> assign(:player_to_cut_cost, Teams.cut_player_dollar_cost(player_to_cut.cost))
+       |> assign(:show_modal, true)
+    }
+  end
+
+  @impl true
+  def handle_event("validate-cut-player", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit-cut-player", params, socket) do
+    Players.cut_player_and_remove_from_rostered_players(socket.assigns.player_to_cut)
+    {:noreply, push_patch_to_live_path(socket)}
+  end
+
+  @impl true
+  def handle_event("close", _params, socket) do
+    {:noreply, socket |> assign(:show_modal, false)}
   end
 
   @impl true
@@ -98,6 +129,19 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
           team_id,
           sort_by: sort_by,
           sort_order: sort_order
+        )
+    )
+  end
+
+  defp push_patch_to_live_path(socket) do
+    push_patch(socket,
+      to:
+        Routes.live_path(
+          socket,
+          __MODULE__,
+          socket.assigns.team.id,
+          sort_by: socket.assigns.options.sort_by,
+          sort_order: socket.assigns.options.sort_order
         )
     )
   end

@@ -46,6 +46,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
        |> assign(:auction, auction)
        |> assign(:number_of_bids, Bids.number_of_bids(auction))
        |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
+       |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
        |> assign(:options, sort_options)
        |> assign(:teams, Auctions.get_teams(auction, sort_options))
     }
@@ -100,6 +101,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
           |> assign(:auction, auction)
           |> assign(:number_of_bids, Bids.number_of_bids(auction))
           |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
+          |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
       else
         socket
       end

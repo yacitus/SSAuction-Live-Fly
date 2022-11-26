@@ -26,10 +26,12 @@ defmodule SSAuctionWeb.Router do
     live "/auction/:id/autonomination_queue", AuctionLive.AutoNominationQueue
     live "/auction/:id/bids", AuctionLive.Bids
     live "/auction/:id/rostered_players", AuctionLive.RosteredPlayers
+    live "/auction/:id/cut_players", AuctionLive.CutPlayers
 
     live "/team/:id", TeamLive.Show, :show
     live "/team/:id/bids", TeamLive.Bids
     live "/team/:id/rostered_players", TeamLive.RosteredPlayers
+    live "/team/:id/cut_players", TeamLive.CutPlayers
 
     live "/player/:id", PlayerLive.Show, :show
 
@@ -113,6 +115,7 @@ defmodule SSAuctionWeb.Router do
     live "/admin/auction/:id/start_or_pause", AdminLive.StartOrPauseAuction
     live "/admin/auction/:id/add_new_players", AdminLive.AddNewPlayersToAuction
     live "/admin/auction/:id/remove_player", AdminLive.RemovePlayerFromAuction
+    live "/admin/auction/:id/uncut_player", AdminLive.UncutPlayer
     live "/admin/auction/:id/export_rosters", AdminLive.ExportRosters
     live "/admin/auction/:id/stop_nominations", AdminLive.StopNominations
   end

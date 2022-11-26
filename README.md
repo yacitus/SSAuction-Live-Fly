@@ -2,6 +2,7 @@
 
 ## TODO:
 
+* don't show New nominations open at on Team pages if auction auto-nomination OFF
 * add admin page to change a single team's number of unused nominations
 * add My Value column to Players Available to Nominate table on nomination queue page
 * auction page doesn't auto-update when it's paused or resume

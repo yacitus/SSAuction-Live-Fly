@@ -5,8 +5,19 @@ defmodule SSAuction.Players do
 
   import Ecto.Query, warn: false
   alias SSAuction.Repo
-
+  alias SSAuction.Auctions
+  alias SSAuction.Auctions.Auction
+  alias SSAuction.Bids
+  alias SSAuction.Bids.BidLog
+  alias SSAuction.Players
   alias SSAuction.Players.AllPlayer
+  alias SSAuction.Players.CutPlayer
+  alias SSAuction.Players.OrderedPlayer
+  alias SSAuction.Players.Player
+  alias SSAuction.Players.RosteredPlayer
+  alias SSAuction.Players.Value
+  alias SSAuction.Teams
+  alias SSAuction.Teams.Team
 
   def subscribe do
     Phoenix.PubSub.subscribe(SSAuction.PubSub, "players")
@@ -187,8 +198,6 @@ defmodule SSAuction.Players do
     AllPlayer.changeset(all_player, attrs)
   end
 
-  alias SSAuction.Players.Player
-
   @doc """
   Returns the list of players.
 
@@ -254,11 +263,6 @@ defmodule SSAuction.Players do
     |> Repo.update()
   end
 
-  alias SSAuction.Bids
-  alias SSAuction.Bids.BidLog
-  alias SSAuction.Players.OrderedPlayer
-  alias SSAuction.Players.Value
-
   @doc """
   Deletes a player.
 
@@ -277,6 +281,9 @@ defmodule SSAuction.Players do
     end
     if is_rostered?(player) do
       delete_rostered_player(get_rostered_player!(player.rostered_player_id))
+    end
+    if is_cut?(player) do
+      delete_cut_player(get_cut_player!(player.cut_player_id))
     end
     Repo.delete_all(from bl in BidLog, where: bl.player_id == ^player.id)
     Repo.delete_all(from op in OrderedPlayer, where: op.player_id == ^player.id)
@@ -306,14 +313,20 @@ defmodule SSAuction.Players do
   end
 
   @doc """
+  Returns true if the player is cut
+
+  """
+  def is_cut?(player = %Player{}) do
+    player.cut_player_id != nil
+  end
+
+  @doc """
   Returns true if the player is in the auction's bid
 
   """
   def in_bids?(player = %Player{}) do
     player.bid_id != nil
   end
-
-  alias SSAuction.Auctions.Auction
 
   def num_players_in_auction(auction = %Auction{}) do
     Repo.aggregate(from(p in Player, where: p.auction_id == ^auction.id), :count, :id)
@@ -331,8 +344,6 @@ defmodule SSAuction.Players do
   def get_player_from_ssnum(auction = %Auction{}, ssnum) do
     Repo.one(from p in Player, where: p.auction_id == ^auction.id and p.ssnum == ^ssnum)
   end
-
-  alias SSAuction.Players.RosteredPlayer
 
   @doc """
   Returns the list of rostered_players.
@@ -412,7 +423,13 @@ defmodule SSAuction.Players do
 
   """
   def delete_rostered_player(%RosteredPlayer{} = rostered_player) do
-    Repo.delete(rostered_player)
+    rostered_player = Repo.preload(rostered_player, [:player])
+    rostered_player.player
+    |> Ecto.Changeset.change(%{rostered_player_id: nil})
+    |> Repo.update
+    rostered_player
+    |> Ecto.Changeset.change
+    |> Repo.delete
   end
 
   @doc """
@@ -428,7 +445,131 @@ defmodule SSAuction.Players do
     RosteredPlayer.changeset(rostered_player, attrs)
   end
 
-  alias SSAuction.Players.OrderedPlayer
+  @doc """
+  Returns the list of cut_players.
+
+  ## Examples
+
+      iex> list_cut_players()
+      [%CutPlayer{}, ...]
+
+  """
+  def list_cut_players do
+    Repo.all(CutPlayer)
+  end
+
+  @doc """
+  Gets a single cut_player.
+
+  Raises `Ecto.NoResultsError` if the Rostered player does not exist.
+
+  ## Examples
+
+      iex> get_cut_player!(123)
+      %CutPlayer{}
+
+      iex> get_cut_player!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_cut_player!(id), do: Repo.get!(CutPlayer, id)
+
+  @doc """
+  Creates a cut_player.
+
+  ## Examples
+
+      iex> create_cut_player(%{field: value})
+      {:ok, %CutPlayer{}}
+
+      iex> create_cut_player(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_cut_player(attrs \\ %{}) do
+    %CutPlayer{}
+    |> CutPlayer.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a cut_player.
+
+  ## Examples
+
+      iex> update_cut_player(cut_player, %{field: new_value})
+      {:ok, %CutPlayer{}}
+
+      iex> update_cut_player(cut_player, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_cut_player(%CutPlayer{} = cut_player, attrs) do
+    cut_player
+    |> CutPlayer.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a cut_player.
+
+  ## Examples
+
+      iex> delete_cut_player(cut_player)
+      {:ok, %CutPlayer{}}
+
+      iex> delete_cut_player(cut_player)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_cut_player(%CutPlayer{} = cut_player) do
+    cut_player = Repo.preload(cut_player, [:player])
+    cut_player.player
+    |> Ecto.Changeset.change(%{cut_player_id: nil})
+    |> Repo.update
+    cut_player
+    |> Ecto.Changeset.change
+    |> Repo.delete
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking cut_player changes.
+
+  ## Examples
+
+      iex> change_cut_player(cut_player)
+      %Ecto.Changeset{data: %CutPlayer{}}
+
+  """
+  def change_cut_player(%CutPlayer{} = cut_player, attrs \\ %{}) do
+    CutPlayer.changeset(cut_player, attrs)
+  end
+
+  @doc """
+  Cut the player and remove from rostered_players
+
+  """
+  def cut_player_and_remove_from_rostered_players(rostered_player = %RosteredPlayer{}) do
+    rostered_player = Repo.preload(rostered_player, [:player, :team, :auction])
+    auction = rostered_player.auction
+    team = rostered_player.team
+    player = rostered_player.player
+    cut_player =
+      %CutPlayer{
+        cost: rostered_player.cost,
+        player: player
+      }
+    cut_player = Ecto.build_assoc(team, :cut_players, cut_player)
+    cut_player = Ecto.build_assoc(auction, :cut_players, cut_player)
+    Repo.transaction(fn ->
+      Repo.insert!(cut_player)
+      delete_rostered_player(rostered_player)
+      Bids.log_bid(auction, team, player, cut_player.cost, "C")
+      Auctions.broadcast({:ok, auction}, :roster_change)
+      Teams.broadcast({:ok, team}, :roster_change)
+      Players.broadcast({:ok, player}, :info_change)
+    end)
+  end
 
   @doc """
   Returns the list of ordered_players.
@@ -523,9 +664,6 @@ defmodule SSAuction.Players do
   def change_ordered_player(%OrderedPlayer{} = ordered_player, attrs \\ %{}) do
     OrderedPlayer.changeset(ordered_player, attrs)
   end
-
-  alias SSAuction.Players.Value
-  alias SSAuction.Teams.Team
 
   def list_values do
     Repo.all(Value)

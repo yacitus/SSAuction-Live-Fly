@@ -10,6 +10,7 @@ defmodule SSAuction.Bids do
   alias SSAuction.Bids.BidLog
   alias SSAuction.Players.Player
   alias SSAuction.Players.RosteredPlayer
+  alias SSAuction.Players.CutPlayer
   alias SSAuction.Auctions.Auction
   alias SSAuction.Teams.Team
   alias SSAuction.Auctions
@@ -133,9 +134,19 @@ defmodule SSAuction.Bids do
   end
 
   def rostered_bid_log(%Player{} = player) do
-    Repo.one(from bl in BidLog,
-              where: bl.player_id == ^player.id,
-              where: bl.type == "R")
+    logs = Repo.all(from bl in BidLog,
+                    where: bl.player_id == ^player.id,
+                    where: bl.type == "R",
+                    order_by: bl.datetime)
+    Enum.at(logs, -1)
+  end
+
+  def cut_bid_log(%Player{} = player) do
+    logs = Repo.all(from bl in BidLog,
+                    where: bl.player_id == ^player.id,
+                    where: bl.type == "C",
+                    order_by: bl.datetime)
+    Enum.at(logs, -1)
   end
 
   def bid_log_type_string(type) do
@@ -145,6 +156,7 @@ defmodule SSAuction.Bids do
       "U" -> "bid under hidden high bid"
       "H" -> "hidden high bid"
       "R" -> "rostered"
+      "C" -> "cut"
       _   -> "UNKNOWN"
     end
   end
@@ -483,6 +495,33 @@ defmodule SSAuction.Bids do
     Teams.broadcast({:ok, team}, :roster_change)
     Players.broadcast({:ok, player}, :info_change)
   end
+
+  @doc """
+  Re-roster the player and remove from cut_players
+
+  """
+  def reroster_cut_player(cut_player = %CutPlayer{}) do
+    cut_player = Repo.preload(cut_player, [:player, :team, :auction])
+    auction = cut_player.auction
+    team = cut_player.team
+    player = cut_player.player
+    rostered_player =
+      %RosteredPlayer{
+        cost: cut_player.cost,
+        player: player
+      }
+    rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
+    rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
+    Repo.insert!(rostered_player)
+
+    log_bid(auction, team, player, cut_player.cost, "R")
+
+    Players.delete_cut_player(cut_player)
+
+    Auctions.broadcast({:ok, auction}, :roster_change)
+    Teams.broadcast({:ok, team}, :roster_change)
+    Players.broadcast({:ok, player}, :info_change)
+    end
 
   @doc """
   Delete the bid
