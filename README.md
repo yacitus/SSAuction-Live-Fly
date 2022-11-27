@@ -14,7 +14,6 @@
 * add sort_name column to all_players and players tables
 * consider other info to add to players table: range, platoon splits, link to Fangraphs, etc.
 * display player page (with breadcrumbs) when clicking on player in auto-nomination queue page
-* Teams Table on auction page: hide Time Nominations Expire and New Nominations Open At columns if there are no unused nominations
 * Auto-Nomination Queue page: show Nominations Per Team
 * Auto-Nomination Queue page: highlight top N players where N = Nominations Per Team
 * don't allow adding a team to an auction that already has a team with that name

@@ -336,6 +336,15 @@ defmodule SSAuction.Auctions do
   end
 
   @doc """
+  Returns the total unused nominations of all teams in the auction
+
+  """
+  def total_unused_nominations(auction = %Auction{}) do
+    query = from t in Team, where: t.auction_id == ^auction.id
+    Repo.aggregate(query, :sum, :unused_nominations)
+  end
+
+  @doc """
   Returns true if the team is in the auction
 
   """
