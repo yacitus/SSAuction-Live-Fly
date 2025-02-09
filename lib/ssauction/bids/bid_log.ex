@@ -3,9 +3,9 @@ defmodule SSAuction.Bids.BidLog do
   import Ecto.Changeset
 
   schema "bid_logs" do
-    field :amount, :integer, null: false
-    field :type, :string, null: false
-    field :datetime, :utc_datetime, null: false
+    field :amount, :integer
+    field :type, :string
+    field :datetime, :utc_datetime
 
     belongs_to :auction, SSAuction.Auctions.Auction
     belongs_to :team, SSAuction.Teams.Team

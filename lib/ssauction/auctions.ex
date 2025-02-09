@@ -302,7 +302,7 @@ defmodule SSAuction.Auctions do
 
   defp correct_league(year_range) do
     if String.slice(year_range, -2, 2) == "SL" do
-      String.slice(year_range, 0..-3) <> "CL"
+      String.slice(year_range, 0..-3//-1) <> "CL"
     else
       year_range
     end
