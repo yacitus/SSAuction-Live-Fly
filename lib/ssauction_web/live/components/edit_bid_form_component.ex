@@ -2,11 +2,11 @@ defmodule SSAuctionWeb.EditBidFormComponent do
   use SSAuctionWeb, :live_component
 
   def mount(socket) do
-     socket =
+    socket =
       socket
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def render(assigns) do

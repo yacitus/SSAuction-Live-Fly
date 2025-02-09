@@ -3,7 +3,7 @@ defmodule SSAuction.Players.Player do
   import Ecto.Changeset
 
   schema "players" do
-    field :year_range, :string    
+    field :year_range, :string
     field :ssnum, :integer
     field :name, :string
     field :position, :string
@@ -33,14 +33,17 @@ defmodule SSAuction.Players.Player do
     case changeset.valid? do
       true ->
         year_range = get_field(changeset, :year_range)
+
         case String.length(year_range) do
           7 ->
             case parse_year_range(year_range) do
               %{"year" => _year, "league" => _league} ->
-                  changeset
+                changeset
+
               _ ->
                 add_error(changeset, :year_range, "can't find start and end year")
             end
+
           _ ->
             add_error(changeset, :year_range, "must be 7 characters")
         end

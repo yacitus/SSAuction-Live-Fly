@@ -4,14 +4,14 @@ defmodule SSAuctionWeb.AdminLive.StopNominations do
   alias SSAuction.Auctions
 
   def mount(_params, _session, socket) do
-     socket =
+    socket =
       socket
       |> assign_locale()
       |> assign_timezone()
       |> assign_timezone_offset()
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def handle_params(params, _, socket) do
@@ -30,7 +30,8 @@ defmodule SSAuctionWeb.AdminLive.StopNominations do
   end
 
   def handle_event("change", params, socket) do
-    {:ok, reset_nominations_open_at_date} = Date.from_iso8601(params["changeset"]["reset_nominations_open_at_date"])
+    {:ok, reset_nominations_open_at_date} =
+      Date.from_iso8601(params["changeset"]["reset_nominations_open_at_date"])
 
     Auctions.stop_nominations(socket.assigns.auction, reset_nominations_open_at_date)
 

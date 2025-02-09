@@ -2,7 +2,7 @@ defmodule SSAuctionWeb.CutPlayerFormComponent do
   use SSAuctionWeb, :live_component
 
   def mount(socket) do
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def render(assigns) do

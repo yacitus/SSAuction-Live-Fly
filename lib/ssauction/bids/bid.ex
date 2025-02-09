@@ -12,7 +12,7 @@ defmodule SSAuction.Bids.Bid do
     has_one :player, SSAuction.Players.Player
     belongs_to :team, SSAuction.Teams.Team, on_replace: :nilify
     belongs_to :auction, SSAuction.Auctions.Auction
-end
+  end
 
   @doc false
   def changeset(bid, params \\ %{}) do

@@ -18,11 +18,13 @@ defmodule SSAuctionWeb.TeamLive.Edit do
 
   def handle_params(%{"id" => id}, _, socket) do
     team = Teams.get_team!(id)
+
     if Teams.user_in_team?(team, socket.assigns.current_user) do
       socket =
         socket
         |> assign(:team, team)
         |> assign(:auction, Auctions.get_auction!(team.auction_id))
+
       {:noreply, socket}
     else
       socket = put_flash(socket, :error, "You must be a team owner to access this page.")

@@ -29,6 +29,7 @@ defmodule SSAuction.Players do
       "players",
       {event, player}
     )
+
     {:ok, player}
   end
 
@@ -58,7 +59,7 @@ defmodule SSAuction.Players do
     Repo.one(from p in AllPlayer, select: count(p.id))
   end
 
- @doc """
+  @doc """
   Returns the list of all_players with indicated year and league.
 
   ## Examples
@@ -72,16 +73,19 @@ defmodule SSAuction.Players do
   end
 
   def list_all_players(year_and_league, sort_order) do
-    order_by
-      = if sort_order == :asc do
-          [asc: :ssnum]
-        else
-          [desc: :ssnum]
-        end
-    Repo.all(from p in AllPlayer,
-              where: p.year_range == ^year_and_league,
-              order_by: ^order_by,
-              select: p)
+    order_by =
+      if sort_order == :asc do
+        [asc: :ssnum]
+      else
+        [desc: :ssnum]
+      end
+
+    Repo.all(
+      from p in AllPlayer,
+        where: p.year_range == ^year_and_league,
+        order_by: ^order_by,
+        select: p
+    )
   end
 
   @doc """
@@ -94,9 +98,11 @@ defmodule SSAuction.Players do
 
   """
   def count_all_players(year_and_league) do
-    Repo.one(from p in AllPlayer,
-              where: p.year_range == ^year_and_league,
-              select: count(p.id))
+    Repo.one(
+      from p in AllPlayer,
+        where: p.year_range == ^year_and_league,
+        select: count(p.id)
+    )
   end
 
   @doc """
@@ -180,9 +186,11 @@ defmodule SSAuction.Players do
 
   """
   def delete_all_players(year_and_league) do
-    Repo.delete_all(from p in AllPlayer,
-                      where: p.year_range == ^year_and_league,
-                      select: p)
+    Repo.delete_all(
+      from p in AllPlayer,
+        where: p.year_range == ^year_and_league,
+        select: p
+    )
   end
 
   @doc """
@@ -279,12 +287,15 @@ defmodule SSAuction.Players do
     if in_bids?(player) do
       Bids.delete_bid(Bids.get_bid!(player.bid_id))
     end
+
     if is_rostered?(player) do
       delete_rostered_player(get_rostered_player!(player.rostered_player_id))
     end
+
     if is_cut?(player) do
       delete_cut_player(get_cut_player!(player.cut_player_id))
     end
+
     Repo.delete_all(from bl in BidLog, where: bl.player_id == ^player.id)
     Repo.delete_all(from op in OrderedPlayer, where: op.player_id == ^player.id)
     Repo.delete_all(from v in Value, where: v.player_id == ^player.id)
@@ -333,10 +344,14 @@ defmodule SSAuction.Players do
   end
 
   def players_not_in_auction(auction = %Auction{}) do
-    player_ssnums_in_auction = Repo.all(from p in Player,
-                                        where: p.auction_id == ^auction.id,
-                                        order_by: [asc: :ssnum],
-                                        select: p.ssnum)
+    player_ssnums_in_auction =
+      Repo.all(
+        from p in Player,
+          where: p.auction_id == ^auction.id,
+          order_by: [asc: :ssnum],
+          select: p.ssnum
+      )
+
     all_players = list_all_players(auction.year_range)
     Enum.filter(all_players, fn ap -> not Enum.member?(player_ssnums_in_auction, ap.ssnum) end)
   end
@@ -424,12 +439,14 @@ defmodule SSAuction.Players do
   """
   def delete_rostered_player(%RosteredPlayer{} = rostered_player) do
     rostered_player = Repo.preload(rostered_player, [:player])
+
     rostered_player.player
     |> Ecto.Changeset.change(%{rostered_player_id: nil})
-    |> Repo.update
+    |> Repo.update()
+
     rostered_player
-    |> Ecto.Changeset.change
-    |> Repo.delete
+    |> Ecto.Changeset.change()
+    |> Repo.delete()
   end
 
   @doc """
@@ -524,12 +541,14 @@ defmodule SSAuction.Players do
   """
   def delete_cut_player(%CutPlayer{} = cut_player) do
     cut_player = Repo.preload(cut_player, [:player])
+
     cut_player.player
     |> Ecto.Changeset.change(%{cut_player_id: nil})
-    |> Repo.update
+    |> Repo.update()
+
     cut_player
-    |> Ecto.Changeset.change
-    |> Repo.delete
+    |> Ecto.Changeset.change()
+    |> Repo.delete()
   end
 
   @doc """
@@ -554,13 +573,16 @@ defmodule SSAuction.Players do
     auction = rostered_player.auction
     team = rostered_player.team
     player = rostered_player.player
+
     cut_player =
       %CutPlayer{
         cost: rostered_player.cost,
         player: player
       }
+
     cut_player = Ecto.build_assoc(team, :cut_players, cut_player)
     cut_player = Ecto.build_assoc(auction, :cut_players, cut_player)
+
     Repo.transaction(fn ->
       Repo.insert!(cut_player)
       delete_rostered_player(rostered_player)

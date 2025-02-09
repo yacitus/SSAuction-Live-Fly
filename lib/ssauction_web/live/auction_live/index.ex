@@ -36,6 +36,7 @@ defmodule SSAuctionWeb.AuctionLive.Index do
 
   @impl true
   def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+    # ignore
+    {:noreply, socket}
   end
 end

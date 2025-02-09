@@ -5,7 +5,7 @@ defmodule SSAuctionWeb.AdminLive.CreateTeam do
   alias SSAuction.Teams
 
   def mount(_params, _session, socket) do
-     socket =
+    socket =
       socket
       |> assign_locale()
       |> assign_timezone()
@@ -13,7 +13,7 @@ defmodule SSAuctionWeb.AdminLive.CreateTeam do
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
       |> assign(:teams, [])
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def handle_params(params, _, socket) do
@@ -33,15 +33,26 @@ defmodule SSAuctionWeb.AdminLive.CreateTeam do
   end
 
   def handle_event("create", params, socket) do
-    {:ok, new_nominations_open_at_date} = Date.from_iso8601(params["changeset"]["new_nominations_open_at_date"])
-    {:ok, new_nominations_open_at_time} = Time.from_iso8601(params["changeset"]["new_nominations_open_at_time"] <> ":00")
-    {:ok, nomination_time} = DateTime.new(new_nominations_open_at_date, new_nominations_open_at_time, socket.assigns.timezone)
+    {:ok, new_nominations_open_at_date} =
+      Date.from_iso8601(params["changeset"]["new_nominations_open_at_date"])
+
+    {:ok, new_nominations_open_at_time} =
+      Time.from_iso8601(params["changeset"]["new_nominations_open_at_time"] <> ":00")
+
+    {:ok, nomination_time} =
+      DateTime.new(
+        new_nominations_open_at_date,
+        new_nominations_open_at_time,
+        socket.assigns.timezone
+      )
+
     {:ok, nomination_time} = DateTime.shift_zone(nomination_time, "Etc/UTC")
     nomination_time = DateTime.truncate(nomination_time, :second)
 
     Auctions.create_team(socket.assigns.auction,
-                         name: params["changeset"]["name"],
-                         new_nominations_open_at: nomination_time)
+      name: params["changeset"]["name"],
+      new_nominations_open_at: nomination_time
+    )
 
     socket = assign(socket, :teams, Auctions.get_teams(socket.assigns.auction))
 

@@ -5,13 +5,13 @@ defmodule SSAuctionWeb.AdminLive.ConfirmUser do
   alias SSAuction.Repo
 
   def mount(_params, _session, socket) do
-     socket =
+    socket =
       socket
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
       |> assign(:confirmed_users, Accounts.get_confirmed_users())
       |> assign(:users_not_confirmed, Accounts.get_users_not_confirmed())
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def handle_event("validate-confirm", _params, socket) do
@@ -34,7 +34,9 @@ defmodule SSAuctionWeb.AdminLive.ConfirmUser do
   end
 
   defp users_not_confirmed_selections(_socket, users_not_confirmed) do
-    Enum.zip(Enum.map(users_not_confirmed, fn user -> user.username <> " - " <> user.email end),
-             Enum.map(users_not_confirmed, fn user -> user.id end))
+    Enum.zip(
+      Enum.map(users_not_confirmed, fn user -> user.username <> " - " <> user.email end),
+      Enum.map(users_not_confirmed, fn user -> user.id end)
+    )
   end
 end

@@ -11,19 +11,20 @@ defmodule SSAuction.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Start the Ecto repository
-      SSAuction.Repo,
-      # Start the Telemetry supervisor
-      SSAuctionWeb.Telemetry,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: SSAuction.PubSub},
-      # Start the Endpoint (http/https)
-      SSAuctionWeb.Endpoint
-      # Start a worker by calling: SSAuction.Worker.start_link(arg)
-      # {SSAuction.Worker, arg}
-    ]
-    |> append_if(System.get_env("PERIODIC_CHECK") == "ON", SSAuction.PeriodicCheck)
+    children =
+      [
+        # Start the Ecto repository
+        SSAuction.Repo,
+        # Start the Telemetry supervisor
+        SSAuctionWeb.Telemetry,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: SSAuction.PubSub},
+        # Start the Endpoint (http/https)
+        SSAuctionWeb.Endpoint
+        # Start a worker by calling: SSAuction.Worker.start_link(arg)
+        # {SSAuction.Worker, arg}
+      ]
+      |> append_if(System.get_env("PERIODIC_CHECK") == "ON", SSAuction.PeriodicCheck)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

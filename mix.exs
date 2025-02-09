@@ -51,7 +51,7 @@ defmodule SSAuction.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:timex, "~> 3.6"},
-      {:ex_cldr_dates_times, "~> 2.0"},
+      {:ex_cldr_dates_times, "~> 2.0"}
     ]
   end
 

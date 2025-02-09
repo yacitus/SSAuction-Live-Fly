@@ -34,13 +34,14 @@ defmodule SSAuctionWeb.TeamLive.CutPlayers do
 
     {:noreply,
      socket
-       |> assign(:team, team)
-       |> assign(:auction, auction)
-       |> assign(:cut_players, Teams.get_cut_players_with_cut_at_and_cost(team, sort_options))
-       |> assign(:options, sort_options)
-       |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
-                          %{label: "#{team.name}", to: "/team/#{id}"}])
-    }
+     |> assign(:team, team)
+     |> assign(:auction, auction)
+     |> assign(:cut_players, Teams.get_cut_players_with_cut_at_and_cost(team, sort_options))
+     |> assign(:options, sort_options)
+     |> assign(:links, [
+       %{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
+       %{label: "#{team.name}", to: "/team/#{id}"}
+     ])}
   end
 
   @impl true
@@ -53,7 +54,11 @@ defmodule SSAuctionWeb.TeamLive.CutPlayers do
   def handle_info({:roster_change, team = %Team{}}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
-        assign(socket, :cut_players, Teams.get_cut_players_with_cut_at_and_cost(team, socket.assigns.sort_options))
+        assign(
+          socket,
+          :cut_players,
+          Teams.get_cut_players_with_cut_at_and_cost(team, socket.assigns.sort_options)
+        )
       else
         socket
       end
@@ -63,7 +68,8 @@ defmodule SSAuctionWeb.TeamLive.CutPlayers do
 
   @impl true
   def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+    # ignore
+    {:noreply, socket}
   end
 
   defp sort_link(socket, text, sort_by, team_id, options) do

@@ -32,11 +32,10 @@ defmodule SSAuctionWeb.AuctionLive.CutPlayers do
 
     {:noreply,
      socket
-       |> assign(:auction, auction)
-       |> assign(:cut_players, Auctions.get_cut_players_with_cut_at_and_cost(auction, sort_options))
-       |> assign(:options, sort_options)
-       |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
-    }
+     |> assign(:auction, auction)
+     |> assign(:cut_players, Auctions.get_cut_players_with_cut_at_and_cost(auction, sort_options))
+     |> assign(:options, sort_options)
+     |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])}
   end
 
   @impl true
@@ -49,7 +48,11 @@ defmodule SSAuctionWeb.AuctionLive.CutPlayers do
   def handle_info({:roster_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
-        assign(socket, :cut_players, Auctions.get_cut_players_with_cut_at_and_cost(auction, socket.assigns.sort_options))
+        assign(
+          socket,
+          :cut_players,
+          Auctions.get_cut_players_with_cut_at_and_cost(auction, socket.assigns.sort_options)
+        )
       else
         socket
       end
@@ -59,7 +62,8 @@ defmodule SSAuctionWeb.AuctionLive.CutPlayers do
 
   @impl true
   def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+    # ignore
+    {:noreply, socket}
   end
 
   defp sort_link(socket, text, sort_by, auction_id, options) do

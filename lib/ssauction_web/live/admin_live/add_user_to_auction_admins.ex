@@ -5,13 +5,13 @@ defmodule SSAuctionWeb.AdminLive.AddUserToAuctionAdmins do
   alias SSAuction.Accounts
 
   def mount(_params, _session, socket) do
-     socket =
+    socket =
       socket
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
       |> assign(:auction_admin_users, [])
       |> assign(:users_in_auction, [])
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def handle_params(params, _, socket) do
@@ -46,7 +46,9 @@ defmodule SSAuctionWeb.AdminLive.AddUserToAuctionAdmins do
   end
 
   defp users_in_auction_selections(users_in_auction) do
-    Enum.zip(Enum.map(users_in_auction, fn user -> user.username <> " - " <> user.email end),
-             Enum.map(users_in_auction, fn user -> user.id end))
+    Enum.zip(
+      Enum.map(users_in_auction, fn user -> user.username <> " - " <> user.email end),
+      Enum.map(users_in_auction, fn user -> user.id end)
+    )
   end
 end
