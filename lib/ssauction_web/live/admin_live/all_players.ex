@@ -16,8 +16,9 @@ defmodule SSAuctionWeb.AdminLive.AllPlayers do
 
   @impl true
   def handle_params(params, _, socket) do
-    year_and_league = (params["year_and_league"] || "")
+    year_and_league = params["year_and_league"] || ""
     sort_order = String.to_atom(params["sort_order"] || "desc")
+
     num_players =
       if year_and_league == "" do
         Players.count_all_players()
@@ -34,11 +35,10 @@ defmodule SSAuctionWeb.AdminLive.AllPlayers do
 
     {:noreply,
      socket
-       |> assign(:year_and_league, year_and_league)
-       |> assign(:sort_order, sort_order)
-       |> assign(:num_players, num_players)
-       |> assign(:all_players, all_players)
-    }
+     |> assign(:year_and_league, year_and_league)
+     |> assign(:sort_order, sort_order)
+     |> assign(:num_players, num_players)
+     |> assign(:all_players, all_players)}
   end
 
   @impl true
@@ -51,10 +51,15 @@ defmodule SSAuctionWeb.AdminLive.AllPlayers do
     year_and_league = params["changeset"]["year_and_league"]
 
     {:noreply,
-     push_patch(socket, to: Routes.live_path(socket,
-                                             __MODULE__,
-                                             year_and_league: year_and_league,
-                                             sort_order: socket.assigns.sort_order))}
+     push_patch(socket,
+       to:
+         Routes.live_path(
+           socket,
+           __MODULE__,
+           year_and_league: year_and_league,
+           sort_order: socket.assigns.sort_order
+         )
+     )}
   end
 
   defp sort_link(socket, text, year_and_league, sort_order) do

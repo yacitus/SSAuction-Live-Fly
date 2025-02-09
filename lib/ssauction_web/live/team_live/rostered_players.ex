@@ -51,21 +51,29 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
 
     {:noreply,
      socket
-       |> assign(:team, team)
-       |> assign(:auction, auction)
-       |> assign(:current_team, current_team)
-       |> assign(:rostered_players, Teams.get_rostered_players_with_rostered_at_and_surplus(team, current_team, sort_options))
-       |> assign(:options, sort_options)
-       |> assign(:show_modal, false)
-       |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
-                          %{label: "#{team.name}", to: "/team/#{id}"}])
-    }
+     |> assign(:team, team)
+     |> assign(:auction, auction)
+     |> assign(:current_team, current_team)
+     |> assign(
+       :rostered_players,
+       Teams.get_rostered_players_with_rostered_at_and_surplus(team, current_team, sort_options)
+     )
+     |> assign(:options, sort_options)
+     |> assign(:show_modal, false)
+     |> assign(:links, [
+       %{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
+       %{label: "#{team.name}", to: "/team/#{id}"}
+     ])}
   end
 
   @impl true
   def handle_event("rostered_players", %{"id" => id}, socket) do
     rostered_player = Players.get_rostered_player!(id) |> Repo.preload([:player])
-    {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, rostered_player.player.id, back_to: "team"))}
+
+    {:noreply,
+     redirect(socket,
+       to: Routes.player_show_path(socket, :show, rostered_player.player.id, back_to: "team")
+     )}
   end
 
   @impl true
@@ -74,10 +82,9 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
 
     {:noreply,
      socket
-       |> assign(:player_to_cut, player_to_cut)
-       |> assign(:player_to_cut_cost, Teams.cut_player_dollar_cost(player_to_cut.cost))
-       |> assign(:show_modal, true)
-    }
+     |> assign(:player_to_cut, player_to_cut)
+     |> assign(:player_to_cut_cost, Teams.cut_player_dollar_cost(player_to_cut.cost))
+     |> assign(:show_modal, true)}
   end
 
   @impl true
@@ -100,7 +107,15 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
   def handle_info({:roster_change, team = %Team{}}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
-        assign(socket, :rostered_players, Teams.get_rostered_players_with_rostered_at_and_surplus(team, socket.assigns.current_team, socket.assigns.sort_options))
+        assign(
+          socket,
+          :rostered_players,
+          Teams.get_rostered_players_with_rostered_at_and_surplus(
+            team,
+            socket.assigns.current_team,
+            socket.assigns.sort_options
+          )
+        )
       else
         socket
       end
@@ -110,7 +125,8 @@ defmodule SSAuctionWeb.TeamLive.RosteredPlayers do
 
   @impl true
   def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+    # ignore
+    {:noreply, socket}
   end
 
   defp sort_link(socket, text, sort_by, team_id, options) do

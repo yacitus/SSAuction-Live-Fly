@@ -9,7 +9,8 @@ defmodule SSAuction.PeriodicCheck do
 
   @impl true
   def init(state) do
-    schedule_work() # Schedule work to be performed at some point
+    # Schedule work to be performed at some point
+    schedule_work()
     {:ok, state}
   end
 
@@ -19,7 +20,8 @@ defmodule SSAuction.PeriodicCheck do
     Auctions.check_for_new_nominations()
     Auctions.check_for_expired_nominations()
 
-    schedule_work() # Reschedule once more
+    # Reschedule once more
+    schedule_work()
     {:noreply, state}
   end
 

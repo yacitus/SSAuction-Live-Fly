@@ -6,13 +6,13 @@ defmodule SSAuctionWeb.AdminLive.AddUserToTeam do
   alias SSAuction.Accounts
 
   def mount(_params, _session, socket) do
-     socket =
+    socket =
       socket
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
       |> assign(:users, [])
       |> assign(:users_not_in_auction, [])
 
-   {:ok, socket}
+    {:ok, socket}
   end
 
   def handle_params(params, _, socket) do
@@ -45,11 +45,16 @@ defmodule SSAuctionWeb.AdminLive.AddUserToTeam do
       |> assign(:users, Teams.get_users(socket.assigns.team))
       |> assign(:users_not_in_auction, Auctions.get_users_not_in_auction(socket.assigns.auction))
 
-    {:noreply, push_patch(socket, to: Routes.live_path(socket, SSAuctionWeb.AdminLive.AddUserToTeam, socket.assigns.team.id))}
+    {:noreply,
+     push_patch(socket,
+       to: Routes.live_path(socket, SSAuctionWeb.AdminLive.AddUserToTeam, socket.assigns.team.id)
+     )}
   end
 
   defp users_not_in_auction_selections(_socket, users_not_in_auction) do
-    Enum.zip(Enum.map(users_not_in_auction, fn user -> user.username <> " - " <> user.email end),
-             Enum.map(users_not_in_auction, fn user -> user.id end))
+    Enum.zip(
+      Enum.map(users_not_in_auction, fn user -> user.username <> " - " <> user.email end),
+      Enum.map(users_not_in_auction, fn user -> user.id end)
+    )
   end
 end

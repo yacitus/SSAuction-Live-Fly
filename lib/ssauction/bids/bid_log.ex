@@ -3,9 +3,9 @@ defmodule SSAuction.Bids.BidLog do
   import Ecto.Changeset
 
   schema "bid_logs" do
-    field :amount, :integer, null: false
-    field :type, :string, null: false
-    field :datetime, :utc_datetime, null: false
+    field :amount, :integer
+    field :type, :string
+    field :datetime, :utc_datetime
 
     belongs_to :auction, SSAuction.Auctions.Auction
     belongs_to :team, SSAuction.Teams.Team
@@ -20,6 +20,7 @@ defmodule SSAuction.Bids.BidLog do
     bid_log
     |> cast(params, required_fields)
     |> validate_required(required_fields)
-    |> validate_inclusion(:type, ["N", "B", "U", "H", "R", "C"]) # N - nomination; B - bid; U - bid under hidden high bid; H - hidden high bid; R - rostered; C - cut
+    # N - nomination; B - bid; U - bid under hidden high bid; H - hidden high bid; R - rostered; C - cut
+    |> validate_inclusion(:type, ["N", "B", "U", "H", "R", "C"])
   end
 end

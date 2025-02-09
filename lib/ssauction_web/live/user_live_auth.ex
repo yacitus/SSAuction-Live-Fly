@@ -4,9 +4,10 @@ defmodule SSAuctionWeb.UserLiveAuth do
   alias SSAuction.Accounts
 
   def on_mount(:default, _params, %{"user_token" => user_token} = _session, socket) do
-    socket = assign_new(socket, :current_user, fn ->
-      Accounts.get_user_by_session_token(user_token)
-    end)
+    socket =
+      assign_new(socket, :current_user, fn ->
+        Accounts.get_user_by_session_token(user_token)
+      end)
 
     IO.inspect(socket.assigns.current_user)
 
@@ -15,6 +16,7 @@ defmodule SSAuctionWeb.UserLiveAuth do
     else
       socket =
         put_flash(socket, :error, "Your email has not been confirmed.")
+
       {:halt, redirect(socket, to: "/users/log_in")}
     end
   end

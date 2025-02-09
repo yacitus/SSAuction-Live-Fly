@@ -5,7 +5,7 @@ defmodule SSAuctionWeb.AdminLive.ChangeTeamTotalSupplementalDollars do
   alias SSAuction.Teams
 
   def mount(_params, _session, socket) do
-   {:ok, assign(socket, :changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))}
+    {:ok, assign(socket, :changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))}
   end
 
   def handle_params(params, _, socket) do
@@ -26,9 +26,13 @@ defmodule SSAuctionWeb.AdminLive.ChangeTeamTotalSupplementalDollars do
   end
 
   def handle_event("change", params, socket) do
-    total_supplemental_dollars = String.to_integer(params["changeset"]["total_supplemental_dollars"])
+    total_supplemental_dollars =
+      String.to_integer(params["changeset"]["total_supplemental_dollars"])
 
-    {:ok, team} = Teams.update_team(socket.assigns.team, %{total_supplemental_dollars: total_supplemental_dollars})
+    {:ok, team} =
+      Teams.update_team(socket.assigns.team, %{
+        total_supplemental_dollars: total_supplemental_dollars
+      })
 
     socket =
       socket

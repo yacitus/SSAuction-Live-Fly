@@ -28,6 +28,7 @@ defmodule SSAuction.Bids do
       "bids",
       {event, bid}
     )
+
     {:ok, bid}
   end
 
@@ -126,26 +127,36 @@ defmodule SSAuction.Bids do
   end
 
   def list_bid_logs(%Player{} = player) do
-    Repo.all(from bl in BidLog,
-              where: bl.player_id == ^player.id,
-              join: t in assoc(bl, :team),
-              preload: [team: t],
-              order_by: bl.datetime)
+    Repo.all(
+      from bl in BidLog,
+        where: bl.player_id == ^player.id,
+        join: t in assoc(bl, :team),
+        preload: [team: t],
+        order_by: bl.datetime
+    )
   end
 
   def rostered_bid_log(%Player{} = player) do
-    logs = Repo.all(from bl in BidLog,
-                    where: bl.player_id == ^player.id,
-                    where: bl.type == "R",
-                    order_by: bl.datetime)
+    logs =
+      Repo.all(
+        from bl in BidLog,
+          where: bl.player_id == ^player.id,
+          where: bl.type == "R",
+          order_by: bl.datetime
+      )
+
     Enum.at(logs, -1)
   end
 
   def cut_bid_log(%Player{} = player) do
-    logs = Repo.all(from bl in BidLog,
-                    where: bl.player_id == ^player.id,
-                    where: bl.type == "C",
-                    order_by: bl.datetime)
+    logs =
+      Repo.all(
+        from bl in BidLog,
+          where: bl.player_id == ^player.id,
+          where: bl.type == "C",
+          order_by: bl.datetime
+      )
+
     Enum.at(logs, -1)
   end
 
@@ -157,7 +168,7 @@ defmodule SSAuction.Bids do
       "H" -> "hidden high bid"
       "R" -> "rostered"
       "C" -> "cut"
-      _   -> "UNKNOWN"
+      _ -> "UNKNOWN"
     end
   end
 
@@ -177,23 +188,27 @@ defmodule SSAuction.Bids do
   end
 
   def list_bids(%Auction{} = auction) do
-    Repo.all(from bl in Bid,
-              where: bl.auction_id == ^auction.id,
-              join: t in assoc(bl, :team),
-              preload: [team: t],
-              join: p in assoc(bl, :player),
-              preload: [player: p],
-              order_by: bl.expires_at)
+    Repo.all(
+      from bl in Bid,
+        where: bl.auction_id == ^auction.id,
+        join: t in assoc(bl, :team),
+        preload: [team: t],
+        join: p in assoc(bl, :player),
+        preload: [player: p],
+        order_by: bl.expires_at
+    )
   end
 
   def list_bids(%Team{} = team) do
-    Repo.all(from bl in Bid,
-              where: bl.team_id == ^team.id,
-              join: t in assoc(bl, :team),
-              preload: [team: t],
-              join: p in assoc(bl, :player),
-              preload: [player: p],
-              order_by: bl.expires_at)
+    Repo.all(
+      from bl in Bid,
+        where: bl.team_id == ^team.id,
+        join: t in assoc(bl, :team),
+        preload: [team: t],
+        join: p in assoc(bl, :player),
+        preload: [player: p],
+        order_by: bl.expires_at
+    )
   end
 
   def list_bids_with_expires_in(%Auction{} = auction) do
@@ -209,17 +224,17 @@ defmodule SSAuction.Bids do
 
   def list_bids_with_expires_in(%Auction{} = auction, sort_options) do
     list_bids_with_expires_in(auction)
-      |> sort_bids(sort_options)
+    |> sort_bids(sort_options)
   end
 
   def list_bids_with_expires_in(%Team{} = team, sort_options) do
     list_bids_with_expires_in(team)
-      |> sort_bids(sort_options)
+    |> sort_bids(sort_options)
   end
 
   def list_bids_with_expires_in_and_surplus(%Team{} = team, %Team{} = current_team) do
     list_bids_with_expires_in(team)
-      |> add_surplus_to_bids(current_team)
+    |> add_surplus_to_bids(current_team)
   end
 
   def list_bids_with_expires_in_and_surplus(%Team{} = team, nil) do
@@ -228,8 +243,8 @@ defmodule SSAuction.Bids do
 
   def list_bids_with_expires_in_and_surplus(%Auction{} = auction, %Team{} = team, sort_options) do
     list_bids_with_expires_in(auction)
-      |> add_surplus_to_bids(team)
-      |> sort_bids(sort_options)
+    |> add_surplus_to_bids(team)
+    |> sort_bids(sort_options)
   end
 
   def list_bids_with_expires_in_and_surplus(%Auction{} = auction, nil, sort_options) do
@@ -237,24 +252,31 @@ defmodule SSAuction.Bids do
   end
 
   defp add_expires_in_to_bids(bids, auction) do
-    Enum.map(bids,
-             fn bid -> seconds_until_bid_expires = seconds_until_bid_expires(bid, auction)
-                       bid
-                       |> Map.put(:seconds_until_bid_expires, seconds_until_bid_expires)
-                       |> Map.put(:expires_in, Auctions.seconds_to_string(seconds_until_bid_expires))
-                       |> Map.put(:team_name, bid.team.name)
-                       |> Map.put(:player_name, bid.player.name)
-                       |> Map.put(:player_position, bid.player.position)
-                       |> Map.put(:player_ssnum, bid.player.ssnum)
-             end)
+    Enum.map(
+      bids,
+      fn bid ->
+        seconds_until_bid_expires = seconds_until_bid_expires(bid, auction)
+
+        bid
+        |> Map.put(:seconds_until_bid_expires, seconds_until_bid_expires)
+        |> Map.put(:expires_in, Auctions.seconds_to_string(seconds_until_bid_expires))
+        |> Map.put(:team_name, bid.team.name)
+        |> Map.put(:player_name, bid.player.name)
+        |> Map.put(:player_position, bid.player.position)
+        |> Map.put(:player_ssnum, bid.player.ssnum)
+      end
+    )
   end
 
   defp add_surplus_to_bids(bids, team) do
-    Enum.map(bids,
-             fn bid -> value_struct = Players.get_value(bid.player, team)
-                       value = if value_struct == nil, do: 0, else: value_struct.value
-                       Map.put(bid, :surplus, value - bid.bid_amount)
-             end)
+    Enum.map(
+      bids,
+      fn bid ->
+        value_struct = Players.get_value(bid.player, team)
+        value = if value_struct == nil, do: 0, else: value_struct.value
+        Map.put(bid, :surplus, value - bid.bid_amount)
+      end
+    )
   end
 
   defp sort_bids(bids, %{sort_by: sort_by, sort_order: sort_order}) do
@@ -279,7 +301,7 @@ defmodule SSAuction.Bids do
 
   def get_bid_with_team_and_player!(id) do
     get_bid!(id)
-      |> Repo.preload([:team, :player])
+    |> Repo.preload([:team, :player])
   end
 
   @doc """
@@ -338,15 +360,17 @@ defmodule SSAuction.Bids do
   def submit_new_bid(auction = %Auction{}, team = %Team{}, player = %Player{}, attrs) do
     insert =
       change_bid(%Bid{}, Map.put(attrs, :nominated_by, team.id))
-        |> Ecto.Changeset.put_assoc(:auction, auction)
-        |> Ecto.Changeset.put_assoc(:team, team)
-        |> Ecto.Changeset.put_assoc(:player, player)
-        |> Repo.insert()
+      |> Ecto.Changeset.put_assoc(:auction, auction)
+      |> Ecto.Changeset.put_assoc(:team, team)
+      |> Ecto.Changeset.put_assoc(:player, player)
+      |> Repo.insert()
+
     case insert do
       {:ok, bid} ->
         log_bid(auction, team, player, bid.bid_amount, "N")
         broadcast({:ok, bid}, :new_nomination)
     end
+
     insert
   end
 
@@ -356,25 +380,32 @@ defmodule SSAuction.Bids do
   """
   def update_existing_bid(bid, new_team = %Team{}, attrs) do
     bid
-      |> Repo.preload([:team, :auction, :player])
-      |> change_bid(attrs)
-      |> Ecto.Changeset.put_assoc(:team, new_team)
-      |> Repo.update()
+    |> Repo.preload([:team, :auction, :player])
+    |> change_bid(attrs)
+    |> Ecto.Changeset.put_assoc(:team, new_team)
+    |> Repo.update()
   end
 
   def submit_bid_changeset(auction = %Auction{}, team = %Team{}, player = %Player{}, args) do
     {:ok, utc_datetime} = DateTime.now("Etc/UTC")
-    args = Map.put(args, :expires_at, DateTime.add(utc_datetime, auction.initial_bid_timeout_seconds, :second))
 
-    args = if not Map.has_key?(args, :hidden_high_bid) do
-      Map.put(args, :hidden_high_bid, nil)
-    else
-      args
-    end
+    args =
+      Map.put(
+        args,
+        :expires_at,
+        DateTime.add(utc_datetime, auction.initial_bid_timeout_seconds, :second)
+      )
+
+    args =
+      if not Map.has_key?(args, :hidden_high_bid) do
+        Map.put(args, :hidden_high_bid, nil)
+      else
+        args
+      end
 
     case submit_new_bid(auction, team, player, args) do
       {:error, changeset} ->
-        { :error, "Could not submit nomination: " <> ChangesetErrors.error_details(changeset) }
+        {:error, "Could not submit nomination: " <> ChangesetErrors.error_details(changeset)}
 
       {:ok, bid} ->
         Teams.update_info_post_nomination(team.id)
@@ -391,28 +422,36 @@ defmodule SSAuction.Bids do
   end
 
   def submit_bid_changeset(auction = %Auction{}, team = %Team{}, existing_bid = %Bid{}, args) do
-    args = if team.id != existing_bid.team_id do
-      {:ok, utc_datetime} = DateTime.now("Etc/UTC")
-      if DateTime.diff(existing_bid.expires_at, utc_datetime) < auction.bid_timeout_seconds do
-        Map.put(args, :expires_at, DateTime.add(utc_datetime, auction.bid_timeout_seconds, :second))
+    args =
+      if team.id != existing_bid.team_id do
+        {:ok, utc_datetime} = DateTime.now("Etc/UTC")
+
+        if DateTime.diff(existing_bid.expires_at, utc_datetime) < auction.bid_timeout_seconds do
+          Map.put(
+            args,
+            :expires_at,
+            DateTime.add(utc_datetime, auction.bid_timeout_seconds, :second)
+          )
+        else
+          args
+        end
       else
         args
       end
-    else
-      args
-    end
 
-    args = if not Map.has_key?(args, :hidden_high_bid) do
-      Map.put(args, :hidden_high_bid, nil)
-    else
-      args
-    end
+    args =
+      if not Map.has_key?(args, :hidden_high_bid) do
+        Map.put(args, :hidden_high_bid, nil)
+      else
+        args
+      end
 
-    args = if not Map.has_key?(args, :keep_bidding_up_to) do
-      Map.put(args, :keep_bidding_up_to, nil)
-    else
-      args
-    end
+    args =
+      if not Map.has_key?(args, :keep_bidding_up_to) do
+        Map.put(args, :keep_bidding_up_to, nil)
+      else
+        args
+      end
 
     current_team_max_bid =
       if existing_bid.hidden_high_bid != nil do
@@ -425,15 +464,17 @@ defmodule SSAuction.Bids do
       cond do
         team.id == existing_bid.team_id ->
           args
+
         args.bid_amount > current_team_max_bid ->
           args
+
         true ->
           Map.put(args, :bid_amount, current_team_max_bid + 1)
       end
 
     case update_existing_bid(existing_bid, team, args) do
       {:error, changeset} ->
-        { :error, "Could not update bid:" <> ChangesetErrors.error_details(changeset) }
+        {:error, "Could not update bid:" <> ChangesetErrors.error_details(changeset)}
 
       {:ok, bid} ->
         Auctions.broadcast({:ok, auction}, :bid_change)
@@ -450,14 +491,14 @@ defmodule SSAuction.Bids do
 
   def number_of_bids(%Auction{} = auction) do
     auction
-      |> Ecto.assoc(:bids)
-      |> Repo.aggregate(:count, :id)
+    |> Ecto.assoc(:bids)
+    |> Repo.aggregate(:count, :id)
   end
 
   def number_of_bids(%Team{} = team) do
     team
-      |> Ecto.assoc(:bids)
-      |> Repo.aggregate(:count, :id)
+    |> Ecto.assoc(:bids)
+    |> Repo.aggregate(:count, :id)
   end
 
   def seconds_until_bid_expires(%Bid{} = bid, %Auction{} = auction) do
@@ -478,11 +519,13 @@ defmodule SSAuction.Bids do
     auction = bid.auction
     team = bid.team
     player = bid.player
+
     rostered_player =
       %RosteredPlayer{
         cost: bid.bid_amount,
         player: player
       }
+
     rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
     rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
     Repo.insert!(rostered_player)
@@ -505,11 +548,13 @@ defmodule SSAuction.Bids do
     auction = cut_player.auction
     team = cut_player.team
     player = cut_player.player
+
     rostered_player =
       %RosteredPlayer{
         cost: cut_player.cost,
         player: player
       }
+
     rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
     rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
     Repo.insert!(rostered_player)
@@ -521,7 +566,7 @@ defmodule SSAuction.Bids do
     Auctions.broadcast({:ok, auction}, :roster_change)
     Teams.broadcast({:ok, team}, :roster_change)
     Players.broadcast({:ok, player}, :info_change)
-    end
+  end
 
   @doc """
   Delete the bid
@@ -536,14 +581,20 @@ defmodule SSAuction.Bids do
     delete_bid(bid, auction, team, player, nominating_team)
   end
 
-
-  def delete_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, nominating_team = %Team{}) do
+  def delete_bid(
+        bid = %Bid{},
+        auction = %Auction{},
+        team = %Team{},
+        player = %Player{},
+        nominating_team = %Team{}
+      ) do
     player
     |> Ecto.Changeset.change(%{bid_id: nil})
-    |> Repo.update
+    |> Repo.update()
+
     bid
-    |> Ecto.Changeset.change
-    |> Repo.delete
+    |> Ecto.Changeset.change()
+    |> Repo.delete()
 
     Auctions.broadcast({:ok, auction}, :bid_change)
     Teams.broadcast({:ok, team}, :bid_change)
@@ -558,14 +609,14 @@ defmodule SSAuction.Bids do
   """
   def log_bid(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, type) do
     {:ok, now} = DateTime.now("Etc/UTC")
+
     %BidLog{}
-    |> BidLog.changeset(%{amount: bid_amount,
-                          type: type,
-                          datetime: now})
+    |> BidLog.changeset(%{amount: bid_amount, type: type, datetime: now})
     |> Ecto.Changeset.put_assoc(:auction, auction)
     |> Ecto.Changeset.put_assoc(:team, team)
     |> Ecto.Changeset.put_assoc(:player, player)
     |> Repo.insert()
+
     Players.broadcast({:ok, player}, :bid_log_change)
   end
 
@@ -590,29 +641,45 @@ defmodule SSAuction.Bids do
 
     cond do
       not auction.active ->
-        { :error, "Auction is paused" }
+        {:error, "Auction is paused"}
+
       not Auctions.team_is_in_auction?(auction, team) ->
-        { :error, "Team is not in auction" }
+        {:error, "Team is not in auction"}
+
       Players.is_rostered?(player) ->
-        { :error, "Player is already rostered" }
+        {:error, "Player is already rostered"}
+
       bid_amount == nil ->
-        { :error, "Bid amount invalid" }
+        {:error, "Bid amount invalid"}
+
       not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
-        { :error, "Hidden high bid must be nothing or above bid amount" }
+        {:error, "Hidden high bid must be nothing or above bid amount"}
+
       Players.in_bids?(player) ->
-        { :error, "Player already nominated" }
+        {:error, "Player already nominated"}
+
       team.unused_nominations == 0 ->
-        { :error, "Team does not have an open nomination" }
+        {:error, "Team does not have an open nomination"}
+
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
-        { :error, "Bid amount not legal for team" }
+        {:error, "Bid amount not legal for team"}
+
       not Teams.has_open_roster_spot?(team, auction) ->
-        { :error, "Team does not have open roster spot for another bid" }
+        {:error, "Team does not have open roster spot for another bid"}
+
       true ->
         {:ok, nil}
     end
   end
 
-  def validate_edited_bid(bid_for_edit = %Bid{}, auction_id, team_id, bid_amount, hidden_high_bid, keep_bidding_up_to) do
+  def validate_edited_bid(
+        bid_for_edit = %Bid{},
+        auction_id,
+        team_id,
+        bid_amount,
+        hidden_high_bid,
+        keep_bidding_up_to
+      ) do
     auction = Auctions.get_auction!(auction_id)
     team = Teams.get_team!(team_id)
 
@@ -622,27 +689,46 @@ defmodule SSAuction.Bids do
 
     cond do
       bid_for_edit.team_id != team.id and bid_amount <= bid_for_edit.bid_amount ->
-        { :error, "Bid amount is not larger than existing bid"}
-      bid_for_edit.team_id != team.id and not keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) ->
-        { :error, "Keep bidding up to amount is not larger than bid amount"}
-      bid_for_edit.team_id != team.id and not keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) ->
-        { :error, "Hidden high bid is less than keep bidding up to amount"}
+        {:error, "Bid amount is not larger than existing bid"}
+
+      bid_for_edit.team_id != team.id and
+          not keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) ->
+        {:error, "Keep bidding up to amount is not larger than bid amount"}
+
+      bid_for_edit.team_id != team.id and
+          not keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) ->
+        {:error, "Hidden high bid is less than keep bidding up to amount"}
+
       bid_for_edit.team_id == team.id and bid_amount != nil ->
-        { :error, "Cannot change bid amount"}
+        {:error, "Cannot change bid amount"}
+
       bid_for_edit.team_id == team.id and bid_for_edit.hidden_high_bid == hidden_high_bid ->
-        { :error, "Nothing is changed"}
+        {:error, "Nothing is changed"}
+
       bid_for_edit.team_id == team.id and keep_bidding_up_to != nil ->
-        { :error, "Keep Bidding Up To does not apply when editing bid"}
+        {:error, "Keep Bidding Up To does not apply when editing bid"}
+
       not auction.active ->
-        { :error, "Auction is paused" }
+        {:error, "Auction is paused"}
+
       not Auctions.team_is_in_auction?(auction, team) ->
-        { :error, "Team is not in auction" }
+        {:error, "Team is not in auction"}
+
       bid_for_edit.team_id != team.id and bid_amount == nil ->
-        { :error, "Bid amount invalid" }
+        {:error, "Bid amount invalid"}
+
       bid_for_edit.team_id != team.id and not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
-        { :error, "Hidden high bid must be nothing or above bid amount" }
-      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid, bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
-        { :error, "Bid amount not legal for team" }
+        {:error, "Hidden high bid must be nothing or above bid amount"}
+
+      not Teams.legal_bid_amount?(
+        team,
+        bid_amount,
+        hidden_high_bid,
+        bid_for_edit.bid_amount,
+        bid_for_edit.hidden_high_bid
+      ) ->
+        {:error, "Bid amount not legal for team"}
+
       true ->
         {:ok, nil}
     end
@@ -676,31 +762,69 @@ defmodule SSAuction.Bids do
     hidden_high_bid >= keep_bidding_up_to
   end
 
-  def submit_nomination(auction = %Auction{}, team = %Team{}, player = %Player{}, bid_amount, hidden_high_bid) do
-    submit_bid_changeset(auction, team, player, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+  def submit_nomination(
+        auction = %Auction{},
+        team = %Team{},
+        player = %Player{},
+        bid_amount,
+        hidden_high_bid
+      ) do
+    submit_bid_changeset(auction, team, player, %{
+      bid_amount: bid_amount,
+      hidden_high_bid: hidden_high_bid
+    })
   end
 
-  def submit_edited_bid(auction = %Auction{}, team = %Team{}, bid_for_edit = %Bid{}, bid_amount, hidden_high_bid, keep_bidding_up_to) do
+  def submit_edited_bid(
+        auction = %Auction{},
+        team = %Team{},
+        bid_for_edit = %Bid{},
+        bid_amount,
+        hidden_high_bid,
+        keep_bidding_up_to
+      ) do
     bid_amount = string_to_integer(bid_amount)
     hidden_high_bid = string_to_integer(hidden_high_bid)
     keep_bidding_up_to = string_to_integer(keep_bidding_up_to)
 
     cond do
       team.id == bid_for_edit.team_id ->
-        submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_for_edit.bid_amount, hidden_high_bid: hidden_high_bid})
+        submit_bid_changeset(auction, team, bid_for_edit, %{
+          bid_amount: bid_for_edit.bid_amount,
+          hidden_high_bid: hidden_high_bid
+        })
+
       bid_amount > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
-        submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+        submit_bid_changeset(auction, team, bid_for_edit, %{
+          bid_amount: bid_amount,
+          hidden_high_bid: hidden_high_bid
+        })
+
         log_bid(auction, team, bid_for_edit.player, bid_amount, "B")
-      keep_bidding_up_to != nil and keep_bidding_up_to > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
-        bid_amount = max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid)+1
-        submit_bid_changeset(auction, team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: hidden_high_bid})
+
+      keep_bidding_up_to != nil and
+          keep_bidding_up_to > max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
+        bid_amount = max_bid(bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) + 1
+
+        submit_bid_changeset(auction, team, bid_for_edit, %{
+          bid_amount: bid_amount,
+          hidden_high_bid: hidden_high_bid
+        })
+
         log_bid(auction, team, bid_for_edit.player, bid_amount, "B")
+
       bid_for_edit.hidden_high_bid != nil ->
         bid_amount = max_bid(bid_amount, keep_bidding_up_to)
         log_bid(auction, team, bid_for_edit.player, bid_amount, "U")
         same_team = Teams.get_team!(bid_for_edit.team_id)
-        submit_bid_changeset(auction, same_team, bid_for_edit, %{bid_amount: bid_amount, hidden_high_bid: bid_for_edit.hidden_high_bid})
+
+        submit_bid_changeset(auction, same_team, bid_for_edit, %{
+          bid_amount: bid_amount,
+          hidden_high_bid: bid_for_edit.hidden_high_bid
+        })
+
         log_bid(auction, same_team, bid_for_edit.player, bid_amount, "H")
+
       true ->
         nil
     end

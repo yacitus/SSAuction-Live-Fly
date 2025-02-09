@@ -43,15 +43,14 @@ defmodule SSAuctionWeb.AuctionLive.Show do
 
     {:noreply,
      socket
-       |> assign(:auction, auction)
-       |> assign(:ssnum_used, length(Auctions.list_teams_with_ssnum(auction)) > 0)
-       |> assign(:total_unused_nominations, Auctions.total_unused_nominations(auction))
-       |> assign(:number_of_bids, Bids.number_of_bids(auction))
-       |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
-       |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
-       |> assign(:options, sort_options)
-       |> assign(:teams, Auctions.get_teams(auction, sort_options))
-    }
+     |> assign(:auction, auction)
+     |> assign(:ssnum_used, length(Auctions.list_teams_with_ssnum(auction)) > 0)
+     |> assign(:total_unused_nominations, Auctions.total_unused_nominations(auction))
+     |> assign(:number_of_bids, Bids.number_of_bids(auction))
+     |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
+     |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
+     |> assign(:options, sort_options)
+     |> assign(:teams, Auctions.get_teams(auction, sort_options))}
   end
 
   @impl true
@@ -100,7 +99,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
     socket =
       if auction.id == socket.assigns.auction.id do
         socket
-          |> assign(:auction, auction)
+        |> assign(:auction, auction)
       else
         socket
       end
@@ -113,10 +112,10 @@ defmodule SSAuctionWeb.AuctionLive.Show do
     socket =
       if auction.id == socket.assigns.auction.id do
         socket
-          |> assign(:auction, auction)
-          |> assign(:number_of_bids, Bids.number_of_bids(auction))
-          |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
-          |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
+        |> assign(:auction, auction)
+        |> assign(:number_of_bids, Bids.number_of_bids(auction))
+        |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
+        |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
       else
         socket
       end
@@ -129,9 +128,9 @@ defmodule SSAuctionWeb.AuctionLive.Show do
     socket =
       if auction.id == socket.assigns.auction.id do
         socket
-          |> assign(:auction, auction)
-          |> assign(:number_of_bids, Bids.number_of_bids(auction))
-          |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
+        |> assign(:auction, auction)
+        |> assign(:number_of_bids, Bids.number_of_bids(auction))
+        |> assign(:number_of_rostered_players, Auctions.number_of_rostered_players(auction))
       else
         socket
       end
@@ -141,7 +140,8 @@ defmodule SSAuctionWeb.AuctionLive.Show do
 
   @impl true
   def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+    # ignore
+    {:noreply, socket}
   end
 
   defp sort_link(socket, text, sort_by, auction_id, options) do

@@ -33,8 +33,10 @@ defmodule SSAuctionWeb.AdminLive.RemovePlayerFromAuction do
   end
 
   def handle_event("find", params, socket) do
-    player = Players.get_player_from_ssnum(socket.assigns.auction, params["changeset"]["ssnum"])
-             |> Repo.preload([:bid, :rostered_player])
+    player =
+      Players.get_player_from_ssnum(socket.assigns.auction, params["changeset"]["ssnum"])
+      |> Repo.preload([:bid, :rostered_player])
+
     {:noreply, assign(socket, :player, player)}
   end
 
@@ -44,6 +46,7 @@ defmodule SSAuctionWeb.AdminLive.RemovePlayerFromAuction do
 
   def handle_event("delete", _params, socket) do
     Players.delete_player(socket.assigns.player)
+
     {:noreply,
      socket
      |> assign(:player, nil)

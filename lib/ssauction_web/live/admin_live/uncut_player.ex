@@ -29,12 +29,11 @@ defmodule SSAuctionWeb.AdminLive.UncutPlayer do
 
     {:noreply,
      socket
-       |> assign(:auction, auction)
-       |> assign(:cut_players, Auctions.get_cut_players_with_cut_at_and_cost(auction, sort_options))
-       |> assign(:options, sort_options)
-       |> assign(show_modal: false)
-       |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
-    }
+     |> assign(:auction, auction)
+     |> assign(:cut_players, Auctions.get_cut_players_with_cut_at_and_cost(auction, sort_options))
+     |> assign(:options, sort_options)
+     |> assign(show_modal: false)
+     |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])}
   end
 
   @impl true
@@ -43,9 +42,8 @@ defmodule SSAuctionWeb.AdminLive.UncutPlayer do
 
     {:noreply,
      socket
-       |> assign(:player_to_uncut, player_to_uncut)
-       |> assign(:show_modal, true)
-    }
+     |> assign(:player_to_uncut, player_to_uncut)
+     |> assign(:show_modal, true)}
   end
 
   @impl true

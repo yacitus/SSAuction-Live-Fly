@@ -11,11 +11,11 @@ defmodule SSAuctionWeb.AuctionLive.AutoNominationQueue do
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
     auction = Auctions.get_auction!(id)
+
     {:noreply,
      socket
-       |> assign(:auction, auction)
-       |> assign(:ordered_players, Auctions.players_in_autonomination_queue(auction))
-       |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
-    }
+     |> assign(:auction, auction)
+     |> assign(:ordered_players, Auctions.players_in_autonomination_queue(auction))
+     |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])}
   end
 end

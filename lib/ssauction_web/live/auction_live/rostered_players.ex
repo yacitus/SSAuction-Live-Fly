@@ -49,25 +49,41 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
 
     {:noreply,
      socket
-       |> assign(:auction, auction)
-       |> assign(:current_team, current_team)
-       |> assign(:rostered_players, Auctions.get_rostered_players_with_rostered_at_and_surplus(auction, current_team, sort_options))
-       |> assign(:options, sort_options)
-       |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
-    }
+     |> assign(:auction, auction)
+     |> assign(:current_team, current_team)
+     |> assign(
+       :rostered_players,
+       Auctions.get_rostered_players_with_rostered_at_and_surplus(
+         auction,
+         current_team,
+         sort_options
+       )
+     )
+     |> assign(:options, sort_options)
+     |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])}
   end
 
   @impl true
   def handle_event("rostered_player", %{"id" => id}, socket) do
     rostered_player = Players.get_rostered_player!(id) |> Repo.preload([:player])
-    {:noreply, redirect(socket, to: Routes.player_show_path(socket, :show, rostered_player.player.id))}
+
+    {:noreply,
+     redirect(socket, to: Routes.player_show_path(socket, :show, rostered_player.player.id))}
   end
 
   @impl true
   def handle_info({:roster_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
-        assign(socket, :rostered_players, Auctions.get_rostered_players_with_rostered_at_and_surplus(auction, socket.assigns.current_team, socket.assigns.sort_options))
+        assign(
+          socket,
+          :rostered_players,
+          Auctions.get_rostered_players_with_rostered_at_and_surplus(
+            auction,
+            socket.assigns.current_team,
+            socket.assigns.sort_options
+          )
+        )
       else
         socket
       end
@@ -77,7 +93,8 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
 
   @impl true
   def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+    # ignore
+    {:noreply, socket}
   end
 
   defp sort_link(socket, text, sort_by, auction_id, options) do

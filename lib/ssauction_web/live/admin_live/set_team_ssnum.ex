@@ -5,7 +5,7 @@ defmodule SSAuctionWeb.AdminLive.SetTeamSsnum do
   alias SSAuction.Teams
 
   def mount(_params, _session, socket) do
-   {:ok, assign(socket, :changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))}
+    {:ok, assign(socket, :changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))}
   end
 
   def handle_params(params, _, socket) do

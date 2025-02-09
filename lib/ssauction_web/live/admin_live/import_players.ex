@@ -22,6 +22,7 @@ defmodule SSAuctionWeb.AdminLive.ImportPlayers do
       consume_uploaded_entries(socket, :csv, fn %{path: path}, _entry ->
         {:ok, players_from_csv(path)}
       end)
+
     {:noreply, assign(socket, :players_for_import, uploaded)}
   end
 
@@ -36,12 +37,17 @@ defmodule SSAuctionWeb.AdminLive.ImportPlayers do
       Players.delete_all_players(year_and_league)
     end
 
-    Enum.map(socket.assigns[:players_for_import],
-             fn row -> row
-                       |> Map.put(:year_range, year_and_league)
-                       |> Players.create_all_player! end)
+    Enum.map(
+      socket.assigns[:players_for_import],
+      fn row ->
+        row
+        |> Map.put(:year_range, year_and_league)
+        |> Players.create_all_player!()
+      end
+    )
 
-    {:noreply, redirect(socket, to: Routes.live_path(socket, AllPlayers, year_and_league: year_and_league))}
+    {:noreply,
+     redirect(socket, to: Routes.live_path(socket, AllPlayers, year_and_league: year_and_league))}
   end
 
   defp players_from_csv(csv_filepath) do
