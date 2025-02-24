@@ -1,5 +1,8 @@
 .DS_Store
 
+*.csv
+*.numbers
+
 ssauction_dump.sql
 fly_ssauction-db_dump.sql
 wireguard.conf
