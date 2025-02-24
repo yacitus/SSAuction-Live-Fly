@@ -13,6 +13,7 @@ config :ssauction,
 # Configures the endpoint
 config :ssauction, SSAuctionWeb.Endpoint,
   url: [host: "localhost"],
+  check_origin: ["https://ssauction.online","https://ssauction.fly.dev"],
   render_errors: [view: SSAuctionWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: SSAuction.PubSub,
   live_view: [signing_salt: "nQAbI+yY"]
