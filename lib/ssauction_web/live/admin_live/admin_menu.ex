@@ -14,10 +14,10 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
       |> assign(:auctions, auctions)
       |> assign(:selected_auction_id, selected_auction.id)
       |> assign(:teams, teams)
-      |> assign(:selected_team_id, selected_team.id)
+      |> assign(:selected_team_id, selected_team && selected_team.id)
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
       |> assign(:auction_links, auction_links(selected_auction.id))
-      |> assign(:team_links, team_links(selected_team.id))
+      |> assign(:team_links, team_links(selected_team && selected_team.id))
 
     {:ok, socket}
   end
