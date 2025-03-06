@@ -24,6 +24,6 @@ defmodule SSAuction.PeriodicCheck do
   end
 
   defp schedule_work() do
-    Process.send_after(self(), :work, 20000)
+    Process.send_after(self(), :work, 60000)
   end
 end
