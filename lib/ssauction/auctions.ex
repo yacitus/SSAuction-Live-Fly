@@ -11,6 +11,7 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
   alias SSAuction.Players.RosteredPlayer
+  alias SSAuction.Players.Value
   alias SSAuction.Players
   alias SSAuction.Bids.BidLog
   alias SSAuction.Bids.Bid
@@ -154,6 +155,7 @@ defmodule SSAuction.Auctions do
     Repo.delete_all(from op in OrderedPlayer, where: op.auction_id == ^auction.id)
     Repo.all(from t in Team, where: t.auction_id == ^auction.id)
     |> Enum.each(fn team ->
+                   Repo.delete_all(from v in Value, where: v.team_id == ^team.id)
                    Repo.delete_all(from op in OrderedPlayer, where: op.team_id == ^team.id)
                    Repo.all(from b in Bid, where: b.team_id == ^team.id)
                    |> Enum.each(fn bid ->
