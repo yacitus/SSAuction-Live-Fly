@@ -4,8 +4,8 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
   alias SSAuction.Auctions
 
   def mount(_params, _session, socket) do
-    auctions = Auctions.list_auctions() |> Enum.sort_by(& &1.name)
-    selected_auction = List.last(auctions)
+    auctions = Auctions.list_auctions() |> Enum.sort_by(& &1.started_or_paused_at)
+    selected_auction = List.first(auctions)
     teams = Auctions.list_teams(selected_auction) |> Enum.sort_by(& &1.name)
     selected_team = List.first(teams)
 
