@@ -35,6 +35,7 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
           |> assign(:teams, teams)
           |> assign(:selected_team_id, selected_team.id)
           |> assign(:auction_links, auction_links(selected_auction_id))
+          |> assign(:team_links, team_links(selected_team.id))
         ["changeset", "team-" <> id] ->
           selected_team_id = String.to_integer(id)
           socket
