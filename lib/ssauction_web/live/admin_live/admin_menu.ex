@@ -76,6 +76,7 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
     link_pairs = [["add_user", "Add User To Team"],
                   ["set_team_ssnum", "Set Team Scoresheet Number"],
                   ["change_team_new_nominations_open_at", "Change Team New Nominations Open At"],
+                  ["change_team_unused_nominations", "Change Team Unused Nominations"],
                   ["change_team_total_supplemental_dollars", "Change Team Total Supplemental Dollars"]]
 
     Enum.map(link_pairs, 
