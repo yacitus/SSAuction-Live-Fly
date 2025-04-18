@@ -44,7 +44,7 @@ defmodule SSAuctionWeb.TeamLive.Show do
        |> assign(:dollars_bid_including_hidden, Teams.dollars_bid_including_hidden(team))
        |> assign(:number_of_bids, Bids.number_of_bids(team))
        |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
-       |> assign(:number_of_cut_players, Auctions.number_of_cut_players(auction))
+       |> assign(:number_of_cut_players, Teams.number_of_cut_players(team))
        |> assign(:dollars_remaining_for_bids_including_hidden, Teams.dollars_remaining_for_bids_including_hidden(team))
        |> assign(:dollars_remaining_for_bids, Teams.dollars_remaining_for_bids(team))
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])

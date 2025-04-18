@@ -565,6 +565,17 @@ defmodule SSAuction.Teams do
   end
 
   @doc """
+  Returns the number of cut players
+
+  """
+
+  def number_of_cut_players(team = %Team{}) do
+    team
+      |> Ecto.assoc(:cut_players)
+      |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
   Returns the number of dollars the team has spent on cut players
 
   """
