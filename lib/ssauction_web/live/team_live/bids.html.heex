@@ -51,7 +51,7 @@
             <% end %>
           </td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.expires_in %></td>
-          <%= if @auction.active do %>
+          <%= if @auction.active and @current_team != nil and @current_team.id == @team.id do %>
             <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
                 phx-click="edit" phx-value-id={"#{bid.id}"}}>
               Edit
