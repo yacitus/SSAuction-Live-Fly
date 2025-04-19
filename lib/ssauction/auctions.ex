@@ -435,6 +435,7 @@ defmodule SSAuction.Auctions do
                          |> Map.put(:cut_at, Bids.cut_bid_log(cp.player).datetime)
                          |> Map.put(:cost, Teams.cut_player_dollar_cost(cp))
                          |> Map.put(:team_name, cp.team.name)
+                         |> Map.put(:team_ssnum, cp.team.ssnum)
                          |> Map.put(:player_name, cp.player.name)
                          |> Map.put(:player_position, cp.player.position)
                          |> Map.put(:player_ssnum, cp.player.ssnum)
