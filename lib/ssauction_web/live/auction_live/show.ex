@@ -37,7 +37,7 @@ defmodule SSAuctionWeb.AuctionLive.Show do
     id = params["id"]
     auction = Auctions.get_auction!(id)
 
-    sort_by = (params["sort_by"] || "dollars_spent") |> String.to_atom()
+    sort_by = (params["sort_by"] || "ssnum") |> String.to_atom()
     sort_order = (params["sort_order"] || "asc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}
 
