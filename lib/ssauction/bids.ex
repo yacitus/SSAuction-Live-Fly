@@ -612,37 +612,64 @@ defmodule SSAuction.Bids do
     end
   end
 
-  def validate_edited_bid(bid_for_edit = %Bid{}, auction_id, team_id, bid_amount, hidden_high_bid, keep_bidding_up_to) do
+  def validate_new_bid(auction_id, team_id, player_id, bid_amount, hidden_high_bid, keep_bidding_up_to) do
     auction = Auctions.get_auction!(auction_id)
     team = Teams.get_team!(team_id)
+    player = Players.get_player!(player_id)
+    existing_bid = get_bid!(player.bid_id)
 
     bid_amount = string_to_integer(bid_amount)
     hidden_high_bid = string_to_integer(hidden_high_bid)
     keep_bidding_up_to = string_to_integer(keep_bidding_up_to)
 
     cond do
-      bid_for_edit.team_id != team.id and bid_amount <= bid_for_edit.bid_amount ->
-        { :error, "Bid amount is not larger than existing bid"}
-      bid_for_edit.team_id != team.id and not keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) ->
-        { :error, "Keep bidding up to amount is not larger than bid amount"}
-      bid_for_edit.team_id != team.id and not keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) ->
-        { :error, "Hidden high bid is less than keep bidding up to amount"}
-      bid_for_edit.team_id == team.id and bid_amount != nil ->
-        { :error, "Cannot change bid amount"}
-      bid_for_edit.team_id == team.id and bid_for_edit.hidden_high_bid == hidden_high_bid ->
-        { :error, "Nothing is changed"}
-      bid_for_edit.team_id == team.id and keep_bidding_up_to != nil ->
-        { :error, "Keep Bidding Up To does not apply when editing bid"}
       not auction.active ->
         { :error, "Auction is paused" }
       not Auctions.team_is_in_auction?(auction, team) ->
         { :error, "Team is not in auction" }
-      bid_for_edit.team_id != team.id and bid_amount == nil ->
+      Players.is_rostered?(player) ->
+        { :error, "Player is already rostered" }
+      player.bid_id == nil ->
+        { :error, "Player not nominated"}
+      existing_bid.team_id == team_id ->
+        { :error, "Team already has high bid"}
+      bid_amount == nil ->
         { :error, "Bid amount invalid" }
-      bid_for_edit.team_id != team.id and not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
+      bid_amount <= existing_bid.bid_amount ->
+        { :error, "Bid amount is not larger than existing bid"}
+      not keep_bidding_up_to_legal?(keep_bidding_up_to, bid_amount) ->
+        { :error, "Keep bidding up to amount is not larger than bid amount"}
+      not keep_bidding_up_to_and_hidden_high_bid_legal?(keep_bidding_up_to, hidden_high_bid) ->
+        { :error, "Hidden high bid is less than keep bidding up to amount"}
+      not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
         { :error, "Hidden high bid must be nothing or above bid amount" }
-      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid, bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid) ->
+      not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
         { :error, "Bid amount not legal for team" }
+      not Teams.has_open_roster_spot?(team, auction) ->
+        { :error, "Team does not have open roster spot for another bid" }
+      true ->
+        {:ok, nil}
+    end
+  end
+
+  def validate_edited_bid(bid_for_edit = %Bid{}, auction_id, team_id, hidden_high_bid) do
+    auction = Auctions.get_auction!(auction_id)
+    team = Teams.get_team!(team_id)
+
+    hidden_high_bid = string_to_integer(hidden_high_bid)
+    hidden_high_bid = if hidden_high_bid == 0 do nil else hidden_high_bid end
+
+    cond do
+      bid_for_edit.hidden_high_bid == hidden_high_bid ->
+        { :error, "Nothing is changed"}
+      not auction.active ->
+        { :error, "Auction is paused" }
+      not Auctions.team_is_in_auction?(auction, team) ->
+        { :error, "Team is not in auction" }
+      not hidden_high_bid_legal?(hidden_high_bid, bid_for_edit.bid_amount) ->
+        { :error, "Hidden high bid must be nothing or above bid amount" }
+      not Teams.legal_bid_amount?(team, bid_for_edit.bid_amount, hidden_high_bid) ->
+        { :error, "Hidden high bid amount not legal for team" }
       true ->
         {:ok, nil}
     end

@@ -746,12 +746,24 @@ defmodule SSAuction.Teams do
 
   """
 
+  def legal_bid_amount?(team = %Team{}, bid_amount, nil) do
+    legal_bid_amount?(team, bid_amount, 0, 0, 0)
+  end
+
   def legal_bid_amount?(team = %Team{}, bid_amount, hidden_high_bid) do
     legal_bid_amount?(team, bid_amount, hidden_high_bid, 0, 0)
   end
 
+  def legal_bid_amount?(team = %Team{}, bid_amount, nil, nil, nil) do
+    legal_bid_amount?(team, bid_amount, 0, 0, 0)
+  end
+
   def legal_bid_amount?(team = %Team{}, bid_amount, hidden_high_bid, nil, nil) do
     legal_bid_amount?(team, bid_amount, hidden_high_bid, 0, 0)
+  end
+
+  def legal_bid_amount?(team = %Team{}, bid_amount, nil, existing_bid_amount, nil) do
+    legal_bid_amount?(team, bid_amount, 0, existing_bid_amount, 0)
   end
 
   def legal_bid_amount?(team = %Team{}, bid_amount, hidden_high_bid, existing_bid_amount, nil) do

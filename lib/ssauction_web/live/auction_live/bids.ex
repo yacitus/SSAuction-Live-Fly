@@ -96,22 +96,41 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
 
   @impl true
   def handle_event("submit-edited-bid", params, socket) do
-    with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.bid_for_edit,
-                                              socket.assigns.auction.id,
-                                              Teams.get_team_by_user_and_auction(socket.assigns.current_user, socket.assigns.auction).id,
-                                              params["changeset"]["bid_amount"],
-                                              params["changeset"]["hidden_high_bid"],
-                                              params["changeset"]["keep_bidding_up_to"]),
-         {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
-                                            Teams.get_team_by_user_and_auction(socket.assigns.current_user, socket.assigns.auction),
-                                            socket.assigns.bid_for_edit,
-                                            params["changeset"]["bid_amount"],
-                                            params["changeset"]["hidden_high_bid"],
-                                            params["changeset"]["keep_bidding_up_to"]) do
-      {:noreply, push_patch_to_live_path(socket)}
+    team = Teams.get_team_by_user_and_auction(socket.assigns.current_user, socket.assigns.auction)
+    if team.id == socket.assigns.bid_for_edit.team_id do
+        with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.bid_for_edit,
+                                                  socket.assigns.auction.id,
+                                                  team.id,
+                                                  params["changeset"]["hidden_high_bid"]),
+             {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
+                                                team,
+                                                socket.assigns.bid_for_edit,
+                                                params["changeset"]["bid_amount"],
+                                                params["changeset"]["hidden_high_bid"],
+                                                params["changeset"]["keep_bidding_up_to"]) do
+          {:noreply, push_patch_to_live_path(socket)}
+        else
+          {_, message} ->
+            {:noreply, put_flash(socket, :error, message)}
+        end
     else
-      {_, message} ->
-        {:noreply, put_flash(socket, :error, message)}
+        with {:ok, _} <- Bids.validate_new_bid(socket.assigns.auction.id,
+                                               team.id,
+                                               socket.assigns.bid_for_edit.player.id,
+                                               params["changeset"]["bid_amount"],
+                                               params["changeset"]["hidden_high_bid"],
+                                               params["changeset"]["keep_bidding_up_to"]),
+             {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
+                                                team,
+                                                socket.assigns.bid_for_edit,
+                                                params["changeset"]["bid_amount"],
+                                                params["changeset"]["hidden_high_bid"],
+                                                params["changeset"]["keep_bidding_up_to"]) do
+          {:noreply, push_patch_to_live_path(socket)}
+        else
+          {_, message} ->
+            {:noreply, put_flash(socket, :error, message)}
+        end
     end
   end
 
