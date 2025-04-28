@@ -23,6 +23,7 @@ defmodule SSAuctionWeb.PlayerLive.Show do
       |> assign_timezone()
       |> assign_timezone_offset()
       |> assign(:current_user, current_user)
+      |> assign(:show_modal, false)
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
 
     {:ok, socket}
@@ -37,6 +38,12 @@ defmodule SSAuctionWeb.PlayerLive.Show do
         nil
       else
         Repo.preload(player, :rostered_player).rostered_player |> Repo.preload(:team)
+      end
+    bid =
+      if player.bid_id == nil do
+        nil
+      else
+        Bids.get_bid_with_team_and_player!(player.bid_id)
       end
     auction = Auctions.get_auction!(player.auction_id)
     back_to = params["back_to"] || "auction"
@@ -79,14 +86,30 @@ defmodule SSAuctionWeb.PlayerLive.Show do
         nil
       end
 
+    {show_modal, bid_for_edit, different_team} = if params["bid"] do
+      {
+       true,
+       bid,
+       bid.team_id != current_team.id
+      }
+    else
+      {false, nil, nil}
+    end
+
     {:noreply,
      socket
+       |> assign(:auction, auction)
        |> assign(:player, player)
        |> assign(:rostered_player, rostered_player)
+       |> assign(:bid, bid)
        |> assign(:bid_logs, Bids.list_bid_logs(player))
        |> assign(:links, links)
        |> assign(:current_team, current_team)
        |> assign(:current_value, current_value)
+       |> assign(:show_modal, show_modal)
+       |> assign(:bid_for_edit, bid_for_edit)
+       |> assign(:different_team, different_team)
+       |> assign(:back_to, back_to)
     }
   end
 
@@ -109,7 +132,89 @@ defmodule SSAuctionWeb.PlayerLive.Show do
     {:noreply, assign(socket, :current_value, current_value)}
   end
 
+  @impl true
+  def handle_event("close", _, socket) do
+    IO.inspect(socket)
+    {:noreply, push_patch_to_live_path(socket, socket.assigns.back_to)}
+  end
+
+  @impl true
+  def handle_event("bid", _, socket) do
+    {:noreply, push_patch_to_live_path_bid(socket, socket.assigns.back_to)}
+  end
+
+  @impl true
+  def handle_event("validate-edited-bid", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit-edited-bid", params, socket) do
+    team = Teams.get_team_by_user_and_auction(socket.assigns.current_user, socket.assigns.auction)
+    if team.id == socket.assigns.bid_for_edit.team_id do
+        with {:ok, _} <- Bids.validate_edited_bid(socket.assigns.bid_for_edit,
+                                                  socket.assigns.auction.id,
+                                                  team.id,
+                                                  params["changeset"]["hidden_high_bid"]),
+             {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
+                                                team,
+                                                socket.assigns.bid_for_edit,
+                                                params["changeset"]["bid_amount"],
+                                                params["changeset"]["hidden_high_bid"],
+                                                params["changeset"]["keep_bidding_up_to"]) do
+          {:noreply, push_patch_to_live_path(socket, socket.assigns.back_to)}
+        else
+          {_, message} ->
+            {:noreply, put_flash(socket, :error, message)}
+        end
+    else
+        with {:ok, _} <- Bids.validate_new_bid(socket.assigns.auction.id,
+                                               team.id,
+                                               socket.assigns.bid_for_edit.player.id,
+                                               params["changeset"]["bid_amount"],
+                                               params["changeset"]["hidden_high_bid"],
+                                               params["changeset"]["keep_bidding_up_to"]),
+             {:ok, _} <- Bids.submit_edited_bid(socket.assigns.auction,
+                                                team,
+                                                socket.assigns.bid_for_edit,
+                                                params["changeset"]["bid_amount"],
+                                                params["changeset"]["hidden_high_bid"],
+                                                params["changeset"]["keep_bidding_up_to"]) do
+          {:noreply, push_patch_to_live_path(socket, socket.assigns.back_to)}
+        else
+          {_, message} ->
+            {:noreply, put_flash(socket, :error, message)}
+        end
+    end
+  end
+
   defp get_current_value(value_struct) do
     if value_struct != nil, do: value_struct.value, else: 0
+  end
+
+  defp push_patch_to_live_path(socket, back_to) do
+    push_patch(socket,
+      to:
+        Routes.player_show_path(
+          socket,
+          :show,
+          socket.assigns.player.id,
+          back_to: back_to
+        )
+    )
+  end
+
+  # TODO - merge this with the above
+  defp push_patch_to_live_path_bid(socket, back_to) do
+    push_patch(socket,
+      to:
+        Routes.player_show_path(
+          socket,
+          :show,
+          socket.assigns.player.id,
+          bid: nil,
+          back_to: back_to
+        )
+    )
   end
 end

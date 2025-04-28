@@ -69,15 +69,17 @@
           <td class="pl-5 text-left border border-blue-300"><%= bid.expires_in %></td>
           <%= if @auction.active do %>
             <%= if current_user_in_team?(bid.team, @current_user) do %>
-              <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
-                  phx-click="edit" phx-value-id={"#{bid.id}"}}>
-                Edit
+              <td class="pl-5 text-left border border-blue-300">
+                <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/player/#{bid.player.id}?bid"}>
+                  Edit
+                </a>
               </td>
             <% else %>
               <%= if current_user_in_auction?(@auction, @current_user) do %>
-                <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer hover:text-green-800"
-                    phx-click="bid" phx-value-id={"#{bid.id}"}}>
-                  Bid
+                <td class="pl-5 text-left border border-blue-300">
+                  <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/player/#{bid.player.id}?bid"}>
+                    Bid
+                  </a>
                 </td>
               <% end %>
             <% end %>

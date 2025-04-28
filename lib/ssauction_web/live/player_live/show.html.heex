@@ -2,6 +2,20 @@
   Player Info
 </h1>
 
+<div class="w-full m-5">
+  <%= if @show_modal do %>
+    <%= live_modal(SSAuctionWeb.EditBidFormComponent,
+                   id: :edit_bid,
+                   bid_for_edit: @bid_for_edit,
+                   different_team: @different_team,
+                   title: "Bid for #{@bid_for_edit.player.name} (#{@bid_for_edit.player.ssnum})",
+                   return_to: Routes.player_show_path(
+                     @socket,
+                     :show,
+                     @player.id)
+                  ) %>
+  <% end %>
+
 <table class="w-full m-5 table-auto border-collapse border border-blue-400">
   <tbody id="auction_info">
     <tr>
@@ -37,7 +51,7 @@
           Rostered By:
         </td>
         <td class="pl-5 border border-blue-300">
-          <%= @rostered_player.team.name %>
+          <%= @rostered_player.team.name %> (<%= @rostered_player.team.ssnum %>)
         </td>
       </tr>
 
@@ -49,6 +63,46 @@
           $<%= @rostered_player.cost %>
         </td>
       </tr>
+    <% end %>
+
+    <%= if @bid != nil do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          High Bid:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          $<%= @bid.bid_amount %>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Team with High Bid:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= @bid.team.name %> (<%= @bid.team.ssnum %>)
+        </td>
+      </tr>
+      <%= if @current_team.id == @bid.team.id do %>
+        <tr>
+          <td class="pl-5 border border-blue-300">
+            Hidden Max Bid:
+          </td>
+          <%= if @bid.hidden_high_bid == nil do %>
+            <td class="pl-5 border border-blue-300">
+              <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/player/#{@player.id}?bid"}>
+                Edit
+              </a>
+            </td>
+        <% else %>
+            <td class="pl-5 border border-blue-300">
+              <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/player/#{@player.id}?bid"}>
+                $<%= @bid.hidden_high_bid %>
+              </a>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
     <% end %>
 
     <%= if @current_value != nil do %>
@@ -69,6 +123,17 @@
             $<%= @current_value.value - @rostered_player.cost %>
           </td>
         </tr>
+    <% else %>
+      <%= if @bid != nil do %>
+          <tr>
+            <td class="pl-5 border border-blue-300">
+              My surplus:
+            </td>
+            <td class="pl-5 border border-blue-300">
+              $<%= @current_value.value - @bid.bid_amount %>
+            </td>
+          </tr>
+        <% end %>
       <% end %>
     <% end %>
   </tbody>
@@ -129,4 +194,18 @@
   </table>
 </div>
 
+<%= if @rostered_player == nil and @bid != nil and @current_team.id != @bid.team.id do %>
+  <div class="bg-slate-200 px-10 py-8 mb-6 shadow rounded-lg px-6 mt-8 mx-auto w-full max-w-md">
+    <button phx-click="bid"
+      class="mt-2 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 transition duration-150 ease-in-out
+              active:bg-indigo-700
+              hover:bg-indigo-500
+              focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300">
+      Bid
+    </button>
+  </div>
 <% end %>
+
+<% end %>
+
+</div>
