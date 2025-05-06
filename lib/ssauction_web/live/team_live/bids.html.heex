@@ -37,12 +37,20 @@
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.name %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.position %></td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.player.ssnum %></td>
-          <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
-            $<%= bid.bid_amount %>
+          <td class="pl-5 text-left border border-blue-300">
+            <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+               href={"/player/#{bid.player.id}"}
+               target="_blank">
+              $<%= bid.bid_amount %>
+            </a>
           </td>
           <%= if @current_team != nil do %>
-            <td class="pl-5 text-left border border-blue-300 hover:cursor-pointer hover:text-green-800" phx-click="bid-log" phx-value-id={"#{bid.id}"}}>
-              $<%= bid.surplus %>
+            <td class="pl-5 text-left border border-blue-300">
+              <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
+                 href={"/player/#{bid.player.id}"}
+                 target="_blank">
+                $<%= bid.surplus %>
+              </a>
             </td>
           <% end %>
           <td class="pl-5 text-left border border-blue-300">
