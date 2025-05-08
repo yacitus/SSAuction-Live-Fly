@@ -22,14 +22,14 @@ defmodule SSAuctionWeb.EditBidFormComponent do
           <%= number_input f, :bid_amount, value: @bid_for_edit.bid_amount + 1 %>
 
           <div class="block mb-2 text-sm font-medium text-slate-700">
-            <%= label f, :bid, "Hidden Max Bid"%>
-          </div>
-          <%= number_input f, :hidden_high_bid %>
-
-          <div class="block mb-2 text-sm font-medium text-slate-700">
             <%= label f, :bid, "Keep Bidding Up To"%>
           </div>
           <%= number_input f, :keep_bidding_up_to%>
+
+          <div class="block mb-2 text-sm font-medium text-slate-700">
+            <%= label f, :bid, "Hidden Max Bid"%>
+          </div>
+          <%= number_input f, :hidden_high_bid %>
         <% else %>
           <div class="block mb-2 text-sm font-medium text-slate-700">
             <%= label f, :bid, "Bid"%>
