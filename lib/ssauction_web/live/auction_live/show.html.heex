@@ -123,7 +123,10 @@
         Nominations Per Team:
       </td>
       <td class="pl-5 border border-blue-300">
-        <%= @auction.nominations_per_team %> - <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/autonomination_queue"}>Auto-Nomination Queue</a>
+        <%= @auction.nominations_per_team %>
+        <%= if @auction.seconds_before_autonomination != 0 do %>
+          &nbsp;- <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href={"/auction/#{@auction.id}/autonomination_queue"}>Auto-Nomination Queue</a>
+        <% end %>
       </td>
     </tr>
 
