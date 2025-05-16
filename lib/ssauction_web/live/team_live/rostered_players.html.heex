@@ -60,7 +60,7 @@
                            locale: @locale,
                            timezone: @timezone %>
           </td>
-          <%= if @auction.allow_player_cuts do %>
+          <%= if @auction.allow_player_cuts and @current_team != nil and @current_team.id == @team.id do %>
             <td class="text-center border border-blue-300 hover:bg-sky-100 hover:cursor-pointer"
                 phx-click="cut-player" phx-value-id={"#{rostered_player.id}"}}>❌</td>
           <% end %>
