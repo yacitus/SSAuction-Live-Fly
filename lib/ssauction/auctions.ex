@@ -387,7 +387,7 @@ defmodule SSAuction.Auctions do
 
   alias SSAuction.Bids
 
-  def get_rostered_players_with_rostered_at(%Auction{} = auction) do
+  def get_rostered_players_with_rostered_at_no_cache(%Auction{} = auction) do
     get_rostered_players(auction)
     |> Enum.map(fn rp -> rp
                          |> Map.put(:rostered_at, Bids.rostered_bid_log(rp.player).datetime)
@@ -396,6 +396,14 @@ defmodule SSAuction.Auctions do
                          |> Map.put(:player_position, rp.player.position)
                          |> Map.put(:player_ssnum, rp.player.ssnum)
                 end)
+  end
+
+  def get_rostered_players_with_rostered_at(%Auction{} = auction) do
+    {_, rostered_players} = Cachex.fetch(:auction_rostered_players, auction.id,
+                                         fn _auction_id ->
+        {:commit, get_rostered_players_with_rostered_at_no_cache(auction)}
+    end)
+    rostered_players
   end
 
   def get_rostered_players_with_rostered_at(%Auction{} = auction, %{sort_by: sort_by, sort_order: sort_order}) do

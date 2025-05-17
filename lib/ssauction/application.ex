@@ -19,7 +19,9 @@ defmodule SSAuction.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: SSAuction.PubSub},
       # Start the Endpoint (http/https)
-      SSAuctionWeb.Endpoint
+      SSAuctionWeb.Endpoint,
+      # cache of SSAuction.Auctions.get_rostered_players_with_rostered_at(auction)
+      {Cachex, [:auction_rostered_players]},
       # Start a worker by calling: SSAuction.Worker.start_link(arg)
       # {SSAuction.Worker, arg}
     ]

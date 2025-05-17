@@ -52,6 +52,7 @@ defmodule SSAuction.MixProject do
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:timex, "~> 3.6"},
       {:ex_cldr_dates_times, "~> 2.0"},
+      {:cachex, "~> 4.0"},
     ]
   end
 
