@@ -8,6 +8,10 @@ defmodule SSAuctionWeb.ExportRostersController do
   def create(conn, params) do
     auction_id = String.to_integer(params["auction_id"])
     auction = Auctions.get_auction!(auction_id)
+
+    {:ok, true} = Cachex.put(:auction_rostered_players, auction_id,
+      Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+
     start_date =
       case Date.from_iso8601(params["start_date"]) do
         {:ok, start_date} ->
