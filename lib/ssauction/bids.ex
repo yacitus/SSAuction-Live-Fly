@@ -494,6 +494,8 @@ defmodule SSAuction.Bids do
     Auctions.broadcast({:ok, auction}, :roster_change)
     Teams.broadcast({:ok, team}, :roster_change)
     Players.broadcast({:ok, player}, :info_change)
+    {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
+        Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
   end
 
   @doc """
