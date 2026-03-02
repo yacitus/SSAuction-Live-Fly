@@ -11,6 +11,7 @@ defmodule SSAuction.Bids do
   alias SSAuction.Players.Player
   alias SSAuction.Players.RosteredPlayer
   alias SSAuction.Players.CutPlayer
+  alias SSAuction.Players.Value
   alias SSAuction.Auctions.Auction
   alias SSAuction.Teams.Team
   alias SSAuction.Auctions
@@ -250,9 +251,15 @@ defmodule SSAuction.Bids do
   end
 
   defp add_surplus_to_bids(bids, team) do
+    player_ids = Enum.map(bids, fn bid -> bid.player.id end)
+    value_map =
+      Repo.all(from v in Value,
+               where: v.player_id in ^player_ids and v.team_id == ^team.id,
+               select: {v.player_id, v.value})
+      |> Map.new()
+
     Enum.map(bids,
-             fn bid -> value_struct = Players.get_value(bid.player, team)
-                       value = if value_struct == nil, do: 0, else: value_struct.value
+             fn bid -> value = Map.get(value_map, bid.player.id, 0)
                        Map.put(bid, :surplus, value - bid.bid_amount)
              end)
   end
