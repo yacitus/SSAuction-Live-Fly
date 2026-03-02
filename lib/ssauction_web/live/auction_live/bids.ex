@@ -8,6 +8,8 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   alias SSAuction.Bids.Bid
   alias SSAuction.Teams
 
+  @debounce_ms 200
+
   @impl true
   def mount(_params, session, socket) do
     if connected?(socket) do
@@ -141,36 +143,38 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
 
   @impl true
   def handle_info({:new_nomination, bid = %Bid{}}, socket) do
-    socket =
-      if bid.auction_id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids_with_expires_in_and_surplus(socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
-      else
-        socket
-      end
-
-    {:noreply, socket}
+    if bid.auction_id == socket.assigns.auction.id do
+      {:noreply, schedule_reload(socket)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
   def handle_info({:bid_expiration_update, auction = %Auction{}}, socket) do
-    socket =
-      if auction.id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids_with_expires_in_and_surplus(socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
-      else
-        socket
-      end
-
-    {:noreply, socket}
+    if auction.id == socket.assigns.auction.id do
+      {:noreply, schedule_reload(socket)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true
   def handle_info({:bid_change, auction = %Auction{}}, socket) do
+    if auction.id == socket.assigns.auction.id do
+      {:noreply, schedule_reload(socket)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info(:reload_bids, socket) do
     socket =
-      if auction.id == socket.assigns.auction.id do
-        assign(socket, :bids, Bids.list_bids_with_expires_in_and_surplus(socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
-      else
-        socket
-      end
+      socket
+      |> assign(:reload_timer, nil)
+      |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(
+           socket.assigns.auction, socket.assigns.current_team, socket.assigns.options))
 
     {:noreply, socket}
   end
@@ -178,6 +182,15 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   @impl true
   def handle_info({_, _}, socket) do
     {:noreply, socket} # ignore
+  end
+
+  defp schedule_reload(socket) do
+    if socket.assigns[:reload_timer] do
+      socket
+    else
+      timer = Process.send_after(self(), :reload_bids, @debounce_ms)
+      assign(socket, :reload_timer, timer)
+    end
   end
 
   defp current_user_in_team?(team, current_user) do
