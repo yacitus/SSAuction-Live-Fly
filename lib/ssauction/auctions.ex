@@ -19,7 +19,6 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Bids
   alias SSAuction.Teams.Team
   alias SSAuction.Teams
-  alias SSAuction.Accounts
   alias SSAuction.Accounts.User
 
   def subscribe do
