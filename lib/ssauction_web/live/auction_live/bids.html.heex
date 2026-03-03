@@ -85,7 +85,7 @@
                 </a>
               </td>
             <% else %>
-              <%= if current_user_in_auction?(@auction, @current_user) do %>
+              <%= if @current_user_in_auction do %>
                 <td class="pl-5 text-left border border-blue-300">
                   <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
                      href={"/player/#{bid.player.id}?bid"}

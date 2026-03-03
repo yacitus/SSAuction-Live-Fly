@@ -59,6 +59,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
        |> assign(:auction, auction)
        |> assign(:current_team, current_team)
        |> assign(:user_team_ids, user_team_ids)
+       |> assign(:current_user_in_auction, current_team != nil)
        |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(auction, current_team, sort_options))
        |> assign(:show_modal, false)
        |> assign(:options, sort_options)
@@ -196,10 +197,6 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
       timer = Process.send_after(self(), :reload_bids, @debounce_ms)
       assign(socket, :reload_timer, timer)
     end
-  end
-
-  defp current_user_in_auction?(auction, current_user) do
-    current_user != nil and Auctions.user_in_auction?(auction, current_user)
   end
 
   defp push_patch_to_live_path(socket) do
