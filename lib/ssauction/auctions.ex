@@ -11,6 +11,7 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
   alias SSAuction.Players.RosteredPlayer
+  alias SSAuction.Players.CutPlayer
   alias SSAuction.Players.Value
   alias SSAuction.Players
   alias SSAuction.Bids.BidLog
@@ -388,9 +389,19 @@ defmodule SSAuction.Auctions do
   alias SSAuction.Bids
 
   def get_rostered_players_with_rostered_at_no_cache(%Auction{} = auction) do
-    get_rostered_players(auction)
+    rostered_players = get_rostered_players(auction)
+    player_ids = Enum.map(rostered_players, fn rp -> rp.player.id end)
+
+    rostered_at_map =
+      Repo.all(from bl in BidLog,
+               where: bl.player_id in ^player_ids and bl.type == "R",
+               order_by: bl.datetime)
+      |> Enum.group_by(& &1.player_id)
+      |> Map.new(fn {player_id, logs} -> {player_id, List.last(logs).datetime} end)
+
+    rostered_players
     |> Enum.map(fn rp -> rp
-                         |> Map.put(:rostered_at, Bids.rostered_bid_log(rp.player).datetime)
+                         |> Map.put(:rostered_at, Map.get(rostered_at_map, rp.player.id))
                          |> Map.put(:team_name, rp.team.name)
                          |> Map.put(:player_name, rp.player.name)
                          |> Map.put(:player_position, rp.player.position)
@@ -424,9 +435,15 @@ defmodule SSAuction.Auctions do
   end
 
   defp add_surplus_to_rostered_players(rostered_players, team) do
+    player_ids = Enum.map(rostered_players, fn rp -> rp.player.id end)
+    value_map =
+      Repo.all(from v in Value,
+               where: v.player_id in ^player_ids and v.team_id == ^team.id,
+               select: {v.player_id, v.value})
+      |> Map.new()
+
     Enum.map(rostered_players,
-             fn rostered_player -> value_struct = Players.get_value(rostered_player.player, team)
-                                   value = if value_struct == nil, do: 0, else: value_struct.value
+             fn rostered_player -> value = Map.get(value_map, rostered_player.player.id, 0)
                                    Map.put(rostered_player, :surplus, value - rostered_player.cost)
              end)
   end
@@ -438,9 +455,19 @@ defmodule SSAuction.Auctions do
   end
 
   def get_cut_players_with_cut_at_and_cost(%Auction{} = auction) do
-    get_cut_players(auction)
+    cut_players = get_cut_players(auction)
+    player_ids = Enum.map(cut_players, fn cp -> cp.player.id end)
+
+    cut_at_map =
+      Repo.all(from bl in BidLog,
+               where: bl.player_id in ^player_ids and bl.type == "C",
+               order_by: bl.datetime)
+      |> Enum.group_by(& &1.player_id)
+      |> Map.new(fn {player_id, logs} -> {player_id, List.last(logs).datetime} end)
+
+    cut_players
     |> Enum.map(fn cp -> cp
-                         |> Map.put(:cut_at, Bids.cut_bid_log(cp.player).datetime)
+                         |> Map.put(:cut_at, Map.get(cut_at_map, cp.player.id))
                          |> Map.put(:cost, Teams.cut_player_dollar_cost(cp))
                          |> Map.put(:team_name, cp.team.name)
                          |> Map.put(:team_ssnum, cp.team.ssnum)
@@ -471,7 +498,34 @@ defmodule SSAuction.Auctions do
 
   def get_teams(%Auction{} = auction) do
     {:ok, now} = DateTime.now("Etc/UTC")
-    Repo.preload(auction, [:teams]).teams
+    teams = Repo.preload(auction, [:teams]).teams
+    team_ids = Enum.map(teams, fn t -> t.id end)
+
+    # Batch: rostered player counts and cost sums per team
+    rostered_stats =
+      Repo.all(from rp in RosteredPlayer,
+               where: rp.team_id in ^team_ids,
+               group_by: rp.team_id,
+               select: {rp.team_id, count(rp.id), coalesce(sum(rp.cost), 0)})
+      |> Map.new(fn {team_id, cnt, cost_sum} -> {team_id, {cnt, cost_sum}} end)
+
+    # Batch: cut player cost sums per team (cut_player_dollar_cost = div(cost + 1, 2))
+    cut_cost_sums =
+      Repo.all(from cp in CutPlayer,
+               where: cp.team_id in ^team_ids,
+               group_by: cp.team_id,
+               select: {cp.team_id, fragment("COALESCE(SUM((? + 1) / 2), 0)", cp.cost)})
+      |> Map.new()
+
+    # Batch: open bid amount sums per team
+    bid_sums =
+      Repo.all(from b in Bid,
+               where: b.team_id in ^team_ids and not b.closed,
+               group_by: b.team_id,
+               select: {b.team_id, coalesce(sum(b.bid_amount), 0)})
+      |> Map.new()
+
+    teams
     |> Enum.map(fn team -> seconds_until_new_nominations_open = DateTime.diff(team.new_nominations_open_at, now)
                            time_nominations_expire = Teams.time_nominations_expire(team)
                            seconds_until_nominations_expire =
@@ -480,9 +534,11 @@ defmodule SSAuction.Auctions do
                               else
                                 DateTime.diff(time_nominations_expire, now)
                               end
-                           total_dollars = Teams.total_dollars(team)
-                           dollars_spent = Teams.dollars_spent(team)
-                           dollars_bid = Teams.dollars_bid(team)
+                           {rostered_count, rostered_cost} = Map.get(rostered_stats, team.id, {0, 0})
+                           cut_cost = Map.get(cut_cost_sums, team.id, 0)
+                           total_dollars = auction.dollars_per_team + team.total_supplemental_dollars
+                           dollars_spent = rostered_cost + cut_cost
+                           dollars_bid = Map.get(bid_sums, team.id, 0)
                            dollars_available = total_dollars - dollars_spent
                            team
                            |> Map.put(:seconds_until_new_nominations_open, seconds_until_new_nominations_open)
@@ -493,7 +549,7 @@ defmodule SSAuction.Auctions do
                            |> Map.put(:dollars_bid, dollars_bid)
                            |> Map.put(:dollars_remaining, dollars_available - dollars_bid)
                            |> Map.put(:time_nominations_expire, time_nominations_expire)
-                           |> Map.put(:number_of_rostered_players, Teams.number_of_rostered_players(team))
+                           |> Map.put(:number_of_rostered_players, rostered_count)
                 end)
   end
 
