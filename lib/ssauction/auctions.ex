@@ -283,7 +283,7 @@ defmodule SSAuction.Auctions do
   def active_emoji(auction) do
     if auction.active do
       "✅"
-    else    
+    else
       "❌"
     end
   end
@@ -299,7 +299,7 @@ defmodule SSAuction.Auctions do
           years_and_league
         end
       _ ->
-       years_and_league 
+       years_and_league
     end
   end
 
@@ -567,17 +567,23 @@ defmodule SSAuction.Auctions do
   end
 
   def get_users_not_in_auction(%Auction{} = auction) do
-    all_user_ids = Repo.all(from u in User, select: u.id, order_by: u.username)
-    user_ids_not_in_auction = all_user_ids -- get_auction_user_ids(auction)
-    Enum.map(user_ids_not_in_auction, fn id -> Accounts.get_user!(id) end)
+    auction_user_ids = get_auction_user_ids(auction)
+    Repo.all(from u in User,
+             where: u.id not in ^auction_user_ids,
+             order_by: u.username)
   end
 
   def get_users_in_auction(%Auction{} = auction) do
-    Enum.map(get_auction_user_ids(auction), fn id -> Accounts.get_user!(id) end)
+    auction_user_ids = get_auction_user_ids(auction)
+    Repo.all(from u in User,
+             where: u.id in ^auction_user_ids,
+             order_by: u.username)
   end
 
   defp get_auction_user_ids(%Auction{} = auction) do
-    Enum.sort(Enum.map(Enum.concat(Enum.map(Repo.preload(auction, [:teams]).teams, fn t -> Repo.preload(t, [:users]).users end)), fn u -> u.id end))
+    Repo.preload(auction, [teams: :users]).teams
+    |> Enum.flat_map(fn t -> Enum.map(t.users, & &1.id) end)
+    |> Enum.sort()
   end
 
   def user_in_auction?(%Auction{} = auction, %User{} = user) do
