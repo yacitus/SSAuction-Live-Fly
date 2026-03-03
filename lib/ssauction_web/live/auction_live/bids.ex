@@ -39,12 +39,16 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   def handle_params(params, _, socket) do
     auction = Auctions.get_auction!(params["id"])
 
+    current_user = socket.assigns.current_user
+
     current_team =
-      if socket.assigns.current_user != nil do
-        Teams.get_team_by_user_and_auction(socket.assigns.current_user, auction)
+      if current_user != nil do
+        Teams.get_team_by_user_and_auction(current_user, auction)
       else
         nil
       end
+
+    user_team_ids = Teams.get_team_ids_for_user(current_user)
 
     sort_by = (params["sort_by"] || "seconds_until_bid_expires") |> String.to_atom()
     sort_order = (params["sort_order"] || "asc") |> String.to_atom()
@@ -54,6 +58,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
      socket
        |> assign(:auction, auction)
        |> assign(:current_team, current_team)
+       |> assign(:user_team_ids, user_team_ids)
        |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(auction, current_team, sort_options))
        |> assign(:show_modal, false)
        |> assign(:options, sort_options)
@@ -191,10 +196,6 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
       timer = Process.send_after(self(), :reload_bids, @debounce_ms)
       assign(socket, :reload_timer, timer)
     end
-  end
-
-  defp current_user_in_team?(team, current_user) do
-    current_user != nil and Teams.user_in_team?(team, current_user)
   end
 
   defp current_user_in_auction?(auction, current_user) do

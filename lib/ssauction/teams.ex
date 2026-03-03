@@ -156,6 +156,15 @@ defmodule SSAuction.Teams do
     Enum.member?(Enum.map(Repo.preload(team, [:users]).users, fn u -> u.id end), user.id)
   end
 
+  def get_team_ids_for_user(%User{} = user) do
+    Repo.all(from t in "teams_users",
+             where: t.user_id == ^user.id,
+             select: t.team_id)
+    |> MapSet.new()
+  end
+
+  def get_team_ids_for_user(nil), do: MapSet.new()
+
   def add_user(%Team{} = team, %User{} = user) do
     team = Repo.preload(team, [:users])
     changeset = Ecto.Changeset.change(team)
