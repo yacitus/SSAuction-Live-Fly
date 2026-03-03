@@ -70,13 +70,13 @@
             </td>
           <% end %>
           <td class="pl-5 text-left border border-blue-300">
-            <%= if current_user_in_team?(bid.team, @current_user) and bid.hidden_high_bid != nil do %>
+            <%= if bid.team_id in @user_team_ids and bid.hidden_high_bid != nil do %>
               $<%= bid.hidden_high_bid %>
             <% end %>
           </td>
           <td class="pl-5 text-left border border-blue-300"><%= bid.expires_in %></td>
           <%= if @auction.active do %>
-            <%= if current_user_in_team?(bid.team, @current_user) do %>
+            <%= if bid.team_id in @user_team_ids do %>
               <td class="pl-5 text-left border border-blue-300">
                 <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
                    href={"/player/#{bid.player.id}?bid"}
@@ -85,7 +85,7 @@
                 </a>
               </td>
             <% else %>
-              <%= if current_user_in_auction?(@auction, @current_user) do %>
+              <%= if @current_user_in_auction do %>
                 <td class="pl-5 text-left border border-blue-300">
                   <a class="underline text-blue-600 hover:text-blue-800 visited:text-purple-600"
                      href={"/player/#{bid.player.id}?bid"}
