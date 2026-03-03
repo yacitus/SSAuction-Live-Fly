@@ -11,10 +11,12 @@ defmodule SSAuction.Teams do
   alias SSAuction.Players.Player
   alias SSAuction.Players.OrderedPlayer
   alias SSAuction.Players.CutPlayer
+  alias SSAuction.Players.Value
   alias SSAuction.Auctions
   alias SSAuction.Auctions.Auction
   alias SSAuction.Accounts.User
   alias SSAuction.Bids
+  alias SSAuction.Bids.BidLog
 
   def subscribe do
     Phoenix.PubSub.subscribe(SSAuction.PubSub, "teams")
@@ -209,9 +211,15 @@ defmodule SSAuction.Teams do
   end
 
   defp add_value_to_ordered_players(ordered_players, team) do
+    player_ids = Enum.map(ordered_players, fn op -> op.player.id end)
+    value_map =
+      Repo.all(from v in Value,
+               where: v.player_id in ^player_ids and v.team_id == ^team.id,
+               select: {v.player_id, v.value})
+      |> Map.new()
+
     Enum.map(ordered_players,
-             fn ordered_player -> value_struct = Players.get_value(ordered_player.player, team)
-                                   value = if value_struct == nil, do: 0, else: value_struct.value
+             fn ordered_player -> value = Map.get(value_map, ordered_player.player.id, 0)
                                    Map.put(ordered_player, :value, value)
              end)
   end
@@ -602,9 +610,19 @@ defmodule SSAuction.Teams do
   end
 
   def get_cut_players_with_cut_at_and_cost(%Team{} = team) do
-    get_cut_players(team)
+    cut_players = get_cut_players(team)
+    player_ids = Enum.map(cut_players, fn cp -> cp.player.id end)
+
+    cut_at_map =
+      Repo.all(from bl in BidLog,
+               where: bl.player_id in ^player_ids and bl.type == "C",
+               order_by: bl.datetime)
+      |> Enum.group_by(& &1.player_id)
+      |> Map.new(fn {player_id, logs} -> {player_id, List.last(logs).datetime} end)
+
+    cut_players
     |> Enum.map(fn cp -> cp
-                         |> Map.put(:cut_at, Bids.cut_bid_log(cp.player).datetime)
+                         |> Map.put(:cut_at, Map.get(cut_at_map, cp.player.id))
                          |> Map.put(:cost, cut_player_dollar_cost(cp))
                          |> Map.put(:team_name, cp.team.name)
                          |> Map.put(:player_name, cp.player.name)
@@ -659,9 +677,19 @@ defmodule SSAuction.Teams do
   end
 
   def get_rostered_players_with_rostered_at(%Team{} = team) do
-    Enum.map(get_rostered_players(team),
+    rostered_players = get_rostered_players(team)
+    player_ids = Enum.map(rostered_players, fn rp -> rp.player.id end)
+
+    rostered_at_map =
+      Repo.all(from bl in BidLog,
+               where: bl.player_id in ^player_ids and bl.type == "R",
+               order_by: bl.datetime)
+      |> Enum.group_by(& &1.player_id)
+      |> Map.new(fn {player_id, logs} -> {player_id, List.last(logs).datetime} end)
+
+    Enum.map(rostered_players,
              fn rp -> rp
-                      |> Map.put(:rostered_at, Bids.rostered_bid_log(rp.player).datetime)
+                      |> Map.put(:rostered_at, Map.get(rostered_at_map, rp.player.id))
                       |> Map.put(:player_name, rp.player.name)
                       |> Map.put(:player_position, rp.player.position)
                       |> Map.put(:player_ssnum, rp.player.ssnum)
@@ -686,9 +714,15 @@ defmodule SSAuction.Teams do
   end
 
   defp add_surplus_to_rostered_players(rostered_players, team) do
+    player_ids = Enum.map(rostered_players, fn rp -> rp.player.id end)
+    value_map =
+      Repo.all(from v in Value,
+               where: v.player_id in ^player_ids and v.team_id == ^team.id,
+               select: {v.player_id, v.value})
+      |> Map.new()
+
     Enum.map(rostered_players,
-             fn rostered_player -> value_struct = Players.get_value(rostered_player.player, team)
-                                   value = if value_struct == nil, do: 0, else: value_struct.value
+             fn rostered_player -> value = Map.get(value_map, rostered_player.player.id, 0)
                                    Map.put(rostered_player, :surplus, value - rostered_player.cost)
              end)
   end
