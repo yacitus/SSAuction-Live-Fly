@@ -389,6 +389,7 @@ defmodule SSAuction.Auctions do
 
   def get_rostered_players_with_rostered_at_no_cache(%Auction{} = auction) do
     rostered_players = get_rostered_players(auction)
+    |> Enum.filter(fn rp -> rp.player != nil end)
     player_ids = Enum.map(rostered_players, fn rp -> rp.player.id end)
 
     rostered_at_map =
