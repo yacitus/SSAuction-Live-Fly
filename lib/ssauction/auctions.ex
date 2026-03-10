@@ -418,20 +418,39 @@ defmodule SSAuction.Auctions do
   end
 
   def get_rostered_players_with_rostered_at(%Auction{} = auction, %{sort_by: sort_by, sort_order: sort_order}) do
-    sort_order = if sort_by == :rostered_at, do: {sort_order, DateTime}, else: sort_order
     get_rostered_players_with_rostered_at(auction)
-    |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
+    |> sort_rostered_players(sort_by, sort_order)
   end
 
   def get_rostered_players_with_rostered_at_and_surplus(%Auction{} = auction, %Team{} = team, %{sort_by: sort_by, sort_order: sort_order}) do
-    sort_order = if sort_by == :rostered_at, do: {sort_order, DateTime}, else: sort_order
     get_rostered_players_with_rostered_at(auction)
     |> add_surplus_to_rostered_players(team)
-    |> Enum.sort_by(fn rp -> Map.get(rp, sort_by) end, sort_order)
+    |> sort_rostered_players(sort_by, sort_order)
   end
 
   def get_rostered_players_with_rostered_at_and_surplus(%Auction{} = auction, nil, sort_options) do
     get_rostered_players_with_rostered_at(auction, sort_options)
+  end
+
+  defp sort_rostered_players(rostered_players, :rostered_at, sort_order) do
+    # Handle nil rostered_at values by sorting them to the end
+    Enum.sort(rostered_players, fn a, b ->
+      case {Map.get(a, :rostered_at), Map.get(b, :rostered_at)} do
+        {nil, nil} -> true
+        {nil, _} -> sort_order == :asc
+        {_, nil} -> sort_order == :desc
+        {dt_a, dt_b} ->
+          case DateTime.compare(dt_a, dt_b) do
+            :lt -> sort_order == :asc
+            :gt -> sort_order == :desc
+            :eq -> true
+          end
+      end
+    end)
+  end
+
+  defp sort_rostered_players(rostered_players, sort_by, sort_order) do
+    Enum.sort_by(rostered_players, fn rp -> Map.get(rp, sort_by) end, sort_order)
   end
 
   defp add_surplus_to_rostered_players(rostered_players, team) do
