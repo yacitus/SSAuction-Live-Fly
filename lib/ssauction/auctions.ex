@@ -755,13 +755,17 @@ defmodule SSAuction.Auctions do
           cond do
             Teams.num_players_in_nomination_queue(team.id) > 0 ->
               player = Teams.next_in_nomination_queue(team)
-              args = %{bid_amount: 1}
-              Bids.submit_bid_changeset(auction, team, player, args)
+              if not Players.in_bids?(player) and not Players.is_rostered?(player) do
+                args = %{bid_amount: 1}
+                Bids.submit_bid_changeset(auction, team, player, args)
+              end
               remove_from_nomination_queues(auction, player)
             num_players_in_nomination_queue(auction) > 0 ->
               player = next_in_nomination_queue(auction)
-              args = %{bid_amount: 1}
-              Bids.submit_bid_changeset(auction, team, player, args)
+              if not Players.in_bids?(player) and not Players.is_rostered?(player) do
+                args = %{bid_amount: 1}
+                Bids.submit_bid_changeset(auction, team, player, args)
+              end
               remove_from_nomination_queues(auction, player)
             true ->
               nil
