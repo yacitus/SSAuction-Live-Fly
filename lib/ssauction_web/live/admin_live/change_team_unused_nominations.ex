@@ -32,7 +32,7 @@ defmodule SSAuctionWeb.AdminLive.ChangeTeamUnusedNominations do
       if unused_nominations != 0 do
         %{
           unused_nominations: unused_nominations,
-          time_nominations_expire: socket.assigns.auction.new_nominations_open_at
+          time_nominations_expire: socket.assigns.team.new_nominations_open_at
         }
       else
         %{unused_nominations: unused_nominations}
