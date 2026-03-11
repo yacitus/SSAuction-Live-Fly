@@ -28,7 +28,17 @@ defmodule SSAuctionWeb.AdminLive.ChangeTeamUnusedNominations do
   def handle_event("change", params, socket) do
     unused_nominations = String.to_integer(params["changeset"]["unused_nominations"])
 
-    {:ok, team} = Teams.update_team(socket.assigns.team, %{unused_nominations: unused_nominations})
+    updates =
+      if unused_nominations != 0 do
+        %{
+          unused_nominations: unused_nominations,
+          time_nominations_expire: socket.assigns.auction.new_nominations_open_at
+        }
+      else
+        %{unused_nominations: unused_nominations}
+      end
+
+    {:ok, team} = Teams.update_team(socket.assigns.team, updates)
 
     socket =
       socket
