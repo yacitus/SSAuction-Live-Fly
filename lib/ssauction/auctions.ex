@@ -663,32 +663,34 @@ defmodule SSAuction.Auctions do
   end
 
   @doc """
-  Searches for expired bids in the auction and roster them
+  Searches for expired bids in the auction and roster them.
+  Optimized to query expired bids directly and refresh cache only once.
 
   """
   def check_for_expired_bids(auction_id) do
-    broadcast({:ok, get_auction!(auction_id)}, :bid_expiration_update)
-    auction_bids = from a in Auction,
-                     where: a.id == ^auction_id,
-                     join: bids in assoc(a, :bids),
-                     select: bids
-    open_bids = from b in subquery(auction_bids),
-                  where: not b.closed
-    Repo.all(open_bids)
-    |> Enum.each(&check_for_expired_bid/1)
-  end
+    auction = get_auction!(auction_id)
+    broadcast({:ok, auction}, :bid_expiration_update)
 
-  @doc """
-  If this bid is expired, close it and roster the player
-
-  """
-  def check_for_expired_bid(bid = %Bid{}) do
     {:ok, now} = DateTime.now("Etc/UTC")
-    if DateTime.diff(now, bid.expires_at) >= 0 do
-      Repo.transaction(fn ->
-        Bids.update_bid(bid, %{closed: true})
-        Bids.roster_player_and_delete_bid(bid)
+
+    # Query expired bids directly - more efficient than fetching all open bids
+    expired_bids = Repo.all(
+      from b in Bid,
+        where: b.auction_id == ^auction_id and not b.closed and b.expires_at <= ^now
+    )
+
+    if Enum.any?(expired_bids) do
+      # Process all expired bids, skipping cache refresh for each
+      Enum.each(expired_bids, fn bid ->
+        Repo.transaction(fn ->
+          Bids.update_bid(bid, %{closed: true})
+          Bids.roster_player_and_delete_bid(bid, skip_cache_refresh: true)
+        end)
       end)
+
+      # Refresh cache only once after all bids are processed
+      {:ok, true} = Cachex.put(:auction_rostered_players, auction_id,
+          get_rostered_players_with_rostered_at_no_cache(auction))
     end
   end
 
