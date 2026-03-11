@@ -685,8 +685,10 @@ defmodule SSAuction.Auctions do
   def check_for_expired_bid(bid = %Bid{}) do
     {:ok, now} = DateTime.now("Etc/UTC")
     if DateTime.diff(now, bid.expires_at) >= 0 do
-      Bids.update_bid(bid, %{closed: true})
-      Bids.roster_player_and_delete_bid(bid)
+      Repo.transaction(fn ->
+        Bids.update_bid(bid, %{closed: true})
+        Bids.roster_player_and_delete_bid(bid)
+      end)
     end
   end
 
