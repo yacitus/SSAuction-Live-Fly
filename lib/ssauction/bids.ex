@@ -479,8 +479,12 @@ defmodule SSAuction.Bids do
   @doc """
   Roster the player from this bid and delete the bid
 
+  Options:
+    - skip_cache_refresh: when true, skips the Cachex cache update (useful for batching)
   """
-  def roster_player_and_delete_bid(bid = %Bid{}) do
+  def roster_player_and_delete_bid(bid, opts \\ [])
+
+  def roster_player_and_delete_bid(bid = %Bid{}, opts) do
     bid = Repo.preload(bid, [:player, :team, :auction])
     auction = bid.auction
     team = bid.team
@@ -501,8 +505,13 @@ defmodule SSAuction.Bids do
     Auctions.broadcast({:ok, auction}, :roster_change)
     Teams.broadcast({:ok, team}, :roster_change)
     Players.broadcast({:ok, player}, :info_change)
-    {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
-        Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+
+    unless Keyword.get(opts, :skip_cache_refresh, false) do
+      {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
+          Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+    end
+
+    auction
   end
 
   @doc """
