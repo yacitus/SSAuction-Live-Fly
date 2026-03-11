@@ -25,7 +25,9 @@ if config_env() == :prod do
   config :ssauction, SSAuction.Repo,
     # ssl: true,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "15"),
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "8"),
+    timeout: 15_000,
+    prepare: :unnamed,
     socket_options: maybe_ipv6
 
   # The secret key base is used to sign/encrypt cookies and other secrets.

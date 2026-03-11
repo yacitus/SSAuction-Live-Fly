@@ -7,7 +7,7 @@ kill_timeout = 5
 processes = []
 
 [deploy]
-  release_command = "/app/bin/migrate"
+  release_command = "/bin/sh -lc 'DATABASE_URL=$DIRECT_DATABASE_URL bin/migrate'"
 
 [env]
   PHX_HOST = "ssauction.fly.dev"
