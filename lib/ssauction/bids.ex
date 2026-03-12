@@ -497,11 +497,11 @@ defmodule SSAuction.Bids do
     rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
     rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
     Repo.insert!(rostered_player)
-    nominating_team = Teams.get_team!(bid.nominated_by)
+    nominating_team = get_nominating_team(bid.nominated_by, player)
     delete_bid(bid, auction, team, player, nominating_team)
     broadcast({:ok, bid}, :deleted_bid)
     log_bid(auction, team, player, bid.bid_amount, "R")
-    Teams.update_unused_nominations(nominating_team, auction)
+    if nominating_team, do: Teams.update_unused_nominations(nominating_team, auction)
     Auctions.broadcast({:ok, auction}, :roster_change)
     Teams.broadcast({:ok, team}, :roster_change)
     Players.broadcast({:ok, player}, :info_change)
@@ -552,12 +552,29 @@ defmodule SSAuction.Bids do
     auction = bid.auction
     team = bid.team
     player = bid.player
-    nominating_team = Teams.get_team!(bid.nominated_by)
+    nominating_team = get_nominating_team(bid.nominated_by, player)
     delete_bid(bid, auction, team, player, nominating_team)
   end
 
+  # Helper to safely get the nominating team
+  # First tries the nominated_by field, then checks bid log for nomination entry
+  defp get_nominating_team(nil, player) do
+    case nomination_bid_log(player) do
+      nil -> nil
+      log -> Teams.get_team!(log.team_id)
+    end
+  end
+  defp get_nominating_team(team_id, _player), do: Teams.get_team!(team_id)
 
-  def delete_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, nominating_team = %Team{}) do
+  defp nomination_bid_log(%Player{} = player) do
+    Repo.one(from bl in BidLog,
+             where: bl.player_id == ^player.id,
+             where: bl.type == "N",
+             order_by: [desc: bl.datetime],
+             limit: 1)
+  end
+
+  def delete_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, nominating_team) do
     player
     |> Ecto.Changeset.change(%{bid_id: nil})
     |> Repo.update
@@ -568,7 +585,7 @@ defmodule SSAuction.Bids do
     Auctions.broadcast({:ok, auction}, :bid_change)
     Teams.broadcast({:ok, team}, :bid_change)
     Teams.broadcast({:ok, team}, :info_change)
-    Teams.broadcast({:ok, nominating_team}, :info_change)
+    if nominating_team, do: Teams.broadcast({:ok, nominating_team}, :info_change)
     Auctions.broadcast({:ok, auction}, :teams_info_change)
   end
 
