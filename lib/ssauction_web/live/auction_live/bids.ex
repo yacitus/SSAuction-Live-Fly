@@ -167,6 +167,8 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
 
   @impl true
   def handle_info({:bid_change, auction = %Auction{}}, socket) do
+    require Logger
+    Logger.info("Bids LiveView received :bid_change for auction #{auction.id}, socket auction: #{socket.assigns.auction.id}")
     if auction.id == socket.assigns.auction.id do
       {:noreply, schedule_reload(socket)}
     else
@@ -176,6 +178,8 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
 
   @impl true
   def handle_info(:reload_bids, socket) do
+    require Logger
+    Logger.info("Bids LiveView reloading bids for auction #{socket.assigns.auction.id}")
     socket =
       socket
       |> assign(:reload_timer, nil)
@@ -186,8 +190,10 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
   end
 
   @impl true
-  def handle_info({_, _}, socket) do
-    {:noreply, socket} # ignore
+  def handle_info({event, _data} = msg, socket) do
+    require Logger
+    Logger.warning("Bids LiveView ignoring unhandled message: #{inspect(event)} - full: #{inspect(msg)}")
+    {:noreply, socket}
   end
 
   defp schedule_reload(socket) do
