@@ -489,29 +489,41 @@ defmodule SSAuction.Bids do
     auction = bid.auction
     team = bid.team
     player = bid.player
-    rostered_player =
-      %RosteredPlayer{
-        cost: bid.bid_amount,
-        player: player
-      }
-    rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
-    rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
-    Repo.insert!(rostered_player)
-    nominating_team = get_nominating_team(bid.nominated_by, player)
-    delete_bid(bid, auction, team, player, nominating_team)
-    broadcast({:ok, bid}, :deleted_bid)
-    log_bid(auction, team, player, bid.bid_amount, "R")
-    if nominating_team, do: Teams.update_unused_nominations(nominating_team, auction)
-    Auctions.broadcast({:ok, auction}, :roster_change)
-    Teams.broadcast({:ok, team}, :roster_change)
-    Players.broadcast({:ok, player}, :info_change)
 
-    unless Keyword.get(opts, :skip_cache_refresh, false) do
-      {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
-          Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+    # Guard against nil player - just delete the orphaned bid
+    if is_nil(player) do
+      delete_bid(bid, auction, team, nil, nil)
+      broadcast({:ok, bid}, :deleted_bid)
+      Auctions.broadcast({:ok, auction}, :bid_change)
+      Teams.broadcast({:ok, team}, :bid_change)
+      Teams.broadcast({:ok, team}, :info_change)
+      Auctions.broadcast({:ok, auction}, :teams_info_change)
+      auction
+    else
+      rostered_player =
+        %RosteredPlayer{
+          cost: bid.bid_amount,
+          player: player
+        }
+      rostered_player = Ecto.build_assoc(team, :rostered_players, rostered_player)
+      rostered_player = Ecto.build_assoc(auction, :rostered_players, rostered_player)
+      Repo.insert!(rostered_player)
+      nominating_team = get_nominating_team(bid.nominated_by, player)
+      delete_bid(bid, auction, team, player, nominating_team)
+      broadcast({:ok, bid}, :deleted_bid)
+      log_bid(auction, team, player, bid.bid_amount, "R")
+      if nominating_team, do: Teams.update_unused_nominations(nominating_team, auction)
+      Auctions.broadcast({:ok, auction}, :roster_change)
+      Teams.broadcast({:ok, team}, :roster_change)
+      Players.broadcast({:ok, player}, :info_change)
+
+      unless Keyword.get(opts, :skip_cache_refresh, false) do
+        {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
+            Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+      end
+
+      auction
     end
-
-    auction
   end
 
   @doc """
@@ -574,10 +586,14 @@ defmodule SSAuction.Bids do
              limit: 1)
   end
 
-  def delete_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player = %Player{}, nominating_team) do
-    player
-    |> Ecto.Changeset.change(%{bid_id: nil})
-    |> Repo.update
+  def delete_bid(bid = %Bid{}, auction = %Auction{}, team = %Team{}, player, nominating_team) do
+    # Clear player's bid reference if player exists
+    if player do
+      player
+      |> Ecto.Changeset.change(%{bid_id: nil})
+      |> Repo.update
+    end
+
     bid
     |> Ecto.Changeset.change
     |> Repo.delete
