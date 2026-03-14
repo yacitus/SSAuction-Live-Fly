@@ -443,6 +443,8 @@ defmodule SSAuction.Bids do
         { :error, "Could not update bid:" <> ChangesetErrors.error_details(changeset) }
 
       {:ok, bid} ->
+        require Logger
+        Logger.info("Broadcasting :bid_change for auction #{auction.id} after bid update")
         Auctions.broadcast({:ok, auction}, :bid_change)
         Teams.broadcast({:ok, team}, :bid_change)
         previous_team = Teams.get_team!(existing_bid.team_id)
