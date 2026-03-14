@@ -10,6 +10,7 @@ defmodule SSAuction.PeriodicCheck do
 
   @impl true
   def init(state) do
+    Auctions.subscribe() # Subscribe to auction broadcasts (e.g., roster_change)
     schedule_work() # Schedule work to be performed at some point
     {:ok, state}
   end
