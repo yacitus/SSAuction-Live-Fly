@@ -32,7 +32,7 @@ config :swoosh, :api_client, false
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.14.0",
+  version: "0.24.2",
   default: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
@@ -50,7 +50,7 @@ config :phoenix, :json_library, Jason
 
 # from https://fly.io/phoenix-files/tailwind-standalone/
 config :tailwind,
-  version: "3.0.7",
+  version: "3.4.17",
   default: [
     args: ~w(
       --config=tailwind.config.js
