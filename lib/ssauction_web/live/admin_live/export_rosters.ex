@@ -26,6 +26,9 @@ defmodule SSAuctionWeb.AdminLive.ExportRosters do
   def handle_event("export", params, socket) do
     {:noreply, redirect(socket, to: Routes.export_rosters_path(socket, :create,
                                                                auction_id: socket.assigns.auction.id,
-                                                               start_date: params["changeset"]["start_date"]))}
+                                                               start_date: params["changeset"]["start_date"],
+                                                               include_timestamp: params["changeset"]["include_timestamp"],
+                                                               timezone: socket.assigns.timezone,
+                                                               locale: socket.assigns.locale))}
   end
 end
