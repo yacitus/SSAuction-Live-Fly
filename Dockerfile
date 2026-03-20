@@ -10,10 +10,10 @@
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
 #   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20210902-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.12.2-erlang-24.0.5-debian-bullseye-20210902-slim
+#   - Ex: hexpm/elixir:1.15.8-erlang-25.3.2.15-debian-bookworm-20241016-slim
 #
-ARG BUILDER_IMAGE="hexpm/elixir:1.12.2-erlang-24.0.5-debian-bullseye-20210902-slim"
-ARG RUNNER_IMAGE="debian:bullseye-20210902-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:1.15.8-erlang-25.3.2.15-debian-bookworm-20241016-slim"
+ARG RUNNER_IMAGE="debian:bookworm-20241016-slim"
 
 FROM ${BUILDER_IMAGE} as builder
 
