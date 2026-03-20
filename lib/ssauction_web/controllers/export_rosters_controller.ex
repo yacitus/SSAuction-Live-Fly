@@ -31,18 +31,18 @@ defmodule SSAuctionWeb.ExportRostersController do
   end
 
   defp team_roster(team, nil) do
-    Teams.get_rostered_players_with_rostered_at(team, %{sort_by: :rostered_at, sort_order: :desc})
+    Teams.get_rostered_players_with_rostered_at(team, %{sort_by: :player_ssnum, sort_order: :asc})
     |> Enum.reduce("", fn rostered_player, text
                         -> "#{text}#{rostered_player.player_ssnum} #{rostered_player.player_name}\n" end)
   end
 
   defp team_roster(team, start_date) do
-    Teams.get_rostered_players_with_rostered_at(team, %{sort_by: :rostered_at, sort_order: :desc})
+    Teams.get_rostered_players_with_rostered_at(team, %{sort_by: :player_ssnum, sort_order: :asc})
     |> Enum.filter(fn rostered_player ->
                      rostered_date = DateTime.to_date(rostered_player.rostered_at)
                      Date.compare(start_date, rostered_date) != :gt
                    end)
     |> Enum.reduce("", fn rostered_player, text
-                        -> "#{text}#{rostered_player.player_ssnum} #{rostered_player.player_name} - #{rostered_player.rostered_at}\n" end)
+                        -> "#{text}#{rostered_player.player_ssnum} #{rostered_player.player_name}\n" end)
   end
 end
