@@ -837,6 +837,15 @@ defmodule SSAuction.Teams do
     (dollars_remaining_for_bids_including_hidden(team) + max_old_dollars - max_new_dollars) >= 0
   end
 
+  def max_bid_for_team(team = %Team{}) do
+    dollars_remaining_for_bids_including_hidden(team)
+  end
+
+  def max_bid_for_team(team = %Team{}, existing_bid_amount, existing_hidden_high_bid) do
+    max_old_dollars = calculate_max_bid(existing_bid_amount, existing_hidden_high_bid)
+    dollars_remaining_for_bids_including_hidden(team) + max_old_dollars
+  end
+
   defp calculate_max_bid(bid_amount, nil) do
     bid_amount
   end
