@@ -659,7 +659,7 @@ defmodule SSAuction.Bids do
       team.unused_nominations == 0 ->
         { :error, "Team does not have an open nomination" }
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
-        { :error, "Bid amount not legal for team" }
+        { :error, "Bid amount not legal for team (max bid is $#{Teams.max_bid_for_team(team)})" }
       not Teams.has_open_roster_spot?(team, auction) ->
         { :error, "Team does not have open roster spot for another bid" }
       true ->
@@ -699,7 +699,7 @@ defmodule SSAuction.Bids do
       not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
         { :error, "Hidden high bid must be nothing or above bid amount" }
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
-        { :error, "Bid amount not legal for team" }
+        { :error, "Bid amount not legal for team (max bid is $#{Teams.max_bid_for_team(team)})" }
       not Teams.has_open_roster_spot?(team, auction) ->
         { :error, "Team does not have open roster spot for another bid" }
       true ->
@@ -727,13 +727,13 @@ defmodule SSAuction.Bids do
       auction_id == 7 and not Teams.legal_bid_amount?(team,
                                                       bid_for_edit.bid_amount,
                                                       hidden_high_bid) ->
-        { :error, "Hidden high bid amount not legal for team" }
+        { :error, "Hidden high bid amount not legal for team (max bid is $#{Teams.max_bid_for_team(team)})" }
       not Teams.legal_bid_amount?(team,
                                   bid_for_edit.bid_amount,
                                   hidden_high_bid,
                                   bid_for_edit.bid_amount,
                                   bid_for_edit.hidden_high_bid) ->
-        { :error, "Hidden high bid amount not legal for team" }
+        { :error, "Hidden high bid amount not legal for team (max bid is $#{Teams.max_bid_for_team(team, bid_for_edit.bid_amount, bid_for_edit.hidden_high_bid)})" }
       true ->
         {:ok, nil}
     end
