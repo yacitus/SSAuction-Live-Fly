@@ -8,6 +8,7 @@
                    id: :edit_bid,
                    bid_for_edit: @bid_for_edit,
                    different_team: @different_team,
+                   bid_error: @bid_error,
                    title: "Bid for #{@bid_for_edit.player.name} (#{@bid_for_edit.player.ssnum})",
                    return_to: Routes.live_path(
                      @socket,

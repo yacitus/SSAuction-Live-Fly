@@ -12,6 +12,7 @@ defmodule SSAuctionWeb.LiveHelpers do
       component: component,
       title: Keyword.fetch!(opts, :title),
       return_to: Keyword.fetch!(opts, :return_to),
+      bid_error: Keyword.get(opts, :bid_error),
       opts: opts
     )
   end

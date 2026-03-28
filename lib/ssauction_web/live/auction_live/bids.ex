@@ -31,6 +31,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
         |> assign_timezone_offset()
         |> assign(:current_user, current_user)
         |> assign(:show_modal, false)
+        |> assign(:bid_error, nil)
 
     {:ok, socket}
   end
@@ -62,6 +63,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
        |> assign(:current_user_in_auction, current_team != nil)
        |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(auction, current_team, sort_options))
        |> assign(:show_modal, false)
+       |> assign(:bid_error, nil)
        |> assign(:options, sort_options)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
     }
@@ -81,6 +83,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
      socket
        |> assign(:bid_for_edit, bid_for_edit)
        |> assign(:different_team, false)
+       |> assign(:bid_error, nil)
        |> assign(:show_modal, true)
     }
   end
@@ -93,6 +96,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
      socket
        |> assign(:bid_for_edit, bid_for_new_bid)
        |> assign(:different_team, true)
+       |> assign(:bid_error, nil)
        |> assign(:show_modal, true)
     }
   end
@@ -119,7 +123,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
           {:noreply, push_patch_to_live_path(socket)}
         else
           {_, message} ->
-            {:noreply, put_flash(socket, :error, message)}
+            {:noreply, assign(socket, :bid_error, message)}
         end
     else
         with {:ok, _} <- Bids.validate_new_bid(socket.assigns.auction.id,
@@ -137,7 +141,7 @@ defmodule SSAuctionWeb.AuctionLive.Bids do
           {:noreply, push_patch_to_live_path(socket)}
         else
           {_, message} ->
-            {:noreply, put_flash(socket, :error, message)}
+            {:noreply, assign(socket, :bid_error, message)}
         end
     end
   end

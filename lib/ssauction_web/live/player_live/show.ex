@@ -24,6 +24,7 @@ defmodule SSAuctionWeb.PlayerLive.Show do
       |> assign_timezone_offset()
       |> assign(:current_user, current_user)
       |> assign(:show_modal, false)
+      |> assign(:bid_error, nil)
       |> assign(:changeset, Ecto.Changeset.cast({%{}, %{}}, %{}, []))
 
     {:ok, socket}
@@ -107,6 +108,7 @@ defmodule SSAuctionWeb.PlayerLive.Show do
        |> assign(:current_team, current_team)
        |> assign(:current_value, current_value)
        |> assign(:show_modal, show_modal)
+       |> assign(:bid_error, nil)
        |> assign(:bid_for_edit, bid_for_edit)
        |> assign(:different_team, different_team)
        |> assign(:back_to, back_to)
@@ -165,7 +167,7 @@ defmodule SSAuctionWeb.PlayerLive.Show do
           {:noreply, push_patch_to_live_path(socket, socket.assigns.back_to)}
         else
           {_, message} ->
-            {:noreply, put_flash(socket, :error, message)}
+            {:noreply, assign(socket, :bid_error, message)}
         end
     else
         with {:ok, _} <- Bids.validate_new_bid(socket.assigns.auction.id,
@@ -183,7 +185,7 @@ defmodule SSAuctionWeb.PlayerLive.Show do
           {:noreply, push_patch_to_live_path(socket, socket.assigns.back_to)}
         else
           {_, message} ->
-            {:noreply, put_flash(socket, :error, message)}
+            {:noreply, assign(socket, :bid_error, message)}
         end
     end
   end

@@ -31,6 +31,7 @@ defmodule SSAuctionWeb.TeamLive.Bids do
         |> assign_timezone_offset()
         |> assign(:current_user, current_user)
         |> assign(:show_modal, false)
+        |> assign(:bid_error, nil)
 
     {:ok, socket}
   end
@@ -54,6 +55,7 @@ defmodule SSAuctionWeb.TeamLive.Bids do
        |> assign(:current_team, current_team)
        |> assign(:bids, Bids.list_bids_with_expires_in_and_surplus(team, current_team))
        |> assign(:show_modal, false)
+       |> assign(:bid_error, nil)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"},
                           %{label: "#{team.name}", to: "/team/#{id}"}])
     }
@@ -72,6 +74,7 @@ defmodule SSAuctionWeb.TeamLive.Bids do
     {:noreply,
      socket
        |> assign(:bid_for_edit, bid_for_edit)
+       |> assign(:bid_error, nil)
        |> assign(:show_modal, true)
     }
   end
@@ -96,7 +99,7 @@ defmodule SSAuctionWeb.TeamLive.Bids do
       {:noreply, push_patch_to_live_path(socket)}
     else
       {_, message} ->
-        {:noreply, put_flash(socket, :error, message)}
+        {:noreply, assign(socket, :bid_error, message)}
     end
   end
 
