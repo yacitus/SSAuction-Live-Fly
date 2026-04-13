@@ -568,6 +568,7 @@ defmodule SSAuction.Players do
       Auctions.broadcast({:ok, auction}, :roster_change)
       Teams.broadcast({:ok, team}, :roster_change)
       Players.broadcast({:ok, player}, :info_change)
+      SSAuction.Pushover.notify_player_cut(auction, team, player)
     end)
   end
 
