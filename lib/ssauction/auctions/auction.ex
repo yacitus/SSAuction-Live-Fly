@@ -16,6 +16,7 @@ defmodule SSAuction.Auctions.Auction do
     field :dollars_per_team, :integer
     field :year_range, :string
     field :allow_player_cuts, :boolean, default: false
+    field :unlimited_nominations, :boolean, default: false
 
     has_many :players, SSAuction.Players.Player
     has_many :teams, SSAuction.Teams.Team
@@ -33,7 +34,7 @@ defmodule SSAuction.Auctions.Auction do
   @doc false
   def changeset(auction, attrs) do
     auction
-    |> cast(attrs, [:name, :year_range, :nominations_per_team, :seconds_before_autonomination, :new_nominations_created, :initial_bid_timeout_seconds, :bid_timeout_seconds, :players_per_team, :must_roster_all_players, :dollars_per_team, :active, :started_or_paused_at, :allow_player_cuts])
+    |> cast(attrs, [:name, :year_range, :nominations_per_team, :seconds_before_autonomination, :new_nominations_created, :initial_bid_timeout_seconds, :bid_timeout_seconds, :players_per_team, :must_roster_all_players, :dollars_per_team, :active, :started_or_paused_at, :allow_player_cuts, :unlimited_nominations])
     |> validate_required([:name, :year_range, :nominations_per_team, :seconds_before_autonomination, :new_nominations_created, :initial_bid_timeout_seconds, :bid_timeout_seconds, :players_per_team, :must_roster_all_players, :dollars_per_team, :active, :started_or_paused_at])
   end
 end

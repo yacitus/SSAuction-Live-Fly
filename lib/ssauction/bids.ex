@@ -384,7 +384,7 @@ defmodule SSAuction.Bids do
         { :error, "Could not submit nomination: " <> ChangesetErrors.error_details(changeset) }
 
       {:ok, bid} ->
-        Teams.update_info_post_nomination(team.id)
+        Teams.update_info_post_nomination(team.id, auction)
         Auctions.remove_from_nomination_queues(auction, player)
         Auctions.broadcast({:ok, auction}, :nomination_queue_change)
         Teams.broadcast({:ok, team}, :nomination_queue_change)
@@ -656,7 +656,7 @@ defmodule SSAuction.Bids do
         { :error, "Hidden high bid must be nothing or above bid amount" }
       Players.in_bids?(player) ->
         { :error, "Player already nominated" }
-      team.unused_nominations == 0 ->
+      not auction.unlimited_nominations and team.unused_nominations == 0 ->
         { :error, "Team does not have an open nomination" }
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
         { :error, "Bid amount not legal for team (max bid is $#{Teams.max_bid_for_team(team)})" }

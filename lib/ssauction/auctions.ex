@@ -536,13 +536,13 @@ defmodule SSAuction.Auctions do
                select: {cp.team_id, fragment("COALESCE(SUM((? + 1) / 2), 0)", cp.cost)})
       |> Map.new()
 
-    # Batch: open bid amount sums per team
-    bid_sums =
+    # Batch: open bid stats per team (sum and count)
+    bid_stats =
       Repo.all(from b in Bid,
                where: b.team_id in ^team_ids and not b.closed,
                group_by: b.team_id,
-               select: {b.team_id, coalesce(sum(b.bid_amount), 0)})
-      |> Map.new()
+               select: {b.team_id, coalesce(sum(b.bid_amount), 0), count(b.id)})
+      |> Map.new(fn {team_id, sum, cnt} -> {team_id, {sum, cnt}} end)
 
     teams
     |> Enum.map(fn team -> seconds_until_new_nominations_open = DateTime.diff(team.new_nominations_open_at, now)
@@ -555,20 +555,27 @@ defmodule SSAuction.Auctions do
                               end
                            {rostered_count, rostered_cost} = Map.get(rostered_stats, team.id, {0, 0})
                            cut_cost = Map.get(cut_cost_sums, team.id, 0)
+                           {bid_sum, bid_count} = Map.get(bid_stats, team.id, {0, 0})
                            total_dollars = auction.dollars_per_team + team.total_supplemental_dollars
                            dollars_spent = rostered_cost + cut_cost
-                           dollars_bid = Map.get(bid_sums, team.id, 0)
                            dollars_available = total_dollars - dollars_spent
+                           unused_nominations =
+                             if auction.unlimited_nominations do
+                               auction.players_per_team - rostered_count - bid_count
+                             else
+                               team.unused_nominations
+                             end
                            team
                            |> Map.put(:seconds_until_new_nominations_open, seconds_until_new_nominations_open)
                            |> Map.put(:seconds_until_nominations_expire, seconds_until_nominations_expire)
                            |> Map.put(:total_dollars, total_dollars)
                            |> Map.put(:dollars_spent, dollars_spent)
                            |> Map.put(:dollars_available, dollars_available)
-                           |> Map.put(:dollars_bid, dollars_bid)
-                           |> Map.put(:dollars_remaining, dollars_available - dollars_bid)
+                           |> Map.put(:dollars_bid, bid_sum)
+                           |> Map.put(:dollars_remaining, dollars_available - bid_sum)
                            |> Map.put(:time_nominations_expire, time_nominations_expire)
                            |> Map.put(:number_of_rostered_players, rostered_count)
+                           |> Map.put(:unused_nominations, unused_nominations)
                 end)
   end
 
@@ -731,10 +738,12 @@ defmodule SSAuction.Auctions do
   """
 
   def check_for_new_nominations(team = %Team{}, auction = %Auction{}) do
-    {:ok, now} = DateTime.now("Etc/UTC")
-    if DateTime.diff(now, team.new_nominations_open_at) >= 0 do
-      num_nominations = auction.nominations_per_team - team.unused_nominations
-      Teams.give_team_new_nominations(team, auction, num_nominations)
+    if not auction.unlimited_nominations do
+      {:ok, now} = DateTime.now("Etc/UTC")
+      if DateTime.diff(now, team.new_nominations_open_at) >= 0 do
+        num_nominations = auction.nominations_per_team - team.unused_nominations
+        Teams.give_team_new_nominations(team, auction, num_nominations)
+      end
     end
   end
 
