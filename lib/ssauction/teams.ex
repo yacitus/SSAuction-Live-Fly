@@ -466,7 +466,7 @@ defmodule SSAuction.Teams do
   end
 
   def update_unused_nominations(team = %Team{}, auction = %Auction{}) do
-    if auction.new_nominations_created == "auction" do
+    if not auction.unlimited_nominations and auction.new_nominations_created == "auction" do
       give_team_new_nominations(team, auction, 1)
     end
   end
@@ -525,9 +525,11 @@ defmodule SSAuction.Teams do
   Update a team's info after a nomination
 
   """
-  def update_info_post_nomination(team_id) do
-    team = get_team!(team_id)
-    set_unused_nominations(team, team.unused_nominations-1)
+  def update_info_post_nomination(team_id, auction) do
+    if not auction.unlimited_nominations do
+      team = get_team!(team_id)
+      set_unused_nominations(team, team.unused_nominations-1)
+    end
   end
 
   def set_unused_nominations(team = %Team{}, num_unused_nominations) do

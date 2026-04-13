@@ -47,6 +47,12 @@ defmodule SSAuctionWeb.TeamLive.Show do
        |> assign(:number_of_cut_players, Teams.number_of_cut_players(team))
        |> assign(:dollars_remaining_for_bids_including_hidden, Teams.dollars_remaining_for_bids_including_hidden(team))
        |> assign(:dollars_remaining_for_bids, Teams.dollars_remaining_for_bids(team))
+       |> assign(:effective_unused_nominations,
+                if auction.unlimited_nominations do
+                  Teams.open_roster_spots(team, auction)
+                else
+                  team.unused_nominations
+                end)
        |> assign(:links, [%{label: "#{auction.name} auction", to: "/auction/#{auction.id}"}])
        |> assign(:users, users)
     }
@@ -87,16 +93,25 @@ defmodule SSAuctionWeb.TeamLive.Show do
   def handle_info({:bid_change, team = %Team{}}, socket) do
     socket =
       if team.id == socket.assigns.team.id do
+        auction = socket.assigns.auction
+        number_of_bids = Bids.number_of_bids(team)
+        number_of_rostered_players = Teams.number_of_rostered_players(team)
         socket
           |> assign(:team, Teams.get_team!(team.id))
           |> assign(:dollars_available, Teams.total_dollars(team))
           |> assign(:dollars_spent, Teams.dollars_spent(team))
           |> assign(:dollars_bid_including_hidden, Teams.dollars_bid_including_hidden(team))
           |> assign(:dollars_bid, Teams.dollars_bid(team))
-          |> assign(:number_of_bids, Bids.number_of_bids(team))
-          |> assign(:number_of_rostered_players, Teams.number_of_rostered_players(team))
+          |> assign(:number_of_bids, number_of_bids)
+          |> assign(:number_of_rostered_players, number_of_rostered_players)
           |> assign(:dollars_remaining_for_bids_including_hidden, Teams.dollars_remaining_for_bids_including_hidden(team))
           |> assign(:dollars_remaining_for_bids, Teams.dollars_remaining_for_bids(team))
+          |> assign(:effective_unused_nominations,
+                   if auction.unlimited_nominations do
+                     auction.players_per_team - number_of_rostered_players - number_of_bids
+                   else
+                     Teams.get_team!(team.id).unused_nominations
+                   end)
       else
         socket
       end
