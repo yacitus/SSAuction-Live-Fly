@@ -565,11 +565,14 @@ defmodule SSAuction.Players do
       Repo.insert!(cut_player)
       delete_rostered_player(rostered_player)
       Bids.log_bid(auction, team, player, cut_player.cost, "C")
-      Auctions.broadcast({:ok, auction}, :roster_change)
-      Teams.broadcast({:ok, team}, :roster_change)
-      Players.broadcast({:ok, player}, :info_change)
       SSAuction.Pushover.notify_player_cut(auction, team, player)
     end)
+
+    {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
+        Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+    Auctions.broadcast({:ok, auction}, :roster_change)
+    Teams.broadcast({:ok, team}, :roster_change)
+    Players.broadcast({:ok, player}, :info_change)
   end
 
   @doc """

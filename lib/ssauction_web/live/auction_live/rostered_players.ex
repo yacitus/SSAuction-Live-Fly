@@ -67,7 +67,7 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
   def handle_info({:roster_change, auction = %Auction{}}, socket) do
     socket =
       if auction.id == socket.assigns.auction.id do
-        assign(socket, :rostered_players, Auctions.get_rostered_players_with_rostered_at_and_surplus(auction, socket.assigns.current_team, socket.assigns.sort_options))
+        assign(socket, :rostered_players, Auctions.get_rostered_players_with_rostered_at_and_surplus(auction, socket.assigns.current_team, socket.assigns.options))
       else
         socket
       end
