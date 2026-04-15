@@ -3,6 +3,7 @@ defmodule SSAuction.Auctions do
   The Auctions context.
   """
 
+  require Logger
   import Ecto.Query, warn: false
   alias SSAuction.Repo
 
@@ -689,15 +690,22 @@ defmodule SSAuction.Auctions do
     if Enum.any?(expired_bids) do
       # Process all expired bids, skipping cache refresh for each
       Enum.each(expired_bids, fn bid ->
-        Repo.transaction(fn ->
-          Bids.update_bid(bid, %{closed: true})
-          Bids.roster_player_and_delete_bid(bid, skip_cache_refresh: true)
-        end)
+        try do
+          Repo.transaction(fn ->
+            Bids.update_bid(bid, %{closed: true})
+            Bids.roster_player_and_delete_bid(bid, skip_cache_refresh: true)
+          end)
+        rescue
+          e -> Logger.error("Error processing expired bid #{bid.id}: #{Exception.message(e)}")
+        end
       end)
 
       # Refresh cache only once after all bids are processed
       {:ok, true} = Cachex.put(:auction_rostered_players, auction_id,
           get_rostered_players_with_rostered_at_no_cache(auction))
+
+      # Broadcast after cache is updated so LiveViews read fresh data
+      broadcast({:ok, auction}, :roster_change)
     end
   end
 
