@@ -43,6 +43,11 @@ defmodule SSAuctionWeb.AuctionLive.RosteredPlayers do
         nil
       end
 
+    if params["refresh_cache"] do
+      {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
+          Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+    end
+
     sort_by = (params["sort_by"] || "rostered_at") |> String.to_atom()
     sort_order = (params["sort_order"] || "desc") |> String.to_atom()
     sort_options = %{sort_by: sort_by, sort_order: sort_order}

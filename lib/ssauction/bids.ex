@@ -515,14 +515,16 @@ defmodule SSAuction.Bids do
       broadcast({:ok, bid}, :deleted_bid)
       log_bid(auction, team, player, bid.bid_amount, "R")
       if nominating_team, do: Teams.update_unused_nominations(nominating_team, auction)
-      Auctions.broadcast({:ok, auction}, :roster_change)
-      Teams.broadcast({:ok, team}, :roster_change)
-      Players.broadcast({:ok, player}, :info_change)
 
       unless Keyword.get(opts, :skip_cache_refresh, false) do
+        # Update cache before broadcasting so LiveViews read fresh data
         {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
             Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
+        Auctions.broadcast({:ok, auction}, :roster_change)
       end
+
+      Teams.broadcast({:ok, team}, :roster_change)
+      Players.broadcast({:ok, player}, :info_change)
 
       auction
     end
@@ -550,11 +552,12 @@ defmodule SSAuction.Bids do
 
     Players.delete_cut_player(cut_player)
 
+    # Update cache before broadcasting so LiveViews read fresh data
+    {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
+        Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
     Auctions.broadcast({:ok, auction}, :roster_change)
     Teams.broadcast({:ok, team}, :roster_change)
     Players.broadcast({:ok, player}, :info_change)
-    {:ok, true} = Cachex.put(:auction_rostered_players, auction.id,
-        Auctions.get_rostered_players_with_rostered_at_no_cache(auction))
   end
 
   @doc """
