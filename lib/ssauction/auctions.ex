@@ -404,6 +404,7 @@ defmodule SSAuction.Auctions do
     |> Enum.map(fn rp -> rp
                          |> Map.put(:rostered_at, Map.get(rostered_at_map, rp.player.id))
                          |> Map.put(:team_name, rp.team.name)
+                         |> Map.put(:team_ssnum, rp.team.ssnum)
                          |> Map.put(:player_name, rp.player.name)
                          |> Map.put(:player_position, rp.player.position)
                          |> Map.put(:player_ssnum, rp.player.ssnum)
