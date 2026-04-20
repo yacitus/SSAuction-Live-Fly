@@ -66,6 +66,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
     {:noreply,
      socket
        |> assign(:nominated_player, nominated_player)
+       |> assign(:bid_error, nil)
        |> assign(:show_modal, true)
     }
   end
@@ -90,7 +91,7 @@ defmodule SSAuctionWeb.TeamLive.NominationQueue do
       {:noreply, push_patch_to_live_path(socket)}
     else
       {_, message} ->
-        {:noreply, put_flash(socket, :error, message)}
+        {:noreply, assign(socket, :bid_error, message)}
     end
   end
 
