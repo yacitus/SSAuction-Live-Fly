@@ -659,6 +659,8 @@ defmodule SSAuction.Bids do
         { :error, "Hidden high bid must be nothing or above bid amount" }
       Players.in_bids?(player) ->
         { :error, "Player already nominated" }
+      Players.cut_by_team?(player, team) ->
+        { :error, "Team cannot nominate a player it cut" }
       not auction.unlimited_nominations and team.unused_nominations == 0 ->
         { :error, "Team does not have an open nomination" }
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->

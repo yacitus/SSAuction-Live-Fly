@@ -321,6 +321,19 @@ defmodule SSAuction.Players do
   end
 
   @doc """
+  Returns true if the player was cut by the given team
+
+  """
+  def cut_by_team?(player = %Player{}, team = %Team{}) do
+    if player.cut_player_id != nil do
+      cut_player = get_cut_player!(player.cut_player_id)
+      cut_player.team_id == team.id
+    else
+      false
+    end
+  end
+
+  @doc """
   Returns true if the player is in the auction's bid
 
   """

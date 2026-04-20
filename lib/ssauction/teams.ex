@@ -369,6 +369,13 @@ defmodule SSAuction.Teams do
       |> Repo.preload([:player])
   end
 
+  defp players_cut_by_team_query(team = %Team{}) do
+    from p in Player,
+      join: cp in CutPlayer, on: cp.id == p.cut_player_id,
+      where: cp.team_id == ^team.id,
+      select: p
+  end
+
   @doc """
   Returns a query for players who can be added to the team's nomination queue
 
@@ -380,12 +387,15 @@ defmodule SSAuction.Teams do
     rostered_players = Auctions.players_rostered_in_query(auction)
     queued_players = players_in_nomination_queue_query(team)
 
+    cut_by_team_players = players_cut_by_team_query(team)
+
     from player in Player,
       where: player.auction_id == ^auction.id,
       select: player,
       except_all: ^bid_players,
       except_all: ^rostered_players,
-      except_all: ^queued_players
+      except_all: ^queued_players,
+      except_all: ^cut_by_team_players
   end
 
   @doc """
