@@ -13,9 +13,9 @@ defmodule SSAuction.Pushover do
 
     if user_key && api_token do
       message =
-        "Player cut: #{player.name} (ID: #{player.id}, ssnum: #{player.ssnum}) " <>
-          "from team #{team.name} (ID: #{team.id}) " <>
-          "in auction #{auction.name} (ID: #{auction.id})"
+        "Player cut: #{player.name} (ssnum: #{player.ssnum}) " <>
+          "from team #{team.name} (team num: #{team.ssnum}) " <>
+          "in auction #{auction.name}"
 
       body =
         URI.encode_query(%{
@@ -33,7 +33,7 @@ defmodule SSAuction.Pushover do
       )
       |> case do
         {:ok, {{_, 200, _}, _headers, _body}} ->
-          Logger.info("Pushover notification sent for cut player #{player.id}")
+          Logger.info("Pushover notification sent for cut player #{player.name} (player ID: #{player.id}, team ID: #{team.id}, auction ID: #{auction.id})")
           :ok
 
         {:ok, {{_, status, _}, _headers, resp_body}} ->
