@@ -141,14 +141,16 @@
       </td>
     <% end %>
 
-    <tr>
-      <td class="pl-5 border border-blue-300">
-        Unused nominations:
-      </td>
-      <td class="pl-5 border border-blue-300">
-        <%= @effective_unused_nominations %>
-      </td>
-    </tr>
+    <%= if @auction.active do %>
+      <tr>
+        <td class="pl-5 border border-blue-300">
+          Unused nominations:
+        </td>
+        <td class="pl-5 border border-blue-300">
+          <%= @effective_unused_nominations %>
+        </td>
+      </tr>
+    <% end %>
 
     <%= if current_user_in_team?(@team, @current_user) do %>
       <tr>
