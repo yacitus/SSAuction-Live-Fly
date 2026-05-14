@@ -509,6 +509,26 @@ defmodule SSAuction.Auctions do
       |> Ecto.assoc(:cut_players)
       |> Repo.all
       |> Repo.preload([:player, :team])
+      |> Enum.reject(fn cp ->
+           cond do
+             is_nil(cp.player) ->
+               Logger.warning(
+                 "Skipping CutPlayer id=#{cp.id} in auction id=#{auction.id}: " <>
+                   "missing player (player_id=#{inspect(cp.player_id)})"
+               )
+               true
+
+             is_nil(cp.team) ->
+               Logger.warning(
+                 "Skipping CutPlayer id=#{cp.id} in auction id=#{auction.id}: " <>
+                   "missing team (team_id=#{inspect(cp.team_id)})"
+               )
+               true
+
+             true ->
+               false
+           end
+         end)
   end
 
   def number_of_cut_players(%Auction{} = auction) do
