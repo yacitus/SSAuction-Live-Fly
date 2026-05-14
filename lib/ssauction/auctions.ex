@@ -514,7 +514,7 @@ defmodule SSAuction.Auctions do
              is_nil(cp.player) ->
                Logger.warning(
                  "Skipping CutPlayer id=#{cp.id} in auction id=#{auction.id}: " <>
-                   "missing player (player_id=#{inspect(cp.player_id)})"
+                   "no Player references this cut_player (has_one :player)"
                )
                true
 
