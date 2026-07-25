@@ -705,6 +705,8 @@ defmodule SSAuction.Bids do
         { :error, "Hidden high bid must be nothing or above bid amount" }
       not Teams.legal_bid_amount?(team, bid_amount, hidden_high_bid) ->
         { :error, "Bid amount not legal for team (max bid is $#{Teams.max_bid_for_team(team)})" }
+      keep_bidding_up_to != nil and keep_bidding_up_to > Teams.max_bid_for_team(team) ->
+        { :error, "Keep bidding up to amount not legal for team (max bid is $#{Teams.max_bid_for_team(team)})" }
       not Teams.has_open_roster_spot?(team, auction) ->
         { :error, "Team does not have open roster spot for another bid" }
       true ->
