@@ -655,6 +655,8 @@ defmodule SSAuction.Bids do
         { :error, "Player is already rostered" }
       bid_amount == nil ->
         { :error, "Bid amount invalid" }
+      bid_amount < 1 ->
+        { :error, "Bid amount must be at least $1" }
       not hidden_high_bid_legal?(hidden_high_bid, bid_amount) ->
         { :error, "Hidden high bid must be nothing or above bid amount" }
       Players.in_bids?(player) ->

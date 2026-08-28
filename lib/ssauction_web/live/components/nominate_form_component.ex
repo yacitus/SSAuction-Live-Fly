@@ -18,7 +18,7 @@ defmodule SSAuctionWeb.NominateFormComponent do
         <div class="block mb-2 text-sm font-medium text-slate-700">
           <%= label f, :bid, "Bid"%>
         </div>
-        <%= number_input f, :bid_amount, value: 1 %>
+        <%= number_input f, :bid_amount, value: 1, min: 1 %>
 
         <div class="block mb-2 text-sm font-medium text-slate-700">
           <%= label f, :bid, "Hidden Max Bid"%>
