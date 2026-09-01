@@ -27,7 +27,7 @@ defmodule SSAuction.Auctions do
   end
 
   @doc """
-  Returns the list of auctions.
+  Returns the list of auctions, most recently started or paused first.
 
   ## Examples
 
@@ -36,7 +36,7 @@ defmodule SSAuction.Auctions do
 
   """
   def list_auctions do
-    Repo.all(Auction)
+    Repo.all(from a in Auction, order_by: [desc: a.started_or_paused_at])
   end
 
   @doc """
