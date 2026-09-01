@@ -65,9 +65,24 @@ defmodule SSAuction.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      # This repo does not carry its full migration history: it was seeded from
+      # the predecessor ssauction_live repo and only migrations from 20221018
+      # onward were copied over. A fresh database is therefore built by loading
+      # priv/repo/structure.sql (regenerate with `mix ecto.dump`) and then
+      # running any migrations newer than that dump.
+      "ecto.setup": [
+        "ecto.create",
+        "ecto.load --skip-if-loaded",
+        "ecto.migrate",
+        "run priv/repo/seeds.exs"
+      ],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: [
+        "ecto.create --quiet",
+        "ecto.load --quiet --skip-if-loaded",
+        "ecto.migrate --quiet",
+        "test"
+      ],
       "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
   end
