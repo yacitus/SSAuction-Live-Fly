@@ -27,7 +27,7 @@
     <p>
       <%= label do %>
         <%= radio_button f, String.to_atom("auction-#{auction.id}"), auction.name, checked: auction.id == @selected_auction_id %>
-        <%= auction.name %>
+        <%= auction.name %> (<%= auction.id %>)
       <% end %>
     </p>
   <% end %>
@@ -47,7 +47,7 @@
     <p>
       <%= label do %>
         <%= radio_button f, String.to_atom("team-#{team.id}"), team.name, checked: team.id == @selected_team_id %>
-        <%= team.name %>
+        <%= team.name %><%= if team.ssnum do %> (snum: <%= team.ssnum %>)<% end %>
       <% end %>
     </p>
   <% end %>

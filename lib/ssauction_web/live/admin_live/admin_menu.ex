@@ -6,7 +6,7 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
   def mount(_params, _session, socket) do
     auctions = Auctions.list_auctions()
     selected_auction = List.first(auctions)
-    teams = Auctions.list_teams(selected_auction) |> Enum.sort_by(& &1.name)
+    teams = Auctions.list_teams(selected_auction) |> Enum.sort_by(&{&1.ssnum, &1.name})
     selected_team = List.first(teams)
 
     socket =
@@ -28,7 +28,7 @@ defmodule SSAuctionWeb.AdminLive.AdminMenu do
         ["changeset", "auction-" <> id] ->
           selected_auction_id = String.to_integer(id)
           selected_auction = Auctions.get_auction!(selected_auction_id)
-          teams = Auctions.list_teams(selected_auction) |> Enum.sort_by(& &1.name)
+          teams = Auctions.list_teams(selected_auction) |> Enum.sort_by(&{&1.ssnum, &1.name})
           selected_team = List.first(teams)
           socket
           |> assign(:selected_auction_id, selected_auction_id)
